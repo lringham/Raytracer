@@ -3,5 +3,10 @@
 
 class Triangle : public Tracable
 {
-  bool raycast(Ray& ray) const override;
+public:
+	Triangle(Vec3 p0 = Vec3(-1, 0, 0), Vec3 p1 = Vec3(0, 1, 0), Vec3 p2 = Vec3(1, 0, 0));
+	bool raycast(Ray& ray) const override;
+
+private:
+	Vec3 p0, p1, p2;
 };

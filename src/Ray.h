@@ -3,7 +3,9 @@
 
 class Ray
 {
+public:
   Vec3 origin;
   Vec3 dir;
   Vec3 normal;
+  float t;
 };

@@ -25,6 +25,8 @@ Scene::Scene(int argc, char** argv)
 	// Create Raster
 
 	// Create Camera
+
+	// backgroundColor =
 }
 
 bool Scene::parseArgs(int argc, char**) //argv
@@ -67,12 +69,51 @@ std::map<unsigned, Ray> Scene::createRays()
 
 void Scene::traceSection(Camera& camera, std::map<unsigned, Ray> rays)
 {
-	std::cout << &camera << rays.size() << "\n";
+	// for(auto& r : rays)
+	// 	camera.pixels[r->first] = raycast(r->second, depth);
 }
+
+// Color Scene::raycast(Ray ray, int depth)
+// {
+// 	Ray closestRay;
+// 	Ray testRay;
+// 	Tracable* geom = nullptr;
+// 	for(unsigned i = 0; i < geometry.size(); ++i)
+// 	{
+// 		testRay = ray;
+// 		if(geometry[i].raycast(testRay) && testRay.t < closestRay.t)
+// 		{
+// 			geom = &geometry[i];
+// 			closestRay = testRay;
+// 		}
+// 	}
+//
+// 	Color color = backgroundColor;
+// 	if(geom != nullptr)
+// 	{
+// 		// Test if object is in shadow
+// 		if(shadow(Ray ray))
+// 		{
+// 			 color = geom->material.ambient;
+// 		}
+// 		else
+// 		{
+// 			color = blinnPhong(closestRay, *geom);
+// 		}
+//
+// 		// Recurse
+// 		if(depth > 0)
+// 		{
+// 			color += reflect(Ray ray, depth - 1);
+// 			color += refract(Ray ray, depth - 1);
+// 		}
+// 	}
+// 	return color;
+// }
 
 void Scene::save()
 {
 	std::cout << "Saving Image...";
-	//TODO save an image
+	//Camera.pixels.save("output.png");
 	std::cout << "Finished\n";
 }
