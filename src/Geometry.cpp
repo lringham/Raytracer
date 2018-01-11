@@ -3,7 +3,7 @@
 Geometry::Geometry()
 {}
 
-bool Geometry::intersect(Ray& ray)
+bool Geometry::intersect(Ray&)
 {
   return false;
 }

@@ -1,14 +1,10 @@
-# set min version of cmake required
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.0) # set min version of cmake required
+project(raytracer)                  # set project name
 
-# set bin dir
-#set(CMAKE_RUNTIME_OUTPUT_DIRECTORY bin/)
+#set(CMAKE_RUNTIME_OUTPUT_DIRECTORY bin/) # set bin dir
 
 set(CMAKE_BUILD_TYPE Debug)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -pthread -lpthread")
-
-# set project name
-project(raytracer)
 
 # set sources
 file(GLOB SOURCES "src/*.cpp")

@@ -1,7 +1,7 @@
 #pragma once
-#include "Geometry.h"
+#include "Tracable.h"
 
-class Plane : public Geometry
+class Plane : public Tracable
 {
-  bool intersect(Ray& ray) override;
+  bool raycast(Ray& ray) const override;
 };

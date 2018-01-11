@@ -3,7 +3,7 @@
 Tracable::Tracable()
 {}
 
-bool Tracable::raycast(Ray&)
+bool Tracable::raycast(Ray&) const
 {
   return false;
 }

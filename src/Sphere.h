@@ -1,8 +1,8 @@
 #pragma once
-#include "Geometry.h"
+#include "Tracable.h"
 
-class Sphere : public Geometry
+class Sphere : public Tracable
 {
-  bool intersect(Ray& ray) override;
+  bool raycast(Ray& ray) const override;
   float radius;
 };
