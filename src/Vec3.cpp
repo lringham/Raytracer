@@ -1,6 +1,6 @@
 #include "Vec3.h"
 #include "Mat3.h"
-#include "../Utils.h"
+#include <cmath>
 
 Vec3::Vec3(float val) : x(val), y(val), z(val)
 {
@@ -58,7 +58,7 @@ void Vec3::rotate(float angle, Vec3 axis)
 
 float Vec3::areaBetween(const Vec3& v)
 {
-	return cross(v).length() / 2.f; 
+	return cross(v).length() / 2.f;
 }
 
 float Vec3::acuteAngleBetween(const Vec3& v)

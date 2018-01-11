@@ -1,4 +1,5 @@
 #include "Vec4.h"
+#include <cmath>
 
 Vec4::Vec4(float val) : x(val), y(val), z(val), w(val)
 {
@@ -93,7 +94,7 @@ void Vec4::normalize()
 
 float Vec4::length() const
 {
-	return sqrt(x*x + y*y + z*z + w*w);
+	return std::sqrt(x*x + y*y + z*z + w*w);
 }
 
 std::ostream& operator<<(std::ostream& os, const Vec4& v)

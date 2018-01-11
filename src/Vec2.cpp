@@ -1,4 +1,5 @@
 #include "Vec2.h"
+#include <cmath>
 
 Vec2::Vec2(float val) : x(val), y(val)
 {
@@ -10,7 +11,7 @@ Vec2::Vec2(float x, float y) : x(x), y(y)
 
 float Vec2::length() const
 {
-	return sqrt(x*x + y*y);
+	return std::sqrt(x*x + y*y);
 }
 
 void Vec2::set(float x, float y)

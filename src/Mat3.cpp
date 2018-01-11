@@ -8,8 +8,17 @@ Mat3::Mat3(float mainDiag) : elements{ mainDiag, 0, 0,
 
 Mat3::Mat3(float elements[9])
 {
-	for (int i = 0; i < 9; i++)
-		this->elements[i] = elements[i];
+	this->elements[0] = elements[0];
+	this->elements[1] = elements[1];
+	this->elements[2] = elements[2];
+
+	this->elements[3] = elements[3];
+	this->elements[4] = elements[4];
+	this->elements[5] = elements[5];
+
+	this->elements[6] = elements[6];
+	this->elements[7] = elements[7];
+	this->elements[8] = elements[8];
 }
 
 Mat3::~Mat3()
@@ -18,24 +27,32 @@ Mat3::~Mat3()
 
 void Mat3::identity()
 {
-	float newElements[] = {
-		1.f, 0.f, 0.f,
-		0.f, 1.f, 0.f,
-		0.f, 0.f, 1.f
-	};
+	elements[0] = 1.f;
+	elements[1] = 0.f;
+	elements[2] = 0.f;
 
-	memcpy(elements, newElements, sizeof(newElements));
+	elements[3] = 0.f;
+	elements[4] = 1.f;
+	elements[5] = 0.f;
+
+	elements[6] = 0.f;
+	elements[7] = 0.f;
+	elements[8] = 1.f;
 }
 
 void Mat3::zero()
 {
-	float newElements[] = {
-		0.f, 0.f, 0.f,
-		0.f, 0.f, 0.f,
-		0.f, 0.f, 0.f
-	};
+	elements[0] = 0.f;
+	elements[1] = 0.f;
+	elements[2] = 0.f;
 
-	memcpy(elements, newElements, sizeof(newElements));
+	elements[3] = 0.f;
+	elements[4] = 0.f;
+	elements[5] = 0.f;
+
+	elements[6] = 0.f;
+	elements[7] = 0.f;
+	elements[8] = 0.f;
 }
 
 void Mat3::set(float newElements[9])
@@ -86,7 +103,7 @@ void Mat3::transpose()
 	float transposed[9] = {
 		elements[0], elements[3], elements[6],
 		elements[1], elements[4], elements[7],
-		elements[2], elements[5], elements[8]		
+		elements[2], elements[5], elements[8]
 	};
 
 	//copy elements

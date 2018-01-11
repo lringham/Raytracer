@@ -23,18 +23,31 @@ Mat4::Mat4(Vec3 row1, Vec3 row2, Vec3 row3, Vec3 row4)
 
 void Mat4::identity()
 {
-	float newElements[] = {
-		1.f, 0.f, 0.f, 0.f,
-		0.f, 1.f, 0.f, 0.f,
-		0.f, 0.f, 1.f, 0.f,
-		0.f, 0.f, 0.f, 1.f };
+	elements[0] = 1.f;
+	elements[1] = 0.f;
+	elements[2] = 0.f;
+	elements[3] = 0.f;
 
-	memcpy(elements, newElements, sizeof(newElements));
+	elements[4] = 0.f;
+	elements[5] = 1.f;
+	elements[6] = 0.f;
+	elements[7] = 0.f;
+
+	elements[8] = 0.f;
+	elements[9] = 0.f;
+	elements[10] = 1.f;
+	elements[11] = 0.f;
+
+	elements[12] = 0.f;
+	elements[13] = 0.f;
+	elements[14] = 0.f;
+	elements[15] = 1.f;
+
 }
 
 void Mat4::zero()
 {
-	for (int i = 0; i < 16; i++)	
+	for (int i = 0; i < 16; i++)
 		elements[i] = 0;
 }
 
@@ -62,7 +75,7 @@ void Mat4::setRow(int index, float x, float y, float z, float w)
 void Mat4::setRow(int index, Vec3 row, float w)
 {
 	int off = 4 * index;
-	
+
 	elements[off]	  = row.x;
 	elements[off + 1] = row.y;
 	elements[off + 2] = row.z;
@@ -138,7 +151,7 @@ Vec4 operator*(const Mat4& m, const Vec4& v)
 	return Vec4(m.elements[0]  * v.x + m.elements[1]  * v.y + m.elements[2]  * v.z + m.elements[3]  * v.w,
 				m.elements[4]  * v.x + m.elements[5]  * v.y + m.elements[6]  * v.z + m.elements[7]  * v.w,
 				m.elements[8]  * v.x + m.elements[9]  * v.y + m.elements[10] * v.z + m.elements[11] * v.w,
-				m.elements[12] * v.x + m.elements[13] * v.y + m.elements[14] * v.z + m.elements[15] * v.w);	
+				m.elements[12] * v.x + m.elements[13] * v.y + m.elements[14] * v.z + m.elements[15] * v.w);
 }
 
 Mat4 operator*(const Mat4& m1, const Mat4& m2)
