@@ -23,7 +23,7 @@ Scene::Scene(int argc, char** argv)
 	// Add lights
 
 	// Create Raster
-	Pixels pixels(200, 100);
+	Pixels pixels(800, 800);
 
 	// Create Camera
 	camera.pixels = pixels;
@@ -102,8 +102,21 @@ std::map<unsigned, Ray> Scene::createRays(unsigned threadID, unsigned threadCoun
 void Scene::traceSection(Camera& camera, std::map<unsigned, Ray> rays)
 {
 	  unsigned depth = 1;
+		Sphere sphere(100.f, Vec3(400, 600, -250));
+		Plane plane(Vec3(0,1,0), Vec3(0, 0, 0));
+		Triangle t(Vec3(0,600,-250), Vec3(100,700,-250), Vec3(200,450,-250));
+
 	  for(auto& r : rays)
-	  	camera.pixels.set(r.first, r.second.dir);
+		{
+			if(plane.raycast(r.second) && r.second.t >= 0)
+	  		camera.pixels.set(r.first, Vec3(1, 0, 0));
+
+			if(sphere.raycast(r.second) && r.second.t >= 0)
+				camera.pixels.set(r.first, Vec3(1, 0, 0));
+
+			if(t.raycast(r.second) && r.second.t >= 0)
+				camera.pixels.set(r.first, Vec3(1, 0, 0));
+		}
 }
 
 // Vec3 Scene::raycast(Ray ray, int depth)
