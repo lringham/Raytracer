@@ -23,10 +23,12 @@ Scene::Scene(int argc, char** argv)
 	// Add lights
 
 	// Create Raster
+	Pixels pixels(200, 100);
 
 	// Create Camera
+	camera.pixels = pixels;
 
-	// backgroundColor =
+	// backgroundVec3 =
 }
 
 bool Scene::parseArgs(int argc, char**) //argv
@@ -38,7 +40,7 @@ bool Scene::parseArgs(int argc, char**) //argv
 
 void Scene::trace()
 {
-	unsigned threadCount = 0;
+	unsigned threadCount = 1;
 	if(threadCount == 0) // Automatically determine threads
 	{
 		threadCount = std::thread::hardware_concurrency();
@@ -52,7 +54,7 @@ void Scene::trace()
 	// Create threads and trace
 	std::vector<std::thread> threads(threadCount);
 	for(unsigned i = 0; i < threadCount; ++i)
-		threads[i] = std::thread(&Scene::traceSection, this, std::ref(camera), Scene::createRays());
+		threads[i] = std::thread(&Scene::traceSection, this, std::ref(camera), Scene::createRays(i, threadCount));
 
 	// Join threads
 	for(auto& thread : threads)
@@ -61,19 +63,50 @@ void Scene::trace()
 	std::cout << "Finished\n";
 }
 
-std::map<unsigned, Ray> Scene::createRays()
+std::map<unsigned, Ray> Scene::createRays(unsigned threadID, unsigned threadCount)
 {
 	std::map<unsigned, Ray> pixelRayMap;
+	unsigned width = camera.pixels.width();
+	unsigned height = camera.pixels.height();
+
+	unsigned rem = width % threadCount;
+	unsigned xRes = width / threadCount;
+	unsigned startX, endX;
+
+	if(rem != 0)
+	{
+		if(threadID >= rem)
+		{
+			startX = rem * (xRes + 1) + (threadID-rem) * xRes;
+			endX = startX + xRes;
+		}
+		else
+		{
+			startX = threadID * (xRes + 1);
+			endX = startX + xRes + 1;
+		}
+	}
+	else
+	{
+		startX = threadID * xRes;
+		endX	 = startX + xRes;
+	}
+
+	for(unsigned x = startX; x < endX; ++x)
+		for(unsigned y = 0; y < height; ++y)
+			pixelRayMap[x+y*width] = camera.createRay(x, y);
+
 	return pixelRayMap;
 }
 
 void Scene::traceSection(Camera& camera, std::map<unsigned, Ray> rays)
 {
-	// for(auto& r : rays)
-	// 	camera.pixels[r->first] = raycast(r->second, depth);
+	  unsigned depth = 1;
+	  for(auto& r : rays)
+	  	camera.pixels.set(r.first, r.second.dir);
 }
 
-// Color Scene::raycast(Ray ray, int depth)
+// Vec3 Scene::raycast(Ray ray, int depth)
 // {
 // 	Ray closestRay;
 // 	Ray testRay;
@@ -88,11 +121,11 @@ void Scene::traceSection(Camera& camera, std::map<unsigned, Ray> rays)
 // 		}
 // 	}
 //
-// 	Color color = backgroundColor;
+// 	Vec3 color = backgroundColor;
 // 	if(geom != nullptr)
 // 	{
 // 		// Test if object is in shadow
-// 		if(shadow(Ray ray))
+// 		if(shadow(ray))
 // 		{
 // 			 color = geom->material.ambient;
 // 		}
@@ -114,6 +147,6 @@ void Scene::traceSection(Camera& camera, std::map<unsigned, Ray> rays)
 void Scene::save()
 {
 	std::cout << "Saving Image...";
-	//Camera.pixels.save("output.png");
+	camera.pixels.save("output.ppm");
 	std::cout << "Finished\n";
 }

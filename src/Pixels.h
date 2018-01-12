@@ -1,7 +1,18 @@
-#pragma once 
+#pragma once
+#include <vector>
+#include <string>
+#include "Vec3.h"
 
 class Pixels
 {
 public:
-	unsigned width = 0, height = 0;
+	Pixels(unsigned width = 0, unsigned height = 0);
+	void set(unsigned i, Vec3 color);
+	bool save(std::string filename);
+	unsigned width() const;
+	unsigned height() const;
+
+private:
+	unsigned pxWidth = 0, pxHeight = 0;
+	std::vector<Vec3> data;
 };
