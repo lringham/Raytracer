@@ -15,10 +15,12 @@ bool savePPM(std::string filename, unsigned width, unsigned height, char* data, 
 	std::ofstream file(filename, std::ios::out | std::ios::binary);
 	if (file.is_open())
 	{
+		// Set header info
 		file << "P6\n";
 		file << "# Generated with Lee Ringham's Raytracer\n";
 		file << width << " " << height << "\n";
 
+		// Set max char val
 		if (normalize)
 		{
 			char max = 0;
@@ -30,11 +32,13 @@ bool savePPM(std::string filename, unsigned width, unsigned height, char* data, 
 		else
 			file << "255\n";
 
+		// Write data
 		for (unsigned long i = 0; i < width*height*3; ++i)
 			file << data[i];
 
+		// Cleanup
 		file.flush();
-		file.close();
+		file.close();		
 		return true;
 	}
 	return false;
