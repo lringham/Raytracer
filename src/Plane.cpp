@@ -11,5 +11,7 @@ bool Plane::raycast(Ray& ray) const
 	if (rayDirDotNormal == 0)
 		return false;
 	ray.t = (position - ray.origin).dot(normal) / rayDirDotNormal;
+  ray.normal = normal;
+  
 	return true;
 }

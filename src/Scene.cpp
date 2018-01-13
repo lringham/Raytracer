@@ -19,7 +19,7 @@ Scene::Scene(int argc, char** argv)
 	}
 
 	// Add geometry
-	geometry.emplace_back(new Sphere(100.f, Vec3(400, 600, -250)));
+	geometry.emplace_back(new Sphere(100.f, Vec3(600, 600, -250)));
 	geometry.emplace_back(new Plane(Vec3(0,1,0), Vec3(0, 0, 0)));
 	geometry.emplace_back(new Triangle(Vec3(0,600,-250), Vec3(100,700,-250), Vec3(200,450,-250)));
 
@@ -120,16 +120,19 @@ Vec3 Scene::castRay(const Ray origRay, int depth)
 		return color;
 
 	// Detect closest geometry
-	Ray ray = origRay;
-	Ray shortestRay;
+	Ray ray;
 	int geomIndex = -1;
-	for(unsigned i = 0; i < geometry.size(); ++i)
-		if(geometry[i]->raycast(ray) && shortestRay.t > ray.t && ray.t >= 0)
+	{
+		for(unsigned i = 0; i < geometry.size(); ++i)
 		{
-			shortestRay = ray;
-			geomIndex = i;
+			Ray tempRay = origRay;
+			if(geometry[i]->raycast(tempRay) && ray.t > tempRay.t && tempRay.t >= 0)
+			{
+				ray = tempRay;
+				geomIndex = i;
+			}
 		}
-
+	}
 	// Calculate shading
 	if(geomIndex != -1)
 	{
@@ -151,10 +154,12 @@ Vec3 Scene::castRay(const Ray origRay, int depth)
 				//shadingColor += blinnPhong
 		//}
 
+		shadingColor = ray.normal;
+
 		//Coefs should add to 1
-		float reflCoef 		= 1.f/3.f;
-		float refrCoef 		= 1.f/3.f;
-		float shadingCoef = 1.f/3.f;
+		float reflCoef 		= 0;//1.f/3.f;
+		float refrCoef 		= 0;//1.f/3.f;
+		float shadingCoef = 1.f;
 		color = reflCoef    * reflectedColor +
 						refrCoef    * refractedColor +
 						shadingCoef * shadingColor;

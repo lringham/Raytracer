@@ -55,6 +55,7 @@ bool Triangle::raycast(Ray& ray) const
 	if (v < 0.f || v > 1.f - u)
 		return false;
 
+	ray.normal = normalize(cross(e1, e0));
 	return true;
 }
 //
