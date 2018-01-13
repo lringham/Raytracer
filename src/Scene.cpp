@@ -19,6 +19,9 @@ Scene::Scene(int argc, char** argv)
 	}
 
 	// Add geometry
+	geometry.emplace_back(new Sphere(100.f, Vec3(400, 600, -250)));
+	geometry.emplace_back(new Plane(Vec3(0,1,0), Vec3(0, 0, 0)));
+	geometry.emplace_back(new Triangle(Vec3(0,600,-250), Vec3(100,700,-250), Vec3(200,450,-250)));
 
 	// Add lights
 
@@ -28,7 +31,8 @@ Scene::Scene(int argc, char** argv)
 	// Create Camera
 	camera.pixels = pixels;
 
-	// backgroundVec3 =
+	// Set background color
+	backgroundColor.set(1, 1, 1);
 }
 
 bool Scene::parseArgs(int argc, char**) //argv
@@ -40,7 +44,7 @@ bool Scene::parseArgs(int argc, char**) //argv
 
 void Scene::trace()
 {
-	unsigned threadCount = 1;
+	unsigned threadCount = 0;
 	if(threadCount == 0) // Automatically determine threads
 	{
 		threadCount = std::thread::hardware_concurrency();
@@ -54,7 +58,7 @@ void Scene::trace()
 	// Create threads and trace
 	std::vector<std::thread> threads(threadCount);
 	for(unsigned i = 0; i < threadCount; ++i)
-		threads[i] = std::thread(&Scene::traceSection, this, std::ref(camera), Scene::createRays(i, threadCount));
+		threads[i] = std::thread(&Scene::traceSection, this, std::ref(camera), Scene::createPixelRayMap(i, threadCount));
 
 	// Join threads
 	for(auto& thread : threads)
@@ -63,7 +67,7 @@ void Scene::trace()
 	std::cout << "Finished\n";
 }
 
-std::map<unsigned, Ray> Scene::createRays(unsigned threadID, unsigned threadCount)
+std::map<unsigned, Ray> Scene::createPixelRayMap(unsigned threadID, unsigned threadCount)
 {
 	std::map<unsigned, Ray> pixelRayMap;
 	unsigned width = camera.pixels.width();
@@ -99,63 +103,72 @@ std::map<unsigned, Ray> Scene::createRays(unsigned threadID, unsigned threadCoun
 	return pixelRayMap;
 }
 
-void Scene::traceSection(Camera& camera, std::map<unsigned, Ray> rays)
+void Scene::traceSection(Camera& camera, std::map<unsigned, Ray> pixelRayMap)
 {
 	  unsigned depth = 1;
-		Sphere sphere(100.f, Vec3(400, 600, -250));
-		Plane plane(Vec3(0,1,0), Vec3(0, 0, 0));
-		Triangle t(Vec3(0,600,-250), Vec3(100,700,-250), Vec3(200,450,-250));
-
-	  for(auto& r : rays)
+	  for(auto& r : pixelRayMap)
 		{
-			if(plane.raycast(r.second) && r.second.t >= 0)
-	  		camera.pixels.set(r.first, Vec3(1, 0, 0));
-
-			if(sphere.raycast(r.second) && r.second.t >= 0)
-				camera.pixels.set(r.first, Vec3(1, 0, 0));
-
-			if(t.raycast(r.second) && r.second.t >= 0)
-				camera.pixels.set(r.first, Vec3(1, 0, 0));
+			camera.pixels.set(r.first, castRay(r.second, depth));
+			//TODO: account for multiple rays per pixel
 		}
 }
 
-// Vec3 Scene::raycast(Ray ray, int depth)
-// {
-// 	Ray closestRay;
-// 	Ray testRay;
-// 	Tracable* geom = nullptr;
-// 	for(unsigned i = 0; i < geometry.size(); ++i)
-// 	{
-// 		testRay = ray;
-// 		if(geometry[i].raycast(testRay) && testRay.t < closestRay.t)
-// 		{
-// 			geom = &geometry[i];
-// 			closestRay = testRay;
-// 		}
-// 	}
-//
-// 	Vec3 color = backgroundColor;
-// 	if(geom != nullptr)
-// 	{
-// 		// Test if object is in shadow
-// 		if(shadow(ray))
-// 		{
-// 			 color = geom->material.ambient;
-// 		}
-// 		else
-// 		{
-// 			color = blinnPhong(closestRay, *geom);
-// 		}
-//
-// 		// Recurse
-// 		if(depth > 0)
-// 		{
-// 			color += reflect(Ray ray, depth - 1);
-// 			color += refract(Ray ray, depth - 1);
-// 		}
-// 	}
-// 	return color;
-// }
+Vec3 Scene::castRay(const Ray origRay, int depth)
+{
+	Vec3 color(0, 0, 0);
+	if(depth == 0)
+		return color;
+
+	// Detect closest geometry
+	Ray ray = origRay;
+	Ray shortestRay;
+	int geomIndex = -1;
+	for(unsigned i = 0; i < geometry.size(); ++i)
+		if(geometry[i]->raycast(ray) && shortestRay.t > ray.t && ray.t >= 0)
+		{
+			shortestRay = ray;
+			geomIndex = i;
+		}
+
+	// Calculate shading
+	if(geomIndex != -1)
+	{
+		color.set(0, 0, 0);
+
+		// Calculate reflection and refraction rays
+		Ray reflectedRay;
+		Ray refractedRay;
+
+		Vec3 reflectedColor = castRay(reflectedRay, depth - 1);
+		Vec3 refractedColor = castRay(refractedRay, depth - 1);
+		Vec3 shadingColor(0, 0, 0);
+
+		//for each light
+		//{
+			//if(castShadowRay(/*shadow ray*/))
+				//shadingColor += amb
+			//else
+				//shadingColor += blinnPhong
+		//}
+
+		//Coefs should add to 1
+		float reflCoef 		= 1.f/3.f;
+		float refrCoef 		= 1.f/3.f;
+		float shadingCoef = 1.f/3.f;
+		color = reflCoef    * reflectedColor +
+						refrCoef    * refractedColor +
+						shadingCoef * shadingColor;
+	}
+	else
+		color = backgroundColor;
+
+	return color;
+}
+
+bool Scene::castShadowRay(Ray ray)
+{
+
+}
 
 void Scene::save()
 {

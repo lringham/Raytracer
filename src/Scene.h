@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 #include <map>
+#include <memory>
 
 #include "Tracable.h"
 #include "Light.h"
@@ -19,16 +20,15 @@ public:
 
 private:
 	bool parseArgs(int argc, char** argv);
-	void traceSection(Camera& camera, std::map<unsigned, Ray> rays);
+	void traceSection(Camera& camera, std::map<unsigned, Ray> pixelRayMap);
 
-	Vec3 raycast(Ray ray, int depth);
-	Vec3 refract(Ray ray, int depth);
-	Vec3 reflect(Ray ray, int depth);
-	Vec3 shadow(Ray ray);
-	Vec3 blinnPhong(Ray ray, const Tracable& geom);
+	Vec3 castRay(const Ray origRay, int depth);
+	bool castShadowRay(Ray ray);
+	// Vec3 blinnPhong(Ray ray, const Tracable& geom);
 
-	std::map<unsigned, Ray> createRays(unsigned threadID, unsigned threadCount);
-	std::vector<Tracable> geometry;
+	std::map<unsigned, Ray> createPixelRayMap(unsigned threadID, unsigned threadCount);
+
+	std::vector<std::unique_ptr<Tracable>> geometry;
 	std::vector<Light> lights;
 	Camera camera;
 	Vec3 backgroundColor;

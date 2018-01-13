@@ -9,6 +9,6 @@ public:
 	bool raycast(Ray& ray) const override;
 
 private:
-	Vec3 position;
 	Vec3 normal;
+	Vec3 position;
 };
