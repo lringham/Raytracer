@@ -19,14 +19,14 @@ Scene::Scene(int argc, char** argv)
 	}
 
 	// Add _geometry
-	_geometry.emplace_back(new Sphere(100.f, Vec3(350, 100, -400)));
+	_geometry.emplace_back(new Sphere(100.f, Vec3(600, 100, -400)));
 	_geometry.emplace_back(new Plane(Vec3(0,1,0), Vec3(0, 0, 0)));
 	_geometry.emplace_back(new Triangle(Vec3(0,0,-700), Vec3(400,500,-700), Vec3(800,0,-700)));
-	_geometry[1]->_material._diffuseColor.set(0, .6f, 0);
-	_geometry[2]->_material._diffuseColor.set(.7f, .6f, 0);
+	_geometry[1]->_material._diffuseColor.set(0, 1.f, 0);
+	_geometry[2]->_material._diffuseColor.set(1.f, 1.f, 0);
 
 	// Add _lights
-	_lights.push_back(Light(Vec3(.6, 0.2, .8), Vec3(0, 300, -500)));
+	_lights.push_back(Light(Vec3(1, 1, 1), Vec3(400, 500, -500)));
 	_lights.push_back(Light(Vec3(.8, 0.2, .6), Vec3(800, 300, -500)));
 
 	// Create Raster
@@ -109,7 +109,7 @@ std::map<unsigned, Ray> Scene::createPixelRayMap(unsigned threadID, unsigned thr
 
 void Scene::traceSection(Camera& _camera, std::map<unsigned, Ray> pixelRayMap)
 {
-	  unsigned depth = 2;
+	  unsigned depth = 32;
 	  for(auto& r : pixelRayMap)
 		{
 			Vec3 color = calculateColor(r.second, depth);
@@ -139,14 +139,11 @@ int Scene::castRay(Ray& ray)
 
 Vec3 Scene::calculateColor(Ray ray, int depth)
 {
-			// TODO: read geom / _lights from file
-			// TODO: add reflections
+			// TODO: read geom / lights from file
+			// TODO: add reflections / refractions
 			// TODO: light attenuation
 
-	// Recursion limit
 	Vec3 color(0, 0, 0);
-	if(depth == 0)
-		return color;
 
 	// Calculate shading
 	int geomIndex = castRay(ray);
@@ -165,27 +162,28 @@ Vec3 Scene::calculateColor(Ray ray, int depth)
 		{
 			L = l._position - collisionPoint;
 			float distToLight = L.length();
-			L = normalize(L);
-			Ray shadowRay(l._position, normalize(collisionPoint - l._position));
+			L.normalize();
+
+			Ray shadowRay(collisionPoint, L, .01f/*offset to avoid self collision*/);
 			if(castShadowRay(shadowRay, distToLight, geomIndex))
 				shadingColor = shadingColor + geom->_material.ambientColor();
 			else
 				shadingColor = shadingColor + geom->_material.blinnPhong(N, V, L, l._color);
 		}
 
+		if(depth == 0)
+			return shadingColor;
+
 		// Calculate reflection and refraction rays
-		Ray reflectedRay(collisionPoint, normalize(reflect(-1.f*ray._dir,N)), .01f);
+		Ray reflectedRay(collisionPoint, reflect(normalize(collisionPoint - ray._origin), N), .01f);
 		Ray refractedRay;
 		Vec3 reflectedColor = calculateColor(reflectedRay, depth - 1);
 		Vec3 refractedColor = calculateColor(refractedRay, depth - 1);
-		float reflCoef 		= 0.f;
+		float reflCoef 		= .5f;
 		float refrCoef 		= 0.f;
-		float shadingCoef = 1.f;
+		float shadingCoef = .5f;
 		color = reflCoef    * reflectedColor +
-						refrCoef    * refractedColor +
 						shadingCoef * shadingColor;
-
-
 	}
 	else
 		color = _backgroundColor;
