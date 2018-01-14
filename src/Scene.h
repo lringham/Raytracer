@@ -20,12 +20,12 @@ public:
 
 private:
 	bool parseArgs(int argc, char** argv);
-	void traceSection(Camera& camera, std::map<unsigned, Ray> pixelRayMap);
+	void traceSection(Camera& camera, std::map<unsigned, std::vector<Ray>> pixelRayMap);
 	int castRay(Ray& ray);
 	Vec3 calculateColor(const Ray origRay, int depth);
-	bool castShadowRay(Ray& ray, float distToLight, int origGeomIndex);
+	bool castShadowRay(Ray& ray, float distToLight);
 	Vec3 blinnPhong(const Ray& ray, const Tracable& geom);
-	std::map<unsigned, Ray> createPixelRayMap(unsigned threadID, unsigned threadCount);
+	std::map<unsigned, std::vector<Ray>> createPixelRayMap(unsigned threadID, unsigned threadCount);
 
 	std::vector<std::unique_ptr<Tracable>> _geometry;
 	std::vector<Light> _lights;

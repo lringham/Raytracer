@@ -29,11 +29,9 @@ Scene::Scene(int argc, char** argv)
 	_lights.push_back(Light(Vec3(1, 1, 1), Vec3(400, 500, -500)));
 	_lights.push_back(Light(Vec3(.8, 0.2, .6), Vec3(800, 300, -500)));
 
-	// Create Raster
-	Pixels pixels(800, 800);
-
 	// Create Camera
-	_camera._pixels = pixels;
+	//0.785398f
+	_camera.init(Vec3(400.f, 400.f, 1000.f), 1.5708f, 3000.f, Pixels(800, 600));
 
 	// Set background color
 	_backgroundColor.set(.2, .2, .4);
@@ -71,9 +69,9 @@ void Scene::trace()
 	std::cout << "Finished\n";
 }
 
-std::map<unsigned, Ray> Scene::createPixelRayMap(unsigned threadID, unsigned threadCount)
+std::map<unsigned, std::vector<Ray>> Scene::createPixelRayMap(unsigned threadID, unsigned threadCount)
 {
-	std::map<unsigned, Ray> pixelRayMap;
+	std::map<unsigned, std::vector<Ray>> pixelRayMap;
 	unsigned width = _camera._pixels.width();
 	unsigned height = _camera._pixels.height();
 
@@ -102,22 +100,31 @@ std::map<unsigned, Ray> Scene::createPixelRayMap(unsigned threadID, unsigned thr
 
 	for(unsigned x = startX; x < endX; ++x)
 		for(unsigned y = 0; y < height; ++y)
-			pixelRayMap[x+y*width] = _camera.createRay(x, y);
+			pixelRayMap[x+y*width] = _camera.createRays(x, y);
 
 	return pixelRayMap;
 }
 
-void Scene::traceSection(Camera& _camera, std::map<unsigned, Ray> pixelRayMap)
+void Scene::traceSection(Camera& _camera, std::map<unsigned, std::vector<Ray>> pixelRayMap)
 {
-	  unsigned depth = 32;
+	  unsigned depth = 8;
 	  for(auto& r : pixelRayMap)
 		{
-			Vec3 color = calculateColor(r.second, depth);
-			color._x = color._x < 0.f ? 0.f : color._x > 1.f ? 1.f : color._x;
-			color._y = color._y < 0.f ? 0.f : color._y > 1.f ? 1.f : color._y;
-			color._z = color._z < 0.f ? 0.f : color._z > 1.f ? 1.f : color._z;
+			Vec3 color(0,0,0);
+			for(auto& ray : r.second)
+			{
+				color = color + calculateColor(ray, depth);
+			}
+
+			float rayCount = static_cast<float>(r.second.size());
+			color._r /= rayCount;
+			color._g /= rayCount;
+			color._b /= rayCount;
+			color._r = color._r < 0.f ? 0.f : color._r > 1.f ? 1.f : color._r;
+			color._g = color._g < 0.f ? 0.f : color._g > 1.f ? 1.f : color._g;
+			color._b = color._b < 0.f ? 0.f : color._b > 1.f ? 1.f : color._b;
+
 			_camera._pixels.set(r.first, color);
-			//TODO: account for multiple rays per pixel
 		}
 }
 
@@ -140,9 +147,10 @@ int Scene::castRay(Ray& ray)
 Vec3 Scene::calculateColor(Ray ray, int depth)
 {
 			// TODO: read geom / lights from file
-			// TODO: add reflections / refractions
+			// TODO: add refractions
 			// TODO: light attenuation
-
+			// TODO: fresnel factor
+			
 	Vec3 color(0, 0, 0);
 
 	// Calculate shading
@@ -165,20 +173,21 @@ Vec3 Scene::calculateColor(Ray ray, int depth)
 			L.normalize();
 
 			Ray shadowRay(collisionPoint, L, .01f/*offset to avoid self collision*/);
-			if(castShadowRay(shadowRay, distToLight, geomIndex))
+			if(castShadowRay(shadowRay, distToLight))
 				shadingColor = shadingColor + geom->_material.ambientColor();
 			else
 				shadingColor = shadingColor + geom->_material.blinnPhong(N, V, L, l._color);
 		}
 
+		// Exit if recursive depth is met
 		if(depth == 0)
 			return shadingColor;
 
 		// Calculate reflection and refraction rays
 		Ray reflectedRay(collisionPoint, reflect(normalize(collisionPoint - ray._origin), N), .01f);
-		Ray refractedRay;
+		//Ray refractedRay(collisionPoint, refract(normalize(collisionPoint - ray._origin), N), .01f);
 		Vec3 reflectedColor = calculateColor(reflectedRay, depth - 1);
-		Vec3 refractedColor = calculateColor(refractedRay, depth - 1);
+		//Vec3 refractedColor = calculateColor(refractedRay, depth - 1);
 		float reflCoef 		= .5f;
 		float refrCoef 		= 0.f;
 		float shadingCoef = .5f;
@@ -191,10 +200,10 @@ Vec3 Scene::calculateColor(Ray ray, int depth)
 	return color;
 }
 
-bool Scene::castShadowRay(Ray& ray, float distToLight, int origGeomIndex)
+bool Scene::castShadowRay(Ray& ray, float distToLight)
 {
 	int geomIndex = castRay(ray);
-	return geomIndex != -1 && geomIndex != origGeomIndex && ray._t <= distToLight;
+	return geomIndex != -1 && ray._t <= distToLight;
 }
 
 void Scene::save()
