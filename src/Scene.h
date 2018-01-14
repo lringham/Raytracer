@@ -21,9 +21,9 @@ public:
 private:
 	bool parseArgs(int argc, char** argv);
 	void traceSection(Camera& camera, std::map<unsigned, Ray> pixelRayMap);
-	bool castRay(Ray& ray, int& geomIndex);
+	int castRay(Ray& ray);
 	Vec3 calculateColor(const Ray origRay, int depth);
-	bool castShadowRay(Ray ray);
+	bool castShadowRay(Ray& ray, float distToLight, int origGeomIndex);
 
 	Vec3 blinnPhong(const Ray& ray, const Tracable& geom);
 

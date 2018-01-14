@@ -12,9 +12,6 @@ Vec3 Material::blinnPhong(const Vec3& N,const Vec3& V, const Vec3& L, const Vec3
     (diffuseColor * clamp(dot(N, L), 0, 1) + // Diffuse color
     pow(clamp(dot(N, H), 0, 1), gloss));     // Specular color
 
-	if(tempColor.length() > 1.f)
-			tempColor.normalize();
-
 	return diffuseColor*ambient + (1.f-ambient) * tempColor;
 }
 

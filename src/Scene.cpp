@@ -19,12 +19,16 @@ Scene::Scene(int argc, char** argv)
 	}
 
 	// Add geometry
-	geometry.emplace_back(new Sphere(100.f, Vec3(600, 600, -250)));
+	geometry.emplace_back(new Sphere(100.f, Vec3(350, 100, -400)));
 	geometry.emplace_back(new Plane(Vec3(0,1,0), Vec3(0, 0, 0)));
-	geometry.emplace_back(new Triangle(Vec3(0,10,-700), Vec3(400,500,-700), Vec3(800,10,-700)));
+	geometry.emplace_back(new Triangle(Vec3(0,0,-700), Vec3(400,500,-700), Vec3(800,0,-700)));
+
+	geometry[1]->material.diffuseColor.set(0, .6f, 0);
+	geometry[2]->material.diffuseColor.set(.7f, .6f, 0);
 
 	// Add lights
-	lights.push_back(Light(Vec3(1, 1, 1), Vec3(400, 100, -400)));
+	lights.push_back(Light(Vec3(.6, 0.2, .8), Vec3(0, 300, -500)));
+	lights.push_back(Light(Vec3(.8, 0.2, .6), Vec3(800, 300, -500)));
 
 	// Create Raster
 	Pixels pixels(800, 800);
@@ -106,17 +110,21 @@ std::map<unsigned, Ray> Scene::createPixelRayMap(unsigned threadID, unsigned thr
 
 void Scene::traceSection(Camera& camera, std::map<unsigned, Ray> pixelRayMap)
 {
-	  unsigned depth = 1;
+	  unsigned depth = 2;
 	  for(auto& r : pixelRayMap)
 		{
-			camera.pixels.set(r.first, calculateColor(r.second, depth));
+			Vec3 color = calculateColor(r.second, depth);
+			color.x = color.x < 0.f ? 0.f : color.x > 1.f ? 1.f : color.x;
+			color.y = color.y < 0.f ? 0.f : color.y > 1.f ? 1.f : color.y;
+			color.z = color.z < 0.f ? 0.f : color.z > 1.f ? 1.f : color.z;
+			camera.pixels.set(r.first, color);
 			//TODO: account for multiple rays per pixel
 		}
 }
 
-bool Scene::castRay(Ray& ray, int& geomIndex)
+int Scene::castRay(Ray& ray)
 {
-	geomIndex = -1;
+	int geomIndex = -1;
 	Ray origRay = ray;
 	for(unsigned i = 0; i < geometry.size(); ++i)
 	{
@@ -127,15 +135,12 @@ bool Scene::castRay(Ray& ray, int& geomIndex)
 			geomIndex = i;
 		}
 	}
-	return geomIndex != -1;
+	return geomIndex;
 }
 
 Vec3 Scene::calculateColor(Ray ray, int depth)
 {
-			// TODO: handle multiple lights (clamp after summation?)
 			// TODO: read geom / lights from file
-			// TODO: refactor blinnPhong to method
-			// TODO: refactor ray collision to method
 			// TODO: add reflections
 			// TODO: light attenuation
 
@@ -145,8 +150,8 @@ Vec3 Scene::calculateColor(Ray ray, int depth)
 		return color;
 
 	// Calculate shading
-	int geomIndex;
-	if(castRay(ray, geomIndex))
+	int geomIndex = castRay(ray);
+	if(geomIndex != -1)
 	{
 		Vec3 collisionPoint = ray.intersection();
 		auto& geom = geometry[geomIndex];
@@ -156,28 +161,32 @@ Vec3 Scene::calculateColor(Ray ray, int depth)
 		Vec3 V = normalize(camera.location - collisionPoint);
 		Vec3 L;
 		Vec3 shadingColor(0, 0, 0);
+
 		for(Light& l : lights)
 		{
-			if(castShadowRay(Ray(collisionPoint, normalize(l.position-collisionPoint))))
+			L = l.position - collisionPoint;
+			float distToLight = L.length();
+			L = normalize(L);
+			Ray shadowRay(l.position, normalize(collisionPoint - l.position));
+			if(castShadowRay(shadowRay, distToLight, geomIndex))
 				shadingColor = shadingColor + geom->material.ambientColor();
 			else
-			{
-				L = normalize(l.position - collisionPoint);
 				shadingColor = shadingColor + geom->material.blinnPhong(N, V, L, l.color);
-			}
 		}
 
 		// Calculate reflection and refraction rays
-		Ray reflectedRay;
+		Ray reflectedRay(collisionPoint, normalize(reflect(-1.f*ray.dir,N)), .01f);
 		Ray refractedRay;
 		Vec3 reflectedColor = calculateColor(reflectedRay, depth - 1);
 		Vec3 refractedColor = calculateColor(refractedRay, depth - 1);
-		float reflCoef 		= 0;//1.f/3.f;
-		float refrCoef 		= 0;//1.f/3.f;
+		float reflCoef 		= 0.f;
+		float refrCoef 		= 0.f;
 		float shadingCoef = 1.f;
 		color = reflCoef    * reflectedColor +
 						refrCoef    * refractedColor +
 						shadingCoef * shadingColor;
+
+
 	}
 	else
 		color = backgroundColor;
@@ -185,9 +194,10 @@ Vec3 Scene::calculateColor(Ray ray, int depth)
 	return color;
 }
 
-bool Scene::castShadowRay(Ray)
+bool Scene::castShadowRay(Ray& ray, float distToLight, int origGeomIndex)
 {
-	return false;
+	int geomIndex = castRay(ray);
+	return geomIndex != -1 && geomIndex != origGeomIndex && ray.t <= distToLight;
 }
 
 void Scene::save()
