@@ -21,10 +21,11 @@ public:
 private:
 	bool parseArgs(int argc, char** argv);
 	void traceSection(Camera& camera, std::map<unsigned, Ray> pixelRayMap);
-
-	Vec3 castRay(const Ray origRay, int depth);
+	bool castRay(Ray& ray, int& geomIndex);
+	Vec3 calculateColor(const Ray origRay, int depth);
 	bool castShadowRay(Ray ray);
-	// Vec3 blinnPhong(Ray ray, const Tracable& geom);
+
+	Vec3 blinnPhong(const Ray& ray, const Tracable& geom);
 
 	std::map<unsigned, Ray> createPixelRayMap(unsigned threadID, unsigned threadCount);
 

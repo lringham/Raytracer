@@ -21,9 +21,10 @@ Scene::Scene(int argc, char** argv)
 	// Add geometry
 	geometry.emplace_back(new Sphere(100.f, Vec3(600, 600, -250)));
 	geometry.emplace_back(new Plane(Vec3(0,1,0), Vec3(0, 0, 0)));
-	geometry.emplace_back(new Triangle(Vec3(0,600,-250), Vec3(100,700,-250), Vec3(200,450,-250)));
+	geometry.emplace_back(new Triangle(Vec3(0,10,-700), Vec3(400,500,-700), Vec3(800,10,-700)));
 
 	// Add lights
+	lights.push_back(Light(Vec3(1, 1, 1), Vec3(400, 100, -400)));
 
 	// Create Raster
 	Pixels pixels(800, 800);
@@ -32,7 +33,7 @@ Scene::Scene(int argc, char** argv)
 	camera.pixels = pixels;
 
 	// Set background color
-	backgroundColor.set(1, 1, 1);
+	backgroundColor.set(.2, .2, .4);
 }
 
 bool Scene::parseArgs(int argc, char**) //argv
@@ -108,55 +109,69 @@ void Scene::traceSection(Camera& camera, std::map<unsigned, Ray> pixelRayMap)
 	  unsigned depth = 1;
 	  for(auto& r : pixelRayMap)
 		{
-			camera.pixels.set(r.first, castRay(r.second, depth));
+			camera.pixels.set(r.first, calculateColor(r.second, depth));
 			//TODO: account for multiple rays per pixel
 		}
 }
 
-Vec3 Scene::castRay(const Ray origRay, int depth)
+bool Scene::castRay(Ray& ray, int& geomIndex)
 {
+	geomIndex = -1;
+	Ray origRay = ray;
+	for(unsigned i = 0; i < geometry.size(); ++i)
+	{
+		Ray tempRay = origRay;
+		if(geometry[i]->raycast(tempRay) && ray.t > tempRay.t && tempRay.t >= 0)
+		{
+			ray = tempRay;
+			geomIndex = i;
+		}
+	}
+	return geomIndex != -1;
+}
+
+Vec3 Scene::calculateColor(Ray ray, int depth)
+{
+			// TODO: handle multiple lights (clamp after summation?)
+			// TODO: read geom / lights from file
+			// TODO: refactor blinnPhong to method
+			// TODO: refactor ray collision to method
+			// TODO: add reflections
+			// TODO: light attenuation
+
+	// Recursion limit
 	Vec3 color(0, 0, 0);
 	if(depth == 0)
 		return color;
 
-	// Detect closest geometry
-	Ray ray;
-	int geomIndex = -1;
+	// Calculate shading
+	int geomIndex;
+	if(castRay(ray, geomIndex))
 	{
-		for(unsigned i = 0; i < geometry.size(); ++i)
+		Vec3 collisionPoint = ray.intersection();
+		auto& geom = geometry[geomIndex];
+
+		// Calculate light contribution
+		Vec3 N = ray.normal;
+		Vec3 V = normalize(camera.location - collisionPoint);
+		Vec3 L;
+		Vec3 shadingColor(0, 0, 0);
+		for(Light& l : lights)
 		{
-			Ray tempRay = origRay;
-			if(geometry[i]->raycast(tempRay) && ray.t > tempRay.t && tempRay.t >= 0)
+			if(castShadowRay(Ray(collisionPoint, normalize(l.position-collisionPoint))))
+				shadingColor = shadingColor + geom->material.ambientColor();
+			else
 			{
-				ray = tempRay;
-				geomIndex = i;
+				L = normalize(l.position - collisionPoint);
+				shadingColor = shadingColor + geom->material.blinnPhong(N, V, L, l.color);
 			}
 		}
-	}
-	// Calculate shading
-	if(geomIndex != -1)
-	{
-		color.set(0, 0, 0);
 
 		// Calculate reflection and refraction rays
 		Ray reflectedRay;
 		Ray refractedRay;
-
-		Vec3 reflectedColor = castRay(reflectedRay, depth - 1);
-		Vec3 refractedColor = castRay(refractedRay, depth - 1);
-		Vec3 shadingColor(0, 0, 0);
-
-		//for each light
-		//{
-			//if(castShadowRay(/*shadow ray*/))
-				//shadingColor += amb
-			//else
-				//shadingColor += blinnPhong
-		//}
-
-		shadingColor = ray.normal;
-
-		//Coefs should add to 1
+		Vec3 reflectedColor = calculateColor(reflectedRay, depth - 1);
+		Vec3 refractedColor = calculateColor(refractedRay, depth - 1);
 		float reflCoef 		= 0;//1.f/3.f;
 		float refrCoef 		= 0;//1.f/3.f;
 		float shadingCoef = 1.f;
@@ -170,9 +185,9 @@ Vec3 Scene::castRay(const Ray origRay, int depth)
 	return color;
 }
 
-bool Scene::castShadowRay(Ray ray)
+bool Scene::castShadowRay(Ray)
 {
-
+	return false;
 }
 
 void Scene::save()

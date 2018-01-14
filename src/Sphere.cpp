@@ -31,7 +31,7 @@ bool Sphere::raycast(Ray& ray) const
 	float t1 = tc - t1c;
 	float t2 = tc + t1c;
 
-	ray.t = t1 >= 0 && t1 <= t2 ? t1 : t2;
-	ray.normal = normalize(ray.intersectioon() - center);
+	ray.t = t1 >= 0 && t1 < t2 ? t1 : t2;
+	ray.normal = normalize(ray.intersection() - center);
 	return true;
 }
