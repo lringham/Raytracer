@@ -2,46 +2,48 @@
 #include "Mat3.h"
 #include <cmath>
 
-Vec3::Vec3(float val) : x(val), y(val), z(val)
+Vec3::Vec3(float val) :
+	_x(val), _y(val), _z(val)
 {
 }
 
-Vec3::Vec3(float x, float y, float z) : x(x), y(y), z(z)
+Vec3::Vec3(float x, float y, float z) :
+	_x(x), _y(y), _z(z)
 {
 }
 
 void Vec3::set(float x, float y, float z)
 {
-	this->x = x;
-	this->y = y;
-	this->z = z;
+	this->_x =x;
+	this->_y =y;
+	this->_z =z;
 }
 
 void Vec3::set(const Vec3& v)
 {
-	x = v.x;
-	y = v.y;
-	z = v.z;
+	_x = v._x;
+	_y = v._y;
+	_z = v._z;
 }
 
 void Vec3::zero()
 {
-	x = 0;
-	y = 0;
-	z = 0;
+	_x = 0;
+	_y = 0;
+	_z = 0;
 }
 
 Vec3 Vec3::cross(const Vec3&  v) const
 {
 	return Vec3(
-		y*v.z - z*v.y,
-		z*v.x - x*v.z,
-		x*v.y - y*v.x);
+		_y*v._z - _z*v._y,
+		_z*v._x - _x*v._z,
+		_x*v._y - _y*v._x);
 }
 
 float Vec3::dot(const Vec3&  v) const
 {
-	return x*v.x + y*v.y + z*v.z;
+	return _x*v._x + _y*v._y + _z*v._z;
 }
 
 Vec3 Vec3::projOnto(const Vec3& v)
@@ -68,30 +70,30 @@ float Vec3::acuteAngleBetween(const Vec3& v)
 
 void Vec3::add(float x, float y, float z)
 {
-	this->x += x;
-	this->y += y;
-	this->z += z;
+	this->_x += x;
+	this->_y += y;
+	this->_z += z;
 }
 
 void Vec3::add(const Vec3& translation)
 {
-	this->x += translation.x;
-	this->y += translation.y;
-	this->z += translation.z;
+	this->_x += translation._x;
+	this->_y += translation._y;
+	this->_z += translation._z;
 }
 
 void Vec3::sub(float x, float y, float z)
 {
-	this->x -= x;
-	this->y -= y;
-	this->z -= z;
+	this->_x -= x;
+	this->_y -= y;
+	this->_z -= z;
 }
 
 void Vec3::sub(const Vec3& translation)
 {
-	this->x -= translation.x;
-	this->y -= translation.y;
-	this->z -= translation.z;
+	this->_x -= translation._x;
+	this->_y -= translation._y;
+	this->_z -= translation._z;
 }
 
 void Vec3::normalize()
@@ -101,133 +103,133 @@ void Vec3::normalize()
 	if (len == 0)
 		return;
 
-	x = x / len;
-	y = y / len;
-	z = z / len;
+	_x = _x / len;
+	_y = _y / len;
+	_z = _z / len;
 }
 
 float Vec3::length() const
 {
-	return sqrt(x*x + y*y + z*z);
+	return sqrt(_x*_x + _y*_y + _z*_z);
 }
 
 std::ostream& operator<<(std::ostream& os, const Vec3& v)
 {
-	os << "(" << v.x << ", " << v.y << ", " << v.z << ")";
+	os << "(" << v._x << ", " << v._y << ", " << v._z << ")";
 	return os;
 }
 
 Vec3 operator+(const Vec3& v1, const Vec3& v2)
 {
-	return Vec3(v1.x + v2.x, v1.y + v2.y,v1.z + v2.z);
+	return Vec3(v1._x + v2._x, v1._y + v2._y, v1._z + v2._z);
 }
 
 Vec3 operator+(const float& val, const Vec3& v)
 {
-	return Vec3(v.x + val, v.y + val, v.z + val);
+	return Vec3(v._x + val, v._y + val, v._z + val);
 }
 
 Vec3 operator+(const Vec3& v, const float& val)
 {
-	return Vec3(v.x + val, v.y + val, v.z + val);
+	return Vec3(v._x + val, v._y + val, v._z + val);
 }
 
 Vec3 operator-(const Vec3& v1, const Vec3& v2)
 {
-	return Vec3(v1.x - v2.x, v1.y - v2.y, v1.z - v2.z);
+	return Vec3(v1._x - v2._x, v1._y - v2._y, v1._z - v2._z);
 }
 
 Vec3 operator-(const float& val, const Vec3& v)
 {
-	return Vec3(v.x - val, v.y - val, v.z - val);
+	return Vec3(v._x - val, v._y - val, v._z - val);
 }
 
 Vec3 operator-(const Vec3& v, const float& val)
 {
-	return Vec3(v.x - val, v.y - val, v.z - val);
+	return Vec3(v._x - val, v._y - val, v._z - val);
 }
 
 Vec3 operator*(const Vec3& v1, const Vec3& v2)
 {
-	return Vec3(v1.x * v2.x, v1.y * v2.y, v1.z * v2.z);
+	return Vec3(v1._x * v2._x, v1._y * v2._y, v1._z * v2._z);
 }
 
 Vec3 operator*(const float& val, const Vec3& v)
 {
-	return Vec3(v.x * val, v.y * val, v.z * val);
+	return Vec3(v._x * val, v._y * val, v._z * val);
 }
 
 Vec3 operator*(const Vec3& v, const float& val)
 {
-	return Vec3(v.x * val, v.y * val, v.z * val);
+	return Vec3(v._x * val, v._y * val, v._z * val);
 }
 
 Vec3 operator/(const Vec3& v1, const Vec3& v2)
 {
-	return Vec3(v1.x / v2.x, v1.y / v2.y, v1.z / v2.z);
+	return Vec3(v1._x / v2._x, v1._y / v2._y, v1._z / v2._z);
 }
 
 Vec3 operator/(const float& val, const Vec3& v)
 {
-	return Vec3(v.x / val, v.y / val, v.z / val);
+	return Vec3(v._x / val, v._y / val, v._z / val);
 }
 
 Vec3 operator/(const Vec3& v, const float& val)
 {
-	return Vec3(v.x / val, v.y / val, v.z / val);
+	return Vec3(v._x / val, v._y / val, v._z / val);
 }
 
 // Non member functions
 Vec3 add(const Vec3& v1, const Vec3& v2)
 {
 	return Vec3(
-		v1.x + v2.x,
-		v1.y + v2.y,
-		v1.z + v2.z);
+		v1._x + v2._x,
+		v1._y + v2._y,
+		v1._z + v2._z);
 }
 
 Vec3 sub(const Vec3& v1, const Vec3& v2)
 {
 	return Vec3(
-		v1.x - v2.x,
-		v1.y - v2.y,
-		v1.z - v2.z);
+		v1._x - v2._x,
+		v1._y - v2._y,
+		v1._z - v2._z);
 }
 
 Vec3 mul(const Vec3& v, float val)
 {
 	return Vec3(
-		v.x * val,
-		v.y * val,
-		v.z * val);
+		v._x * val,
+		v._y * val,
+		v._z * val);
 }
 
 Vec3 div(const Vec3& v, float val)
 {
 	return Vec3(
-		v.x / val,
-		v.y / val,
-		v.z / val);
+		v._x / val,
+		v._y / val,
+		v._z / val);
 }
 
 float length(const Vec3& v)
 {
-	return sqrt(v.x*v.x + v.y*v.y + v.z*v.z);
+	return sqrt(v._x*v._x + v._y*v._y + v._z*v._z);
 }
 
 float dot(const Vec3& v1, const Vec3& v2)
 {
-	return v1.x * v2.x +
-		v1.y * v2.y +
-		v1.z * v2.z;
+	return v1._x * v2._x +
+		v1._y * v2._y +
+		v1._z * v2._z;
 }
 
 Vec3 cross(const Vec3& v1, const Vec3& v2)
 {
 	return Vec3(
-		v1.y*v2.z - v1.z*v2.y,
-		v1.z*v2.x - v1.x*v2.z,
-		v1.x*v2.y - v1.y*v2.x);
+		v1._y*v2._z - v1._z*v2._y,
+		v1._z*v2._x - v1._x*v2._z,
+		v1._x*v2._y - v1._y*v2._x);
 }
 
 Vec3 normalize(const Vec3& v)

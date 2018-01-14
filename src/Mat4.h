@@ -22,11 +22,11 @@ public:
 	friend std::ostream& operator<<(std::ostream& os, const Mat4& m);
 	friend Mat4 operator+(const Mat4& m1, const Mat4& m2);
 	friend Mat4 operator-(const Mat4& m1, const Mat4& m2);
-	friend Mat4 operator*(const Mat4& m1, const Mat4& m2);	
+	friend Mat4 operator*(const Mat4& m1, const Mat4& m2);
 	friend Vec4 operator*(const Mat4& m, const Vec4& v);
 
-	//fields 
-	float elements[16];
+	//fields
+	float _elements[16];
 };
 
 Mat4 transpose(const Mat4& m);

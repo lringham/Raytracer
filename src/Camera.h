@@ -8,6 +8,6 @@ public:
 	Camera();
 	Ray createRay(unsigned x, unsigned y) const;
 
-	Pixels pixels;
-	Vec3 location;
+	Pixels _pixels;
+	Vec3 _position;
 };

@@ -25,7 +25,6 @@ public:
 	friend Mat3 operator-(const Mat3& m1, const Mat3& m2);
 	friend Mat3 operator*(const Mat3& m1, const Mat3& m2);
 	friend Vec3 operator*(const Mat3& m, const Vec3& v);
- 
-	float elements[9];
-};
 
+	float _elements[9];
+};

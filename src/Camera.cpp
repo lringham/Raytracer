@@ -1,11 +1,10 @@
 #include "Camera.h"
 
-Camera::Camera()
-{
-  location.set(400, 400, 1000);
-}
+Camera::Camera() :
+  _position(400, 400, 1000)
+{}
 
 Ray Camera::createRay(unsigned x, unsigned y) const
 {
-  return Ray(location, normalize(Vec3(x, (pixels.height() - 1 - y), -1) - location));
+  return Ray(_position, normalize(Vec3(x, (_pixels.height() - 1 - y), -1) - _position));
 }

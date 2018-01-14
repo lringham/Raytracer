@@ -2,16 +2,16 @@
 #include <cassert>
 
 Plane::Plane(Vec3 normal, Vec3 position) :
-  normal(normal), position(position)
+  _normal(normal), _position(position)
 {}
 
 bool Plane::raycast(Ray& ray) const
 {
-	float rayDirDotNormal = ray.dir.dot(normal);
+	float rayDirDotNormal = ray._dir.dot(_normal);
 	if (rayDirDotNormal == 0)
 		return false;
-	ray.t = (position - ray.origin).dot(normal) / rayDirDotNormal;
-  ray.normal = normal;
+	ray._t = (_position - ray._origin).dot(_normal) / rayDirDotNormal;
+  ray._normal = _normal;
 
 	return true;
 }

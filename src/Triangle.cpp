@@ -1,7 +1,7 @@
 #include "Triangle.h"
 
 Triangle::Triangle(Vec3 p0, Vec3 p1, Vec3 p2) :
-	p0(p0), p1(p1), p2(p2)
+	_p0(p0), _p1(p1), _p2(p2)
 {}
 
 /* From pg 78 in Fundamentals of Computer Graphics 3rd Edition
@@ -24,14 +24,14 @@ det(A3)/M = v
 */
 bool Triangle::raycast(Ray& ray) const
 {
-	Vec3 e0 = p1 - p0;
-	Vec3 e1 = p2 - p0;
-	Vec3 rsubv0 = ray.origin - p0;
+	Vec3 e0 = _p1 - _p0;
+	Vec3 e1 = _p2 - _p0;
+	Vec3 rsubv0 = ray._origin - _p0;
 
-	float a = -ray.dir.x, b = -ray.dir.y, c = -ray.dir.z;
-	float d = e0.x, e = e0.y, f = e0.z;
-	float g = e1.x, h = e1.y, i = e1.z;
-	float j = rsubv0.x, k = rsubv0.y, l = rsubv0.z;
+	float a = -ray._dir._x, b = -ray._dir._y, c = -ray._dir._z;
+	float d = e0._x, e = e0._y, f = e0._z;
+	float g = e1._x, h = e1._y, i = e1._z;
+	float j = rsubv0._x, k = rsubv0._y, l = rsubv0._z;
 
 	float eisubhf = e*i - h*f;
 	float gfsubdi = g*f - d*i;
@@ -39,8 +39,8 @@ bool Triangle::raycast(Ray& ray) const
 
 	float Minv = 1.f / (a*eisubhf + b*gfsubdi + c*dhsubeg);
 
-	ray.t = (j*eisubhf + k*gfsubdi + l*dhsubeg) * Minv;
-	if (ray.t < 0)
+	ray._t = (j*eisubhf + k*gfsubdi + l*dhsubeg) * Minv;
+	if (ray._t < 0)
 		return false;
 
 	float aksubjb = a*k - j*b;
@@ -55,7 +55,7 @@ bool Triangle::raycast(Ray& ray) const
 	if (v < 0.f || v > 1.f - u)
 		return false;
 
-	ray.normal = normalize(cross(e1, e0));
+	ray._normal = normalize(cross(e1, e0));
 	return true;
 }
 //

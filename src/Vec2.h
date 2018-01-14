@@ -31,12 +31,12 @@ public:
 
 	union
 	{
-		float x, u;
+		float _x, _u;
 	};
 
 	union
 	{
-		float y, v;
+		float _y, _v;
 	};
 };
 

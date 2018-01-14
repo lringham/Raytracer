@@ -8,5 +8,5 @@ public:
 	bool raycast(Ray& ray) const override;
 
 private:
-	Vec3 p0, p1, p2;
+	Vec3 _p0, _p1, _p2;
 };

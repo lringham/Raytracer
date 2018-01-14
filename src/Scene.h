@@ -24,13 +24,11 @@ private:
 	int castRay(Ray& ray);
 	Vec3 calculateColor(const Ray origRay, int depth);
 	bool castShadowRay(Ray& ray, float distToLight, int origGeomIndex);
-
 	Vec3 blinnPhong(const Ray& ray, const Tracable& geom);
-
 	std::map<unsigned, Ray> createPixelRayMap(unsigned threadID, unsigned threadCount);
 
-	std::vector<std::unique_ptr<Tracable>> geometry;
-	std::vector<Light> lights;
-	Camera camera;
-	Vec3 backgroundColor;
+	std::vector<std::unique_ptr<Tracable>> _geometry;
+	std::vector<Light> _lights;
+	Camera _camera;
+	Vec3 _backgroundColor;
 };

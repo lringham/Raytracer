@@ -24,8 +24,7 @@ public:
 	Vec3 projOnto(const Vec3& v);
 	float areaBetween(const Vec3& v);
 	float acuteAngleBetween(const Vec3& v);
-	
-	//FIXME: need to be friends?
+
 	friend std::ostream& operator<<(std::ostream& os, const Vec3& v);
 	friend Vec3 operator+(const Vec3& v1, const Vec3& v2);
 	friend Vec3 operator+(const float& val, const Vec3& v);
@@ -45,17 +44,17 @@ public:
 
 	union
 	{
-		float x, r, u;
+		float _x, _r, _u;
 	};
 
 	union
 	{
-		float y, g, v;
+		float _y, _g, _v;
 	};
 
 	union
 	{
-		float z, b, w;
+		float _z, _b, _w;
 	};
 };
 

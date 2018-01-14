@@ -27,6 +27,6 @@ public:
 	bool raycast(Ray& ray) const override;
 
 private:
-	float radius;
-	Vec3 center;
+	float _radius;
+	Vec3 _center;
 };

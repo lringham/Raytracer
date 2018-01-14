@@ -2,15 +2,15 @@
 #include <cmath>
 
 Sphere::Sphere(float radius, Vec3 center)
-	: radius(radius), center(center)
+	: _radius(radius), _center(center)
 {
 
 }
 
 bool Sphere::raycast(Ray& ray) const
 {
-	Vec3 L = center - ray.origin; // Get vector from ray origin to sphere centre
-	float tc = L.dot(ray.dir);	// Project vector onto ray dir
+	Vec3 L = _center - ray._origin; // Get vector from ray origin to sphere centre
+	float tc = L.dot(ray._dir);	// Project vector onto ray dir
 
 	// Check if ray is pointing at sphere
 	if (tc < 0)
@@ -20,7 +20,7 @@ bool Sphere::raycast(Ray& ray) const
 	float d2 = L.dot(L) -  tc*tc;
 
 	// Check if ray missed the sphere
-	float radius2 = radius*radius;
+	float radius2 = _radius*_radius;
 	if (d2 > radius2)
 		return false;
 
@@ -31,7 +31,7 @@ bool Sphere::raycast(Ray& ray) const
 	float t1 = tc - t1c;
 	float t2 = tc + t1c;
 
-	ray.t = t1 >= 0 && t1 < t2 ? t1 : t2;
-	ray.normal = normalize(ray.intersection() - center);
+	ray._t = t1 >= 0 && t1 < t2 ? t1 : t2;
+	ray._normal = normalize(ray.intersection() - _center);
 	return true;
 }

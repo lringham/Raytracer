@@ -8,9 +8,9 @@ public:
   Vec3 blinnPhong(const Vec3& N,const Vec3& V, const Vec3& L, const Vec3& lightColor);
   Vec3 ambientColor() const;
 
-  Vec3 diffuseColor;
-  Vec3 specularColor;
-  float ambient, gloss;
+  Vec3 _diffuseColor;
+  Vec3 _specularColor;
+  float _ambient, _gloss;
 
 
 	inline float clamp(float v, float v1, float v2)

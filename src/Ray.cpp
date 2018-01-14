@@ -2,19 +2,19 @@
 #include <limits>
 
 Ray::Ray(Vec3 origin, Vec3 dir, float offset) :
-  origin(origin), dir(dir)
+  _origin(origin), _dir(dir)
 {
-  t = std::numeric_limits<float>::max();
-  origin = origin + dir * offset;
+  _t = std::numeric_limits<float>::max();
+  _origin = _origin + _dir * offset;
 }
 
 Ray::Ray() :
-  origin(Vec3(0, 0, 0)), dir(Vec3(0, 0, -1))
+  _origin(Vec3(0, 0, 0)), _dir(Vec3(0, 0, -1))
 {
-  t = std::numeric_limits<float>::max();
+  _t = std::numeric_limits<float>::max();
 }
 
 Vec3 Ray::intersection() const
 {
-  return origin + dir * t;
+  return _origin + _dir * _t;
 }
