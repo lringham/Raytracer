@@ -262,6 +262,21 @@ Vec3 reflect(const Vec3& I, const Vec3& N)
 	return I - 2.f*N.dot(I)*N;
 }
 
+Vec3 refract(const Vec3& I, const Vec3& N, float ior)
+{
+	//https://www.scratchapixel.com/lessons/3d-basic-rendering/introduction-to-shading/reflection-refraction-fresnel
+	//Handle total internal reflection
+	float eta = 1.f / ior;
+	float cosi = N.dot(I);
+
+	float c2 = std::sqrt(1.f-eta*eta*(1.f-cosi*cosi));
+
+	if(c2 < 0)
+		return Vec3(0);
+	else
+		return eta*I + (eta*cosi - c2) * N;
+}
+
 Vec3 rotate(const Vec3& v, float angle, const Vec3& axis)
 {
 	return v*cos(angle) + ::cross(axis, v)*sin(angle) + axis*(::dot(axis, v)*(1.f - cos(angle)));
