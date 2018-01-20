@@ -1,11 +1,14 @@
 #include <thread>
 #include <iostream>
+#include <yaml-cpp/yaml.h>
+
 #include "Scene.h"
 #include "Ray.h"
 
-Scene::Scene(int argc, char** argv)
+Scene::Scene(int argc, char** argv) :
+	 _name("scene"), _outputName(""), _threadCount(0)
 {
-	std::cout << "Loading...";
+	std::cout << "Loading... ";
 
 	// Parse
 	if(parseArgs(argc, argv))
@@ -17,52 +20,155 @@ Scene::Scene(int argc, char** argv)
 		std::cout << "Failed\n";
 		throw -1;
 	}
-
-	// Add _geometry
-	_geometry.emplace_back(new Sphere(200.f, Vec3(600, 600, 0)));
-	_geometry.emplace_back(new Plane(Vec3(0,1,0), Vec3(0, 0, 0)));
-	_geometry.emplace_back(new Triangle(Vec3(0,0,-700), Vec3(400,500,-700), Vec3(800,0,-700)));
-	_geometry.emplace_back(new Sphere(100.f, Vec3(800, 900, -100)));
-	_geometry[1]->_material._diffuseColor.set(0, 1.f, 0);
-	_geometry[2]->_material._diffuseColor.set(1.f, 1.f, 0);
-	_geometry[3]->_material._diffuseColor.set(1.f, 1.f, 1.f);
-
-	// Add _lights
-	_lights.push_back(Light(Vec3(1, 1, 1), Vec3(400, 1500, 0)));
-	_lights.push_back(Light(Vec3(.8, 0.2, .6), Vec3(800, 300, -500)));
-
-	// Create Camera
-	//0.785398f
-	_camera.init(Vec3(400.f, 400.f, 1000.f), 1.5708f, 3000.f, Pixels(800, 600));
-
-	// Set background color
-	_backgroundColor.set(.2, .2, .4);
 }
 
-bool Scene::parseArgs(int argc, char**) //argv
+bool Scene::parseArgs(int argc, char** argv) //argv
 {
-	if(argc <= 1)
+	if(argc <= 1 || argc > 3)
+	{
+		usage();
 		return false;
+	}
+	else if (argc == 3)
+	{
+		std::string arg = argv[2];
+		std::string threadCountStr = "-threads=";
+		if(arg.compare(0, threadCountStr.length(), threadCountStr) == 0)
+			_threadCount = std::stoi(arg.substr(arg.find(threadCountStr)+threadCountStr.size()));
+		else
+		{
+			usage();
+			return false;
+		}
+	}
+
+	YAML::Node config;
+	try
+	{
+		//
+		YAML::Node config = YAML::LoadFile(argv[1]);
+
+		if(config["outputName"])
+			_outputName = config["outputName"].as<std::string>();
+
+		if(config["name"])
+			_name = config["name"].as<std::string>();
+
+		const YAML::Node& materials = config["materials"];
+		for (YAML::const_iterator it = materials.begin(); it != materials.end(); ++it)
+		{
+		    const YAML::Node& material = *it;
+		    // std::cout << "name: " << material["name"].as<std::string>() << "\n";
+		    // std::cout << "ks: " << material["ks"].as<std::string>() << "\n";
+				// std::cout << "kd: " << material["kd"].as<std::string>() << "\n";
+				// std::cout << "ka: " << material["ka"].as<std::string>() << "\n";
+				// std::cout << "dColor: " << material["dColor"].as<std::string>() << "\n";
+				// std::cout << "specularColor: " << material["specularColor"].as<std::string>() << "\n";
+		}
+
+		const YAML::Node& objects = config["objects"];
+		for (YAML::const_iterator it = objects.begin(); it != objects.end(); ++it)
+		{
+		    const YAML::Node& object = *it;
+		    std::string type = object["type"].as<std::string>();
+
+				if(type == "sphere")
+				{
+					_geometry.emplace_back(
+						new Sphere(
+							object["radius"].as<float>(), Vec3(
+								object["position"][0].as<float>(),
+								object["position"][1].as<float>(),
+								object["position"][2].as<float>())));
+				}
+				else if(type == "triangle")
+				{
+					_geometry.emplace_back(
+						new Triangle(
+							Vec3(object["x0"][0].as<float>(),
+									 object["x0"][1].as<float>(),
+									 object["x0"][2].as<float>()),
+							Vec3(object["x1"][0].as<float>(),
+									 object["x1"][1].as<float>(),
+									 object["x1"][2].as<float>()),
+						  Vec3(object["x2"][0].as<float>(),
+									 object["x2"][1].as<float>(),
+									 object["x2"][2].as<float>())));
+				}
+				else if(type == "plane")
+				{
+					_geometry.emplace_back(
+						new Plane(
+							Vec3(object["normal"][0].as<float>(),
+									 object["normal"][1].as<float>(),
+									 object["normal"][2].as<float>()),
+							Vec3(object["position"][0].as<float>(),
+									 object["position"][1].as<float>(),
+									 object["position"][2].as<float>())));
+				}
+
+				//std::cout << "material: " << object["material"].as<std::string>() << "\n\n";
+		}
+
+		const YAML::Node& lights = config["lights"];
+		for (YAML::const_iterator it = lights.begin(); it != lights.end(); ++it)
+		{
+			const YAML::Node& light = *it;
+			_lights.emplace_back(
+					Vec3(light["color"][0].as<float>(),
+							 light["color"][1].as<float>(),
+							 light["color"][2].as<float>()),
+					Vec3(light["position"][0].as<float>(),
+							 light["position"][1].as<float>(),
+							 light["position"][2].as<float>()));
+		}
+
+		_camera.init(
+			  Vec3(
+					 config["camera"]["position"][0].as<float>(),
+					 config["camera"]["position"][1].as<float>(),
+					 config["camera"]["position"][2].as<float>()),
+				config["camera"]["fov"].as<float>(),
+				config["camera"]["focalLength"].as<float>(),
+				Pixels(
+					 config["camera"]["pxWidth"].as<unsigned>(),
+					 config["camera"]["pxHeight"].as<unsigned>()));
+
+		_backgroundColor.set(
+			config["backgroundColor"][0].as<float>(),
+			config["backgroundColor"][1].as<float>(),
+			config["backgroundColor"][2].as<float>());
+	}
+	catch(YAML::BadFile e)
+	{
+		usage();
+		return false;
+	}
+
 	return true;
+}
+
+void Scene::usage()
+{
+	std::cout << "Invalid command line parameters.\nUsage: ./Raytracer scenefile.yaml [-threads=n]";
 }
 
 void Scene::trace()
 {
-	unsigned threadCount = 0;
-	if(threadCount == 0) // Automatically determine threads
+	if(_threadCount == 0) // Automatically determine threads
 	{
-		threadCount = std::thread::hardware_concurrency();
-		if(threadCount == 0) // Cannot be determined
-			threadCount = 1;
+		_threadCount = std::thread::hardware_concurrency();
+		if(_threadCount == 0) // Cannot be determined
+			_threadCount = 1;
 	}
 
-	std::cout << "Thread count: " << threadCount << "\n";
-	std::cout << "Tracing...";
+	std::cout << "Thread count: " << _threadCount << "\n";
+	std::cout << "Tracing " << _name << "...";
 
 	// Create threads and trace
-	std::vector<std::thread> threads(threadCount);
-	for(unsigned i = 0; i < threadCount; ++i)
-		threads[i] = std::thread(&Scene::traceSection, this, std::ref(_camera), Scene::createPixelRayMap(i, threadCount));
+	std::vector<std::thread> threads(_threadCount);
+	for(unsigned i = 0; i < _threadCount; ++i)
+		threads[i] = std::thread(&Scene::traceSection, this, std::ref(_camera), Scene::createPixelRayMap(i, _threadCount));
 
 	// Join threads
 	for(auto& thread : threads)
@@ -206,6 +312,6 @@ bool Scene::castShadowRay(Ray& ray, float distToLight)
 void Scene::save()
 {
 	std::cout << "Saving Image...";
-	_camera._pixels.save("output.ppm");
+	_camera._pixels.save(_outputName.c_str());
 	std::cout << "Finished\n";
 }

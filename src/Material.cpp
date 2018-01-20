@@ -1,21 +1,24 @@
 #include "Material.h"
 
-Material::Material(const Vec3& diffuseColor, const Vec3& specularColor, float ambient, float gloss) :
-  _diffuseColor(diffuseColor), _specularColor(specularColor), _ambient(ambient), _gloss(gloss)
+Material::Material(const Vec3& kd, const Vec3& ks, float ka, float gloss) :
+  _kd(kd), _ks(ks), _ka(ka), _gloss(gloss)
 {}
 
 Vec3 Material::blinnPhong(const Vec3& N,const Vec3& V, const Vec3& L, const Vec3& lightColor)
 {
 	Vec3 H = normalize(L + V);
 
-	Vec3 tempColor = lightColor *
-    (_diffuseColor * clamp(dot(N, L), 0, 1) + // Diffuse color
-    pow(clamp(dot(N, H), 0, 1), _gloss));     // Specular color
+  Vec3 kd = lightColor * _kd * clamp(dot(N, L), 0, 1);
+  Vec3 ks = lightColor * _ks * pow(clamp(dot(N, H), 0, 1), _gloss);
 
-	return _diffuseColor*_ambient + (1.f-_ambient) * tempColor;
+	// Vec3 tempColor = lightColor *
+  // (_kd * clamp(dot(N, L), 0, 1) + // Diffuse color
+  //    _ks * pow(clamp(dot(N, H), 0, 1), _gloss));     // Specular color
+
+	return _kd*_ka + (1.f-_ka) * (kd + ks);
 }
 
 Vec3 Material::ambientColor() const
 {
-  return _diffuseColor*_ambient;
+  return _kd*_ka;
 }

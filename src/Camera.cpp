@@ -5,7 +5,7 @@ Camera::Camera()
 {}
 
 Camera::Camera(Vec3 position, float fov, float focalLength, Pixels pixels) :
-  _position(position), _fov(fov), _focalLength(focalLength), _pixels(pixels)
+   _pixels(pixels), _position(position), _fov(fov), _focalLength(focalLength)
 {}
 
 void Camera::init(Vec3 position, float fov, float focalLength, Pixels pixels)

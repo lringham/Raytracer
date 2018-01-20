@@ -1,0 +1,40 @@
+name: Test Scene
+outputName: scene.ppm
+backgroundColor: [.2, .2, .4]
+materials:
+    - name: "basic"
+      ks: [400,500,-700]
+      kd: [400,500,-700]
+      ka: .1
+      gloss: 8
+      transparent: false
+      reflective: false
+objects:
+    - type: sphere
+      radius: 200.0
+      position: [600.0, 600.0, 0.0]
+      material: basic
+    - type: sphere
+      position: [800.0, 900.0, -100.0]
+      radius: 100.0
+      material: basic
+    - type: triangle
+      x0: [0,0,-700]
+      x1: [400,500,-700]
+      x2: [800,0,-700]
+      material: basic
+    - type: plane
+      normal: [0, 1, 0]
+      position: [0, 0, 0]
+      material: basic
+lights:
+  - color: [1.0, 1.0, 1.0]
+    position: [400.0, 1500.0, 0.0]
+  - color: [0.8, 0.2, 0.6]
+    position: [800, 300, -500]
+camera:
+  position: [400.0, 400.0, 1000.0]
+  fov: 1.5708
+  focalLength: 3000.0
+  pxWidth: 800
+  pxHeight: 600

@@ -26,9 +26,14 @@ private:
 	bool castShadowRay(Ray& ray, float distToLight);
 	Vec3 blinnPhong(const Ray& ray, const Tracable& geom);
 	std::map<unsigned, std::vector<Ray>> createPixelRayMap(unsigned threadID, unsigned threadCount);
+	void usage();
 
 	std::vector<std::unique_ptr<Tracable>> _geometry;
 	std::vector<Light> _lights;
+	std::vector<Material> _materials;
 	Camera _camera;
 	Vec3 _backgroundColor;
+	std::string _name;
+	std::string _outputName;
+	unsigned _threadCount;
 };
