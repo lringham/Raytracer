@@ -203,7 +203,7 @@ std::map<unsigned, std::vector<Ray>> Scene::createPixelRayMap(unsigned threadID,
 
 void Scene::traceSection(Camera& _camera, std::map<unsigned, std::vector<Ray>> pixelRayMap)
 {
-	  unsigned depth = 0;
+	  unsigned depth = 8;
 	  for(auto& r : pixelRayMap)
 		{
 			Vec3 color(0,0,0);
@@ -279,11 +279,11 @@ Vec3 Scene::calculateColor(Ray ray, int depth)
 		Vec3 reflectedColor = calculateColor(reflectedRay, depth - 1);
 		Vec3 refractedColor = calculateColor(refractedRay, depth - 1);
 
-		//float reflCoef 		= 1.f;		// Reflection probability
-		//float refrCoef 		= 1.f-reflCoef; // Transmission probability
-		float shadingCoef = 1.f;
+		float reflCoef 		= .49f; // Reflection probability
+		float refrCoef 		= 0.01f; // Transmission probability
+		float shadingCoef = .5f;
 
-		color = shadingCoef * color;
+		color = reflCoef * reflectedColor + refrCoef * refractedColor + shadingCoef * color;
 	}
 	else
 		color = _backgroundColor;
