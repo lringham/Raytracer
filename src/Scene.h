@@ -10,6 +10,7 @@
 #include "Sphere.h"
 #include "Plane.h"
 #include "Triangle.h"
+#include <yaml-cpp/yaml.h>
 
 class Scene
 {
@@ -27,6 +28,7 @@ private:
 	Vec3 blinnPhong(const Ray& ray, const Tracable& geom);
 	std::map<unsigned, std::vector<Ray>> createPixelRayMap(unsigned threadID, unsigned threadCount);
 	void usage();
+	Vec3 nodeToVec3(const YAML::Node& node) const;
 
 	std::vector<std::unique_ptr<Tracable>> _geometry;
 	std::vector<Light> _lights;
@@ -36,4 +38,5 @@ private:
 	std::string _name;
 	std::string _outputName;
 	unsigned _threadCount;
+	float _rayOffset = .01f;
 };

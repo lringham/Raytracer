@@ -1,6 +1,5 @@
 #include <thread>
 #include <iostream>
-#include <yaml-cpp/yaml.h>
 
 #include "Scene.h"
 #include "Ray.h"
@@ -9,8 +8,6 @@ Scene::Scene(int argc, char** argv) :
 	 _name("scene"), _outputName(""), _threadCount(0)
 {
 	std::cout << "Loading... ";
-
-	// Parse
 	if(parseArgs(argc, argv))
 	{
 		std::cout << "Finished\n";
@@ -20,6 +17,14 @@ Scene::Scene(int argc, char** argv) :
 		std::cout << "Failed\n";
 		throw -1;
 	}
+}
+
+Vec3 Scene::nodeToVec3(const YAML::Node& node) const
+{
+	return Vec3(
+		node[0].as<float>(),
+		node[1].as<float>(),
+		node[2].as<float>());
 }
 
 bool Scene::parseArgs(int argc, char** argv) //argv
@@ -54,20 +59,23 @@ bool Scene::parseArgs(int argc, char** argv) //argv
 		if(config["name"])
 			_name = config["name"].as<std::string>();
 
-		const YAML::Node& materials = config["materials"];
-		for (YAML::const_iterator it = materials.begin(); it != materials.end(); ++it)
+		const YAML::Node& materialsNode = config["materials"];
+		for (YAML::const_iterator it = materialsNode.begin(); it != materialsNode.end(); ++it)
 		{
-		    const YAML::Node& material = *it;
-		    // std::cout << "name: " << material["name"].as<std::string>() << "\n";
-		    // std::cout << "ks: " << material["ks"].as<std::string>() << "\n";
-				// std::cout << "kd: " << material["kd"].as<std::string>() << "\n";
-				// std::cout << "ka: " << material["ka"].as<std::string>() << "\n";
-				// std::cout << "dColor: " << material["dColor"].as<std::string>() << "\n";
-				// std::cout << "specularColor: " << material["specularColor"].as<std::string>() << "\n";
+		    const YAML::Node& materialNode = *it;
+				_materials.emplace_back(
+					materialNode["name"].as<std::string>(),
+					materialNode["Ia"].as<float>(),
+					nodeToVec3(materialNode["kd"]),
+					nodeToVec3(materialNode["ks"]),
+					materialNode["gloss"].as<float>(),
+					materialNode["eta"].as<float>(),
+					false,
+					false);
 		}
 
-		const YAML::Node& objects = config["objects"];
-		for (YAML::const_iterator it = objects.begin(); it != objects.end(); ++it)
+		const YAML::Node& objectsNode = config["objects"];
+		for (YAML::const_iterator it = objectsNode.begin(); it != objectsNode.end(); ++it)
 		{
 		    const YAML::Node& object = *it;
 		    std::string type = object["type"].as<std::string>();
@@ -76,35 +84,23 @@ bool Scene::parseArgs(int argc, char** argv) //argv
 				{
 					_geometry.emplace_back(
 						new Sphere(
-							object["radius"].as<float>(), Vec3(
-								object["position"][0].as<float>(),
-								object["position"][1].as<float>(),
-								object["position"][2].as<float>())));
+							object["radius"].as<float>(),
+							nodeToVec3(object["position"])));
 				}
 				else if(type == "triangle")
 				{
 					_geometry.emplace_back(
 						new Triangle(
-							Vec3(object["x0"][0].as<float>(),
-									 object["x0"][1].as<float>(),
-									 object["x0"][2].as<float>()),
-							Vec3(object["x1"][0].as<float>(),
-									 object["x1"][1].as<float>(),
-									 object["x1"][2].as<float>()),
-						  Vec3(object["x2"][0].as<float>(),
-									 object["x2"][1].as<float>(),
-									 object["x2"][2].as<float>())));
+							nodeToVec3(object["x0"]),
+							nodeToVec3(object["x1"]),
+							nodeToVec3(object["x2"])));
 				}
 				else if(type == "plane")
 				{
 					_geometry.emplace_back(
 						new Plane(
-							Vec3(object["normal"][0].as<float>(),
-									 object["normal"][1].as<float>(),
-									 object["normal"][2].as<float>()),
-							Vec3(object["position"][0].as<float>(),
-									 object["position"][1].as<float>(),
-									 object["position"][2].as<float>())));
+							nodeToVec3(object["normal"]),
+							nodeToVec3(object["position"])));
 				}
 
 				//std::cout << "material: " << object["material"].as<std::string>() << "\n\n";
@@ -115,29 +111,19 @@ bool Scene::parseArgs(int argc, char** argv) //argv
 		{
 			const YAML::Node& light = *it;
 			_lights.emplace_back(
-					Vec3(light["color"][0].as<float>(),
-							 light["color"][1].as<float>(),
-							 light["color"][2].as<float>()),
-					Vec3(light["position"][0].as<float>(),
-							 light["position"][1].as<float>(),
-							 light["position"][2].as<float>()));
+					nodeToVec3(light["color"]),
+					nodeToVec3(light["position"]));
 		}
 
 		_camera.init(
-			  Vec3(
-					 config["camera"]["position"][0].as<float>(),
-					 config["camera"]["position"][1].as<float>(),
-					 config["camera"]["position"][2].as<float>()),
+				nodeToVec3(config["camera"]["position"]),
 				config["camera"]["fov"].as<float>(),
 				config["camera"]["focalLength"].as<float>(),
 				Pixels(
 					 config["camera"]["pxWidth"].as<unsigned>(),
 					 config["camera"]["pxHeight"].as<unsigned>()));
 
-		_backgroundColor.set(
-			config["backgroundColor"][0].as<float>(),
-			config["backgroundColor"][1].as<float>(),
-			config["backgroundColor"][2].as<float>());
+		_backgroundColor.set(nodeToVec3(config["backgroundColor"]));
 	}
 	catch(YAML::BadFile e)
 	{
@@ -150,7 +136,7 @@ bool Scene::parseArgs(int argc, char** argv) //argv
 
 void Scene::usage()
 {
-	std::cout << "Invalid command line parameters.\nUsage: ./Raytracer scenefile.yaml [-threads=n]";
+	std::cout << "Invalid command line parameters.\nUsage: ./Raytracer scene.yaml [-threads=8] [-w=800] [-h=600] [recurDepth=6]";
 }
 
 void Scene::trace()
@@ -215,7 +201,7 @@ std::map<unsigned, std::vector<Ray>> Scene::createPixelRayMap(unsigned threadID,
 
 void Scene::traceSection(Camera& _camera, std::map<unsigned, std::vector<Ray>> pixelRayMap)
 {
-	  unsigned depth = 8;
+	  unsigned depth = 0;
 	  for(auto& r : pixelRayMap)
 		{
 			Vec3 color(0,0,0);
@@ -274,7 +260,7 @@ Vec3 Scene::calculateColor(Ray ray, int depth)
 			float distToLight = L.length();
 			L.normalize();
 
-			Ray shadowRay(collisionPoint, L, .01f/*offset to avoid self collision*/);
+			Ray shadowRay(collisionPoint, L, _rayOffset);
 			if(castShadowRay(shadowRay, distToLight))
 				color = color + geom->_material.ambientColor();
 			else
@@ -286,16 +272,16 @@ Vec3 Scene::calculateColor(Ray ray, int depth)
 			return color;
 
 		// Calculate reflection and refraction rays
-		Ray reflectedRay(collisionPoint, reflect(normalize(collisionPoint - ray._origin), N), .01f);
-		Ray refractedRay(collisionPoint, refract(normalize(collisionPoint - ray._origin), N, 1.500f), .01f);
+		Ray reflectedRay(collisionPoint, reflect(normalize(collisionPoint - ray._origin), N), _rayOffset);
+		Ray refractedRay(collisionPoint, refract(normalize(collisionPoint - ray._origin), N, geom->_material._eta), _rayOffset);
 		Vec3 reflectedColor = calculateColor(reflectedRay, depth - 1);
 		Vec3 refractedColor = calculateColor(refractedRay, depth - 1);
-		float reflCoef 		= .4444f;
-		float refrCoef 		= .1111f;
-		float shadingCoef = .444f;
-		color = reflCoef    * reflectedColor +
-						refrCoef 		* refractedColor +
-						shadingCoef * color;
+
+		//float reflCoef 		= 1.f;		// Reflection probability
+		//float refrCoef 		= 1.f-reflCoef; // Transmission probability
+		float shadingCoef = 1.f;
+
+		color = shadingCoef * color;
 	}
 	else
 		color = _backgroundColor;

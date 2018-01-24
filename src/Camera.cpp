@@ -29,10 +29,6 @@ void Camera::init(Vec3 position, float fov, float focalLength, Pixels pixels)
 
   _pxWidth  = (_x1 - _x0)  / _pixels.width();
   _pxHeight = (_y0 - _y1) / _pixels.height();
-
-  std::cout << "w: " << _pixels.width() << ", h: " << _pixels.height() << "\n";
-  std::cout << "[x0 " << _x0 << ", " << _y0 << ", " << _x1 << ", " << _y1 << "]\n";
-  std::cout << "_pxWidth: " << _pxWidth << ", _pxHeight: " << _pxHeight << ", ratio: " << ratio << "\n";
 }
 
 std::vector<Ray> Camera::createRays(unsigned x, unsigned y) const

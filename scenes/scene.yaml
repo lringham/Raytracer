@@ -3,10 +3,11 @@ outputName: scene.ppm
 backgroundColor: [.2, .2, .4]
 materials:
     - name: "basic"
-      ks: [400,500,-700]
       kd: [400,500,-700]
-      ka: .1
+      ks: [400,500,-700]
+      Ia: .1
       gloss: 8
+      eta: 1.5
       transparent: false
       reflective: false
 objects:
@@ -31,7 +32,7 @@ lights:
   - color: [1.0, 1.0, 1.0]
     position: [400.0, 1500.0, 0.0]
   - color: [0.8, 0.2, 0.6]
-    position: [800, 300, -500]
+    position: [800, 1000, -500]
 camera:
   position: [400.0, 400.0, 1000.0]
   fov: 1.5708
