@@ -63,15 +63,15 @@ bool Scene::parseArgs(int argc, char** argv) //argv
 		for (YAML::const_iterator it = materialsNode.begin(); it != materialsNode.end(); ++it)
 		{
 		    const YAML::Node& materialNode = *it;
-				_materials.emplace_back(
-					materialNode["name"].as<std::string>(),
-					materialNode["Ia"].as<float>(),
-					nodeToVec3(materialNode["kd"]),
-					nodeToVec3(materialNode["ks"]),
-					materialNode["gloss"].as<float>(),
-					materialNode["eta"].as<float>(),
-					false,
-					false);
+				_materialMap[materialNode["name"].as<std::string>()] = Material(
+						materialNode["name"].as<std::string>(),
+						materialNode["Ia"].as<float>(),
+						nodeToVec3(materialNode["kd"]),
+						nodeToVec3(materialNode["ks"]),
+						materialNode["gloss"].as<float>(),
+						materialNode["eta"].as<float>(),
+						false,
+						false);
 		}
 
 		const YAML::Node& objectsNode = config["objects"];
@@ -103,7 +103,9 @@ bool Scene::parseArgs(int argc, char** argv) //argv
 							nodeToVec3(object["position"])));
 				}
 
-				//std::cout << "material: " << object["material"].as<std::string>() << "\n\n";
+				std::string materialName = object["material"].as<std::string>();
+				if(_materialMap.count(materialName) == 1)
+					_geometry.back()->_material = _materialMap[materialName];
 		}
 
 		const YAML::Node& lights = config["lights"];

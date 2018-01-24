@@ -32,7 +32,7 @@ private:
 
 	std::vector<std::unique_ptr<Tracable>> _geometry;
 	std::vector<Light> _lights;
-	std::vector<Material> _materials;
+	std::map<std::string, Material> _materialMap;
 	Camera _camera;
 	Vec3 _backgroundColor;
 	std::string _name;
