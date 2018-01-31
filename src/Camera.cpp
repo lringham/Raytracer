@@ -1,5 +1,6 @@
 #include "Camera.h"
 #include <cmath>
+#include <random>
 
 Camera::Camera()
 {}
@@ -34,12 +35,17 @@ void Camera::init(Vec3 position, float fov, float focalLength, Pixels pixels)
 std::vector<Ray> Camera::createRays(unsigned x, unsigned y) const
 {
   std::vector<Ray> rays;
-  rays.push_back(Ray(_position, normalize(Vec3(_x0+x*_pxWidth+_pxWidth/2.f, _y0-y*_pxHeight+_pxHeight/2.f, -_focalLength) - _position)));
+  std::random_device rd;
+  std::mt19937 gen(rd());
+  std::uniform_real_distribution<> dis(0.f, 1.0001f);
 
-  //Anti aliasing
-  rays.push_back(Ray(_position, normalize(Vec3(_x0+x*_pxWidth,          _y0-y*_pxHeight+_pxHeight/2.f, -_focalLength) - _position)));
-  rays.push_back(Ray(_position, normalize(Vec3(_x0+x*_pxWidth,          _y0-y*_pxHeight-_pxHeight/2.f, -_focalLength) - _position)));
-  rays.push_back(Ray(_position, normalize(Vec3(_x0+x*_pxWidth+_pxWidth, _y0-y*_pxHeight-_pxHeight/2.f, -_focalLength) - _position)));
-  rays.push_back(Ray(_position, normalize(Vec3(_x0+x*_pxWidth+_pxWidth, _y0-y*_pxHeight+_pxHeight/2.f, -_focalLength) - _position)));
+  for(int rayID=0; rayID<10; ++rayID)
+  {
+    rays.push_back( Ray(_position,
+      normalize(
+        Vec3(_x0 + x * _pxWidth + dis(gen)*_pxWidth, _y0 - y * _pxHeight + dis(gen)*_pxHeight, -_focalLength)
+       - _position)));
+  }
+
   return rays;
 }

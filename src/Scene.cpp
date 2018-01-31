@@ -203,7 +203,7 @@ std::map<unsigned, std::vector<Ray>> Scene::createPixelRayMap(unsigned threadID,
 
 void Scene::traceSection(Camera& _camera, std::map<unsigned, std::vector<Ray>> pixelRayMap)
 {
-	  unsigned depth = 8;
+	  unsigned depth = 1;
 	  for(auto& r : pixelRayMap)
 		{
 			Vec3 color(0,0,0);
