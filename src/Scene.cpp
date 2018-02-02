@@ -1,6 +1,7 @@
 #include <thread>
 #include <iostream>
 
+#include "Utils.h"
 #include "Scene.h"
 #include "Ray.h"
 
@@ -114,7 +115,9 @@ bool Scene::parseArgs(int argc, char** argv) //argv
 			const YAML::Node& light = *it;
 			_lights.emplace_back(
 					nodeToVec3(light["color"]),
-					nodeToVec3(light["position"]));
+					nodeToVec3(light["position"]),
+					light["radius"].as<float>()
+				);
 		}
 
 		_camera.init(
@@ -151,12 +154,12 @@ void Scene::trace()
 	}
 
 	std::cout << "Thread count: " << _threadCount << "\n";
-	std::cout << "Tracing " << _name << "...";
+	std::cout << "Tracing " << _name << "\n";
 
 	// Create threads and trace
 	std::vector<std::thread> threads(_threadCount);
 	for(unsigned i = 0; i < _threadCount; ++i)
-		threads[i] = std::thread(&Scene::traceSection, this, std::ref(_camera), Scene::createPixelRayMap(i, _threadCount));
+		threads[i] = std::thread(&Scene::traceSection, this, std::ref(_camera), i);
 
 	// Join threads
 	for(auto& thread : threads)
@@ -165,14 +168,13 @@ void Scene::trace()
 	std::cout << "Finished\n";
 }
 
-std::map<unsigned, std::vector<Ray>> Scene::createPixelRayMap(unsigned threadID, unsigned threadCount)
+void Scene::traceSection(Camera& _camera, unsigned threadID)
 {
-	std::map<unsigned, std::vector<Ray>> pixelRayMap;
 	unsigned width = _camera._pixels.width();
 	unsigned height = _camera._pixels.height();
 
-	unsigned rem = width % threadCount;
-	unsigned xRes = width / threadCount;
+	unsigned rem = width % _threadCount;
+	unsigned xRes = width / _threadCount;
 	unsigned startX, endX;
 
 	if(rem != 0)
@@ -194,33 +196,42 @@ std::map<unsigned, std::vector<Ray>> Scene::createPixelRayMap(unsigned threadID,
 		endX	 = startX + xRes;
 	}
 
+	int perc = 0;
+	int depth = 1;
 	for(unsigned x = startX; x < endX; ++x)
+	{
 		for(unsigned y = 0; y < height; ++y)
-			pixelRayMap[x+y*width] = _camera.createRays(x, y);
-
-	return pixelRayMap;
-}
-
-void Scene::traceSection(Camera& _camera, std::map<unsigned, std::vector<Ray>> pixelRayMap)
-{
-	  unsigned depth = 1;
-	  for(auto& r : pixelRayMap)
 		{
+			std::vector<Ray> rays = _camera.createRays(x, y);
+
 			Vec3 color(0,0,0);
-			for(auto& ray : r.second)
+			for(auto& ray : rays)
 			{
 				color = color + calculateColor(ray, depth);
 			}
 
-			float rayCount = static_cast<float>(r.second.size());
+			float rayCount = rays.size();
 			color._r /= rayCount;
 			color._g /= rayCount;
 			color._b /= rayCount;
-			color._r = color._r < 0.f ? 0.f : color._r > 1.f ? 1.f : color._r;
-			color._g = color._g < 0.f ? 0.f : color._g > 1.f ? 1.f : color._g;
-			color._b = color._b < 0.f ? 0.f : color._b > 1.f ? 1.f : color._b;
+			color._r = clamp(color._r, 0.f, 1.f);
+			color._g = clamp(color._g, 0.f, 1.f);
+			color._b = clamp(color._b, 0.f, 1.f);
 
-			_camera._pixels.set(r.first, color);
+			_camera._pixels.set(x+y*width, color);
+		}
+
+		if(threadID == 0)
+		{
+			int newPerc = (x*100) / (endX-1);
+			if(newPerc > perc)
+			{
+				perc = newPerc;
+				std::cout << "." << std::flush;
+			}
+			if(perc > 0 && perc % 10 == 0)
+				std::cout << perc << "%\n" << std::flush;
+		}
 		}
 }
 
@@ -256,18 +267,27 @@ Vec3 Scene::calculateColor(Ray ray, int depth)
 		Vec3 V = normalize(_camera._position - collisionPoint);
 		Vec3 L;
 
+		// Lights
+		int numShadowSamples = 30;
 		for(Light& l : _lights)
 		{
 			L = l._position - collisionPoint;
 			float distToLight = L.length();
 			L.normalize();
 
-			Ray shadowRay(collisionPoint, L, _rayOffset);
-			if(castShadowRay(shadowRay, distToLight))
-				color = color + geom->_material.ambientColor();
-			else
-				color = color + geom->_material.blinnPhong(N, V, L, l._color);
+			// Shadows
+			for(int i=0; i<numShadowSamples; ++i)
+			{
+				Ray shadowRay = l.getShadowRay(collisionPoint, _rayOffset);
+				if(castShadowRay(shadowRay, distToLight))
+					color = color + geom->_material.ambientColor();
+				else
+					color = color + geom->_material.blinnPhong(N, V, L, l._color);
+			}
 		}
+		color._r /= numShadowSamples;
+		color._g /= numShadowSamples;
+		color._b /= numShadowSamples;
 
 		// Exit if recursive depth is met
 		if(depth == 0)
@@ -276,14 +296,14 @@ Vec3 Scene::calculateColor(Ray ray, int depth)
 		// Calculate reflection and refraction rays
 		Ray reflectedRay(collisionPoint, reflect(normalize(collisionPoint - ray._origin), N), _rayOffset);
 		Ray refractedRay(collisionPoint, refract(normalize(collisionPoint - ray._origin), N, geom->_material._eta), _rayOffset);
-		Vec3 reflectedColor = calculateColor(reflectedRay, depth - 1);
-		Vec3 refractedColor = calculateColor(refractedRay, depth - 1);
+		Vec3 Ir = calculateColor(reflectedRay, depth - 1);
+		Vec3 It = calculateColor(refractedRay, depth - 1);
 
-		float reflCoef 		= .49f; // Reflection probability
-		float refrCoef 		= 0.01f; // Transmission probability
-		float shadingCoef = .5f;
-
-		color = reflCoef * reflectedColor + refrCoef * refractedColor + shadingCoef * color;
+		//https://blog.demofox.org/2017/01/09/raytracing-reflection-refraction-fresnel-total-internal-reflection-and-beers-law/
+		//TODO replace with fresnel coef
+		float kt 		= 0.f; // Transmission probability
+		float kr 		= 0.5f; // Reflection probability
+		color = color + kr*Ir + kt*It;
 	}
 	else
 		color = _backgroundColor;

@@ -5,13 +5,13 @@ materials:
     - name: "plane"
       kd: [0.0, 1.0, 0.0]
       ks: [1.0, 1.0, 1.0]
-      Ia: .1
+      Ia: 0.
       gloss: 64
       eta: 1.0
       transparent: false
       reflective: false
     - name: "sphere"
-      kd: [1.0, 0.0, 0.0]
+      kd: [.8, 0.0, 0.0]
       ks: [1.0, 1.0, 1.0]
       Ia: .1
       gloss: 64
@@ -37,14 +37,16 @@ objects:
     #  x2: [800,0,-700]
     #  material: triangle
     - type: plane
-      normal: [0, 1, 0]
-      position: [0, 0, 450]
+      normal: [0, .5, 0]
+      position: [0, 0, 0]
       material: plane
 lights:
   - color: [1.0, 1.0, 1.0]
-    position: [400.0, 500.0, 0.0]
-  #- color: [0.8, 0.2, 0.6]
-  #  position: [800.0, 300.0, -500.0]
+    position: [200.0, 500.0, 300.0]
+    radius: 50.0
+  - color: [0.6, 0.6, 0.8]
+    position: [800.0, 500.0, 300.0]
+    radius: 50.0
 camera:
   position: [400.0, 200.0, 1000.0]
   fov: 1.5708

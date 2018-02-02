@@ -39,7 +39,7 @@ std::vector<Ray> Camera::createRays(unsigned x, unsigned y) const
   std::mt19937 gen(rd());
   std::uniform_real_distribution<> dis(0.f, 1.0001f);
 
-  for(int rayID=0; rayID<10; ++rayID)
+  for(int rayID=0; rayID<15; ++rayID)
   {
     rays.push_back( Ray(_position,
       normalize(

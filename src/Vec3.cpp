@@ -264,8 +264,6 @@ Vec3 reflect(const Vec3& I, const Vec3& N)
 
 Vec3 refract(const Vec3& I, const Vec3& N, float ior)
 {
-	//https://www.scratchapixel.com/lessons/3d-basic-rendering/introduction-to-shading/reflection-refraction-fresnel
-	//Handle total internal reflection
 	float eta = 1.f / ior;
 	float cosi = N.dot(I);
 

@@ -9,20 +9,7 @@ public:
   Vec3 blinnPhong(const Vec3& N,const Vec3& V, const Vec3& L, const Vec3& lightColor);
   Vec3 ambientColor() const;
   // Returns the probability of reflection
-  float schlick(float angle, float eta1, float eta2);
-
-  inline float clamp(float v, float v1, float v2)
-	{
-		return v < v1 ? v1 : v > v2 ? v2 : v;
-	}
-
-	inline float pow(float v, int n)
-	{
-		float temp = 1.f;
-		while(n-- > 0)
-			temp *= v;
-		return temp;
-	}
+  float schlick(const Vec3& I, const Vec3& N, float eta1, float eta2);
 
   std::string _name;
   float _Ia;
