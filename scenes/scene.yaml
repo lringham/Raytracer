@@ -1,55 +1,61 @@
 name: Test Scene
 outputName: scene.ppm
 backgroundColor: [.2, .2, .4]
+recursionDepth: 1
+shadowSampleCount: 1
 materials:
-    - name: "plane"
+    - name: plane
+      type: blinnPhong
       kd: [0.0, 1.0, 0.0]
-      ks: [1.0, 1.0, 1.0]
-      Ia: 0.
+      ks: [0.0, 0.0, 0.0]
+      Ia: 0.1
       gloss: 64
-      eta: 1.0
-      transparent: false
-      reflective: false
-    - name: "sphere"
+    - name: sphere
       kd: [.8, 0.0, 0.0]
       ks: [1.0, 1.0, 1.0]
       Ia: .1
       gloss: 64
-      eta: 1.5
-      transparent: false
-      reflective: false
-    - name: "triangle"
+    - name: triangle
       kd: [1.0, 1.0, 0.0]
-      ks: [1.0, 1.0, 1.0]
+      ks: [0.0, 0.0, 0.0]
       Ia: .1
       gloss: 64
-      eta: 1.0
-      transparent: false
-      reflective: false
+    - name: backplane
+      kd: [0, .4, .6]
+      ks: [0.0, 0.0, 0.0]
+      Ia: .1
+      gloss: 64
 objects:
     - type: sphere
       radius: 100.0
       position: [400, 100, 400]
       material: sphere
-    #- type: triangle
-    #  x0: [0,0,-700]
-    #  x1: [400,500,-700]
-    #  x2: [800,0,-700]
-    #  material: triangle
+    - type: triangle
+      x0: [0,0,-700]
+      x1: [400,500,-700]
+      x2: [800,0,-700]
+      material: triangle
     - type: plane
-      normal: [0, .5, 0]
+      normal: [0, 1, 0]
       position: [0, 0, 0]
       material: plane
+  #  - type: plane
+  #    normal: [0, 0, 1]
+  #    position: [0, 0, -5000]
+  #    material: backplane
 lights:
   - color: [1.0, 1.0, 1.0]
-    position: [200.0, 500.0, 300.0]
+    position: [200.0, 400.0, -300.0]
     radius: 50.0
+    intensity: 100000.0
   - color: [0.6, 0.6, 0.8]
-    position: [800.0, 500.0, 300.0]
+    position: [800.0, 400.0, 500.0]
     radius: 50.0
+    intensity: 100000.0
 camera:
   position: [400.0, 200.0, 1000.0]
   fov: 1.5708
   focalLength: 3000.0
-  pxWidth: 800
+  pxWidth: 845
   pxHeight: 600
+  sampleCount: 1

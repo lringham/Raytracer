@@ -37,6 +37,6 @@ private:
 	Vec3 _backgroundColor;
 	std::string _name;
 	std::string _outputName;
-	unsigned _threadCount;
+	unsigned _threadCount, _depth, _shadowSampleCount;
 	float _rayOffset = .01f;
 };

@@ -60,6 +60,12 @@ bool Scene::parseArgs(int argc, char** argv) //argv
 		if(config["name"])
 			_name = config["name"].as<std::string>();
 
+		if(config["recursionDepth"])
+			_depth =  config["recursionDepth"].as<unsigned>();
+
+		if(config["shadowSampleCount"])
+			_shadowSampleCount =  config["shadowSampleCount"].as<unsigned>();
+
 		const YAML::Node& materialsNode = config["materials"];
 		for (YAML::const_iterator it = materialsNode.begin(); it != materialsNode.end(); ++it)
 		{
@@ -70,7 +76,7 @@ bool Scene::parseArgs(int argc, char** argv) //argv
 						nodeToVec3(materialNode["kd"]),
 						nodeToVec3(materialNode["ks"]),
 						materialNode["gloss"].as<float>(),
-						materialNode["eta"].as<float>(),
+						0,
 						false,
 						false);
 		}
@@ -116,7 +122,8 @@ bool Scene::parseArgs(int argc, char** argv) //argv
 			_lights.emplace_back(
 					nodeToVec3(light["color"]),
 					nodeToVec3(light["position"]),
-					light["radius"].as<float>()
+					light["radius"].as<float>(),
+					light["intensity"].as<float>()
 				);
 		}
 
@@ -126,7 +133,8 @@ bool Scene::parseArgs(int argc, char** argv) //argv
 				config["camera"]["focalLength"].as<float>(),
 				Pixels(
 					 config["camera"]["pxWidth"].as<unsigned>(),
-					 config["camera"]["pxHeight"].as<unsigned>()));
+					 config["camera"]["pxHeight"].as<unsigned>()),
+				config["camera"]["sampleCount"].as<int>());
 
 		_backgroundColor.set(nodeToVec3(config["backgroundColor"]));
 	}
@@ -154,7 +162,10 @@ void Scene::trace()
 	}
 
 	std::cout << "Thread count: " << _threadCount << "\n";
-	std::cout << "Tracing " << _name << "\n";
+	std::cout << "Recursion depth: " << _depth << "\n";
+	std::cout << "AA: " << _camera.sampleCount() << "\n";
+	std::cout << "Shadow sample count " << _shadowSampleCount << "\n";
+	std::cout << "Tracing " << _name << "... ";
 
 	// Create threads and trace
 	std::vector<std::thread> threads(_threadCount);
@@ -196,8 +207,7 @@ void Scene::traceSection(Camera& _camera, unsigned threadID)
 		endX	 = startX + xRes;
 	}
 
-	int perc = 0;
-	int depth = 1;
+	int depth = _depth;
 	for(unsigned x = startX; x < endX; ++x)
 	{
 		for(unsigned y = 0; y < height; ++y)
@@ -220,19 +230,7 @@ void Scene::traceSection(Camera& _camera, unsigned threadID)
 
 			_camera._pixels.set(x+y*width, color);
 		}
-
-		if(threadID == 0)
-		{
-			int newPerc = (x*100) / (endX-1);
-			if(newPerc > perc)
-			{
-				perc = newPerc;
-				std::cout << "." << std::flush;
-			}
-			if(perc > 0 && perc % 10 == 0)
-				std::cout << perc << "%\n" << std::flush;
-		}
-		}
+	}
 }
 
 int Scene::castRay(Ray& ray)
@@ -268,7 +266,6 @@ Vec3 Scene::calculateColor(Ray ray, int depth)
 		Vec3 L;
 
 		// Lights
-		int numShadowSamples = 30;
 		for(Light& l : _lights)
 		{
 			L = l._position - collisionPoint;
@@ -276,18 +273,18 @@ Vec3 Scene::calculateColor(Ray ray, int depth)
 			L.normalize();
 
 			// Shadows
-			for(int i=0; i<numShadowSamples; ++i)
+			for(int i = 0; i < _shadowSampleCount; ++i)
 			{
 				Ray shadowRay = l.getShadowRay(collisionPoint, _rayOffset);
 				if(castShadowRay(shadowRay, distToLight))
 					color = color + geom->_material.ambientColor();
 				else
-					color = color + geom->_material.blinnPhong(N, V, L, l._color);
+					color = color + geom->_material.blinnPhong(N, V, L, collisionPoint, l);
 			}
 		}
-		color._r /= numShadowSamples;
-		color._g /= numShadowSamples;
-		color._b /= numShadowSamples;
+		color._r /= _shadowSampleCount;
+		color._g /= _shadowSampleCount;
+		color._b /= _shadowSampleCount;
 
 		// Exit if recursive depth is met
 		if(depth == 0)
@@ -295,15 +292,15 @@ Vec3 Scene::calculateColor(Ray ray, int depth)
 
 		// Calculate reflection and refraction rays
 		Ray reflectedRay(collisionPoint, reflect(normalize(collisionPoint - ray._origin), N), _rayOffset);
-		Ray refractedRay(collisionPoint, refract(normalize(collisionPoint - ray._origin), N, geom->_material._eta), _rayOffset);
+		//Ray refractedRay(collisionPoint, refract(normalize(collisionPoint - ray._origin), N, geom->_material._eta), _rayOffset);
 		Vec3 Ir = calculateColor(reflectedRay, depth - 1);
-		Vec3 It = calculateColor(refractedRay, depth - 1);
+		//Vec3 It = calculateColor(refractedRay, depth - 1);
 
 		//https://blog.demofox.org/2017/01/09/raytracing-reflection-refraction-fresnel-total-internal-reflection-and-beers-law/
 		//TODO replace with fresnel coef
-		float kt 		= 0.f; // Transmission probability
-		float kr 		= 0.5f; // Reflection probability
-		color = color + kr*Ir + kt*It;
+		//float kt 		= 0.f; // Transmission probability
+		float kr 		= 0.25f; // Reflection probability
+		color = color + kr*Ir; // + kt*It
 	}
 	else
 		color = _backgroundColor;

@@ -5,11 +5,11 @@
 Camera::Camera()
 {}
 
-Camera::Camera(Vec3 position, float fov, float focalLength, Pixels pixels) :
-   _pixels(pixels), _position(position), _fov(fov), _focalLength(focalLength)
+Camera::Camera(Vec3 position, float fov, float focalLength, Pixels pixels, int sampleCount) :
+   _pixels(pixels), _position(position), _fov(fov), _focalLength(focalLength), _sampleCount(sampleCount)
 {}
 
-void Camera::init(Vec3 position, float fov, float focalLength, Pixels pixels)
+void Camera::init(Vec3 position, float fov, float focalLength, Pixels pixels, int sampleCount)
 {
   _pixels = pixels;
   _position = position;
@@ -30,6 +30,8 @@ void Camera::init(Vec3 position, float fov, float focalLength, Pixels pixels)
 
   _pxWidth  = (_x1 - _x0)  / _pixels.width();
   _pxHeight = (_y0 - _y1) / _pixels.height();
+
+  _sampleCount = sampleCount;
 }
 
 std::vector<Ray> Camera::createRays(unsigned x, unsigned y) const
@@ -39,7 +41,7 @@ std::vector<Ray> Camera::createRays(unsigned x, unsigned y) const
   std::mt19937 gen(rd());
   std::uniform_real_distribution<> dis(0.f, 1.0001f);
 
-  for(int rayID=0; rayID<15; ++rayID)
+  for(int rayID = 0; rayID < _sampleCount; ++rayID)
   {
     rays.push_back( Ray(_position,
       normalize(
@@ -48,4 +50,9 @@ std::vector<Ray> Camera::createRays(unsigned x, unsigned y) const
   }
 
   return rays;
+}
+
+int Camera::sampleCount() const
+{
+  return _sampleCount;
 }

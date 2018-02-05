@@ -6,12 +6,12 @@ Material::Material(const std::string& name, float Ia, const Vec3& kd, const Vec3
   _name(name), _Ia(Ia), _kd(kd), _ks(ks), _gloss(gloss), _eta(eta), _reflective(reflective), _transparent(transparent)
 {}
 
-Vec3 Material::blinnPhong(const Vec3& N,const Vec3& V, const Vec3& L, const Vec3& lightColor)
+Vec3 Material::blinnPhong(const Vec3& N,const Vec3& V, const Vec3& L, const Vec3& pos, const Light& light)
 {
 	Vec3 H = normalize(L + V);
   Vec3 ks = _ks * pow(clamp(dot(N, H), 0, 1), _gloss);
   Vec3 kd = _kd * clamp(dot(N, L), 0, 1);
-  return _Ia*_kd + (1.f-_Ia) * lightColor * (kd + ks);
+  return _Ia*_kd + (1.f-_Ia) * light._color * light.attenuation(pos) * (kd + ks);
 }
 
 Vec3 Material::ambientColor() const
