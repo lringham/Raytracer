@@ -2,33 +2,40 @@ name: Test Scene
 outputName: scene.ppm
 backgroundColor: [.2, .2, .4]
 recursionDepth: 1
-shadowSampleCount: 1
+shadowSampleCount: 5
 materials:
     - name: plane
-      type: blinnPhong
+      type: metallic
       kd: [0.0, 1.0, 0.0]
       ks: [0.0, 0.0, 0.0]
       Ia: 0.1
       gloss: 64
+      eta: 1.0
     - name: sphere
+      type: metallic
       kd: [.8, 0.0, 0.0]
       ks: [1.0, 1.0, 1.0]
       Ia: .1
       gloss: 64
+      eta: 2.0
     - name: triangle
+      type: blinnPhong
       kd: [1.0, 1.0, 0.0]
       ks: [0.0, 0.0, 0.0]
       Ia: .1
       gloss: 64
+      eta: 1.0
     - name: backplane
+      type: blinnPhong
       kd: [0, .4, .6]
       ks: [0.0, 0.0, 0.0]
       Ia: .1
       gloss: 64
+      eta: 1.0
 objects:
     - type: sphere
       radius: 100.0
-      position: [400, 100, 400]
+      position: [500, 100, 400]
       material: sphere
     - type: triangle
       x0: [0,0,-700]
@@ -56,6 +63,6 @@ camera:
   position: [400.0, 200.0, 1000.0]
   fov: 1.5708
   focalLength: 3000.0
-  pxWidth: 845
-  pxHeight: 600
-  sampleCount: 1
+  pxWidth: 1024
+  pxHeight: 800
+  sampleCount: 10

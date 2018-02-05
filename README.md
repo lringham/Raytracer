@@ -14,7 +14,6 @@ make
 ```
 ## Bugs and Limitations
 - Uses non PBR
-- Out of memory when photo too large
 
 ## TODO
 - debug refractions

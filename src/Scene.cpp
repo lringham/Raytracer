@@ -76,9 +76,9 @@ bool Scene::parseArgs(int argc, char** argv) //argv
 						nodeToVec3(materialNode["kd"]),
 						nodeToVec3(materialNode["ks"]),
 						materialNode["gloss"].as<float>(),
-						0,
-						false,
-						false);
+						materialNode["eta"].as<float>(),
+						materialNode["type"].as<std::string>()
+					);
 		}
 
 		const YAML::Node& objectsNode = config["objects"];
@@ -161,9 +161,10 @@ void Scene::trace()
 			_threadCount = 1;
 	}
 
+	// Print tracing details
 	std::cout << "Thread count: " << _threadCount << "\n";
 	std::cout << "Recursion depth: " << _depth << "\n";
-	std::cout << "AA: " << _camera.sampleCount() << "\n";
+	std::cout << "Pixel sample count: " << _camera.sampleCount() << "\n";
 	std::cout << "Shadow sample count " << _shadowSampleCount << "\n";
 	std::cout << "Tracing " << _name << "... ";
 
@@ -273,13 +274,13 @@ Vec3 Scene::calculateColor(Ray ray, int depth)
 			L.normalize();
 
 			// Shadows
-			for(int i = 0; i < _shadowSampleCount; ++i)
+			for(unsigned i = 0; i < _shadowSampleCount; ++i)
 			{
 				Ray shadowRay = l.getShadowRay(collisionPoint, _rayOffset);
 				if(castShadowRay(shadowRay, distToLight))
 					color = color + geom->_material.ambientColor();
 				else
-					color = color + geom->_material.blinnPhong(N, V, L, collisionPoint, l);
+					color = color + geom->_material.color(N, V, L, collisionPoint, l);
 			}
 		}
 		color._r /= _shadowSampleCount;
@@ -291,16 +292,26 @@ Vec3 Scene::calculateColor(Ray ray, int depth)
 			return color;
 
 		// Calculate reflection and refraction rays
-		Ray reflectedRay(collisionPoint, reflect(normalize(collisionPoint - ray._origin), N), _rayOffset);
-		//Ray refractedRay(collisionPoint, refract(normalize(collisionPoint - ray._origin), N, geom->_material._eta), _rayOffset);
-		Vec3 Ir = calculateColor(reflectedRay, depth - 1);
-		//Vec3 It = calculateColor(refractedRay, depth - 1);
+		if(geom->_material.isMetallic())
+		{
+			float kr 		= 0.5f; // Reflection probability
+			Ray reflectedRay(collisionPoint, reflect(normalize(collisionPoint - ray._origin), N), _rayOffset);
+			Vec3 Ir = calculateColor(reflectedRay, depth - 1);
+			color = color + kr*Ir;
+		}
+		else if(geom->_material.isTransparent())
+		{
+			float kt 		= 0.25f; // Transmission probability
+			float kr 		= 0.25f; // Reflection probability
+			Ray reflectedRay(collisionPoint, reflect(normalize(collisionPoint - ray._origin), N), _rayOffset);
+			Ray refractedRay(collisionPoint, refract(normalize(collisionPoint - ray._origin), N, geom->_material._eta), _rayOffset);
+			Vec3 Ir = calculateColor(reflectedRay, depth - 1);
+			Vec3 It = calculateColor(refractedRay, depth - 1);
+			color = color + kr*Ir + kt*It;
+		}
 
-		//https://blog.demofox.org/2017/01/09/raytracing-reflection-refraction-fresnel-total-internal-reflection-and-beers-law/
+		//https://blog.demofox.org/2017/01/09/raytracing-reflection-refraction-fresnel-total-internal-reflection-and-bee rs-law/
 		//TODO replace with fresnel coef
-		//float kt 		= 0.f; // Transmission probability
-		float kr 		= 0.25f; // Reflection probability
-		color = color + kr*Ir; // + kt*It
 	}
 	else
 		color = _backgroundColor;

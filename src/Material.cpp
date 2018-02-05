@@ -2,24 +2,49 @@
 #include "Utils.h"
 #include <math.h>
 
-Material::Material(const std::string& name, float Ia, const Vec3& kd, const Vec3& ks, float gloss, float eta, bool reflective, bool transparent) :
-  _name(name), _Ia(Ia), _kd(kd), _ks(ks), _gloss(gloss), _eta(eta), _reflective(reflective), _transparent(transparent)
-{}
-
-Vec3 Material::blinnPhong(const Vec3& N,const Vec3& V, const Vec3& L, const Vec3& pos, const Light& light)
+Material::Material(const std::string& name, float Ia, const Vec3& kd, const Vec3& ks, float gloss, float eta, const std::string& materialType) :
+  _name(name), _Ia(Ia), _kd(kd), _ks(ks), _gloss(gloss), _eta(eta)
 {
+  if(materialType == "metallic")
+  {
+    _type = MaterialType::metallic;
+  }
+  else if(materialType == "transparent")
+  {
+    _type = MaterialType::transparent;
+  }
+  else
+  {
+    _type = MaterialType::blinnPhong;
+  }
+
+
+}
+
+Vec3 Material::color(const Vec3& N,const Vec3& V, const Vec3& L, const Vec3& pos, const Light& light) const
+{
+  Vec3 color = ambientColor();
 	Vec3 H = normalize(L + V);
   Vec3 ks = _ks * pow(clamp(dot(N, H), 0, 1), _gloss);
   Vec3 kd = _kd * clamp(dot(N, L), 0, 1);
-  return _Ia*_kd + (1.f-_Ia) * light._color * light.attenuation(pos) * (kd + ks);
+
+  if(isMetallic())
+  {
+    color = color + (1.f-_Ia) * light._color * light.attenuation(pos) * (kd + ks);
+  }
+  else if(isTransparent())
+  {
+    color = color + (1.f-_Ia) * light._color * light.attenuation(pos) * ks;
+  }
+  else
+  {
+    color = color + (1.f-_Ia) * light._color * light.attenuation(pos) * (kd + ks);
+  }
+
+  return color;
 }
 
-Vec3 Material::ambientColor() const
-{
-  return _Ia*_kd;
-}
-
-float Material::schlick(const Vec3& I, const Vec3& N, float eta1, float eta2)
+float Material::schlick(const Vec3& I, const Vec3& N, float eta1, float eta2) const
 {
   float r0 = pow((eta1-eta2) / (eta1+eta2), 2);
   return r0 + (1.f-r0) * pow((1.f-dot(I, N)), 5);
