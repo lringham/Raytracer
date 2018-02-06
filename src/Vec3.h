@@ -70,7 +70,7 @@ Vec3 projOnto(const Vec3& v1, const Vec3& v2);
 float areaBetween(const Vec3& v1, const Vec3& v2);
 float acuteAngleBetween(const Vec3& v1, const Vec3& v2);
 Vec3 reflect(const Vec3& I, const Vec3& N);
-Vec3 refract(const Vec3& I, const Vec3& N, float ior);
+Vec3 refract(const Vec3& I, const Vec3& N, float eta1, float eta2);
 Vec3 rotate(const Vec3& v, float angle, const Vec3& axis);
 Vec3 lerp(float s, const Vec3& v1, const Vec3& v2);
 Vec3 nlerp(float s, const Vec3& v1, const Vec3& v2);

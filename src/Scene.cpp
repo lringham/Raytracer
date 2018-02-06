@@ -301,13 +301,13 @@ Vec3 Scene::calculateColor(Ray ray, int depth)
 		}
 		else if(geom->_material.isTransparent())
 		{
-			float kt 		= 0.25f; // Transmission probability
-			float kr 		= 0.25f; // Reflection probability
+			float kt 		= 0.85f; // Transmission probability
+			float kr 		= 0.1f; // Reflection probability
 			Ray reflectedRay(collisionPoint, reflect(normalize(collisionPoint - ray._origin), N), _rayOffset);
-			Ray refractedRay(collisionPoint, refract(normalize(collisionPoint - ray._origin), N, geom->_material._eta), _rayOffset);
+			Ray refractedRay(collisionPoint, refract(normalize(collisionPoint - ray._origin), N, ambientIOR, geom->_material._eta), _rayOffset);
 			Vec3 Ir = calculateColor(reflectedRay, depth - 1);
 			Vec3 It = calculateColor(refractedRay, depth - 1);
-			color = color + kr*Ir + kt*It;
+			color = (1.f-(kt+kr)) * color + kr*Ir + kt*It;
 		}
 
 		//https://blog.demofox.org/2017/01/09/raytracing-reflection-refraction-fresnel-total-internal-reflection-and-bee rs-law/

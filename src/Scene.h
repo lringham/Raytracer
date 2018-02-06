@@ -38,5 +38,5 @@ private:
 	std::string _name;
 	std::string _outputName;
 	unsigned _threadCount, _depth, _shadowSampleCount;
-	float _rayOffset = .01f;
+	float _rayOffset = .01f, ambientIOR = 1.f;
 };
