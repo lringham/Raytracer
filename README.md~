@@ -14,11 +14,8 @@ make
 ```
 ## Bugs and Limitations
 - Uses non PBR
-- Out of memory when photo too large
 
 ## TODO
-- soft shadows
-- jittered rays
 - debug refractions
 - objs
 - test scenes

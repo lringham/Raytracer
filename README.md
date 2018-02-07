@@ -16,7 +16,6 @@ make
 - Uses non PBR
 
 ## TODO
-- debug refractions
 - objs
 - test scenes
 - support png

@@ -14,7 +14,6 @@ public:
 
   Material(const std::string& name = "", float Ia = .1f, const Vec3& kd = Vec3(1,1,1), const Vec3& ks = Vec3(1,1,1), float gloss = 64.f, float eta = 1.f, const std::string& type = "blinnPhong");
   Vec3 color(const Vec3& N,const Vec3& V, const Vec3& L, const Vec3& pos, const Light& light) const;
-  float schlick(const Vec3& I, const Vec3& N, float eta1, float eta2) const;
 
   inline Vec3 ambientColor() const
   {
@@ -40,3 +39,5 @@ public:
   float _gloss, _eta;
   MaterialType _type;
 };
+
+float schlick(float eta1, float eta2, const Vec3& N, const Vec3& I);

@@ -7,9 +7,9 @@ class Camera
 {
 public:
 	Camera();
-	Camera(Vec3 position, float fov, float focalLength, Pixels pixels, int sampleCount);
+	Camera(Vec3 position, float fov, float focalLength, Pixels pixels, int sampleCount, float lensRadius);
 	std::vector<Ray> createRays(unsigned x, unsigned y) const;
-	void init(Vec3 position, float fov, float focalLength, Pixels pixels, int sampleCount);
+	void init(Vec3 position, float fov, float focalLength, Pixels pixels, int sampleCount, float lensRadius);
 	int sampleCount() const;
 
 	Pixels _pixels;
@@ -22,4 +22,5 @@ private:
 	float _pxHeight;
 	float _x0, _x1, _y0, _y1;
 	int _sampleCount;
+	float _lensRadius;
 };

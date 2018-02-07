@@ -134,7 +134,8 @@ bool Scene::parseArgs(int argc, char** argv) //argv
 				Pixels(
 					 config["camera"]["pxWidth"].as<unsigned>(),
 					 config["camera"]["pxHeight"].as<unsigned>()),
-				config["camera"]["sampleCount"].as<int>());
+				config["camera"]["sampleCount"].as<int>(),
+				config["camera"]["lensRadius"].as<float>());
 
 		_backgroundColor.set(nodeToVec3(config["backgroundColor"]));
 	}
@@ -264,12 +265,11 @@ Vec3 Scene::calculateColor(Ray ray, int depth)
 		// Calculate light contribution
 		Vec3 N = ray._normal;
 		Vec3 V = normalize(_camera._position - collisionPoint);
-		Vec3 L;
 
 		// Lights
 		for(Light& l : _lights)
 		{
-			L = l._position - collisionPoint;
+			Vec3 L = l._position - collisionPoint;
 			float distToLight = L.length();
 			L.normalize();
 
@@ -294,20 +294,20 @@ Vec3 Scene::calculateColor(Ray ray, int depth)
 		// Calculate reflection and refraction rays
 		if(geom->_material.isMetallic())
 		{
-			float kr 		= 0.5f; // Reflection probability
+			float kr 		= 0.25f; // Reflection probability
 			Ray reflectedRay(collisionPoint, reflect(normalize(collisionPoint - ray._origin), N), _rayOffset);
 			Vec3 Ir = calculateColor(reflectedRay, depth - 1);
 			color = color + kr*Ir;
 		}
 		else if(geom->_material.isTransparent())
 		{
-			float kt 		= 0.85f; // Transmission probability
-			float kr 		= 0.1f; // Reflection probability
+			float kt 		= .8; // Transmission probability
+			float kr 		= 1.f - kt; // Reflection probability
 			Ray reflectedRay(collisionPoint, reflect(normalize(collisionPoint - ray._origin), N), _rayOffset);
 			Ray refractedRay(collisionPoint, refract(normalize(collisionPoint - ray._origin), N, ambientIOR, geom->_material._eta), _rayOffset);
 			Vec3 Ir = calculateColor(reflectedRay, depth - 1);
 			Vec3 It = calculateColor(refractedRay, depth - 1);
-			color = (1.f-(kt+kr)) * color + kr*Ir + kt*It;
+			color = (1.f-(kt+kr))*color + kr*Ir + kt*It;
 		}
 
 		//https://blog.demofox.org/2017/01/09/raytracing-reflection-refraction-fresnel-total-internal-reflection-and-bee rs-law/

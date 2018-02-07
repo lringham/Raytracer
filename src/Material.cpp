@@ -17,8 +17,6 @@ Material::Material(const std::string& name, float Ia, const Vec3& kd, const Vec3
   {
     _type = MaterialType::blinnPhong;
   }
-
-
 }
 
 Vec3 Material::color(const Vec3& N,const Vec3& V, const Vec3& L, const Vec3& pos, const Light& light) const
@@ -44,31 +42,24 @@ Vec3 Material::color(const Vec3& N,const Vec3& V, const Vec3& L, const Vec3& pos
   return color;
 }
 
-float Material::schlick(const Vec3& I, const Vec3& N, float eta1, float eta2) const
+float schlick(float eta1, float eta2, const Vec3& N, const Vec3& I)
 {
-  float r0 = pow((eta1-eta2) / (eta1+eta2), 2);
-  return r0 + (1.f-r0) * pow((1.f-dot(I, N)), 5);
-}
+        // Schlick aproximation
+        float r0 = (eta1-eta2) / (eta1+eta2);
+        r0 *= r0;
+        float cosX = -dot(N, I);
+        if (eta1 > eta2)
+        {
+            float eta = eta1/eta2;
+            float sinT2 = eta*eta*(1.0-cosX*cosX);
+            // Total internal reflection
+            if (sinT2 > 1.0)
+                return 1.0;
+            cosX = sqrt(1.0-sinT2);
+        }
+        float x = 1.0-cosX;
+        float ret = r0+(1.0-r0)*x*x*x*x*x;
 
-//float FresnelReflectAmount (float n1, float n2, vec3 normal, vec3 incident)
-//{
-//        // Schlick aproximation
-//        float r0 = (n1-n2) / (n1+n2);
-//        r0 *= r0;
-//        float cosX = -dot(normal, incident);
-//        if (n1 > n2)
-//        {
-//            float n = n1/n2;
-//            float sinT2 = n*n*(1.0-cosX*cosX);
-//            // Total internal reflection
-//            if (sinT2 > 1.0)
-//                return 1.0;
-//            cosX = sqrt(1.0-sinT2);
-//        }
-//        float x = 1.0-cosX;
-//        float ret = r0+(1.0-r0)*x*x*x*x*x;
-//
-//        // adjust reflect multiplier for object reflectivity
-//        ret = (OBJECT_REFLECTIVITY + (1.0-OBJECT_REFLECTIVITY) * ret);
-//        return ret;
-//}
+        //ret = (OBJECT_REFLECTIVITY + (1.0-OBJECT_REFLECTIVITY) * ret);
+        return ret;
+}
