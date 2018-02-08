@@ -185,7 +185,7 @@ void Scene::trace()
 	std::cout << "Recursion depth: " << _depth << "\n";
 	std::cout << "Pixel sample count: " << _camera.sampleCount() << "\n";
 	std::cout << "Shadow sample count " << _shadowSampleCount << "\n";
-	std::cout << "Tracing " << _name << "... ";
+	std::cout << "Tracing " << _name << "...";
 
 	// Create threads and trace
 	std::vector<std::thread> threads(_threadCount);
@@ -227,9 +227,17 @@ void Scene::traceSection(Camera& _camera, unsigned threadID)
 		endX	 = startX + xRes;
 	}
 
+	std::string progressString = "";
 	int depth = _depth;
 	for(unsigned x = startX; x < endX; ++x)
 	{
+		// thread 0 prints progress
+		if(threadID == 0)
+		{
+			progressString = std::to_string(int((100.f*x) / float(endX - startX))) + "%";
+			std::cout << progressString << std::flush;
+		}
+
 		for(unsigned y = 0; y < height; ++y)
 		{
 			std::vector<Ray> rays = _camera.createRays(x, y);
@@ -249,6 +257,18 @@ void Scene::traceSection(Camera& _camera, unsigned threadID)
 			color._b = clamp(color._b, 0.f, 1.f);
 
 			_camera._pixels.set(x+y*width, color);
+		}
+
+		// erase progress indication
+		if(threadID == 0)
+		{
+			for(unsigned i = 0; i < progressString.size(); ++i)
+				std::cout << '\b';
+			for(unsigned i = 0; i < progressString.size(); ++i)
+				std::cout << ' ';
+			for(unsigned i = 0; i < progressString.size(); ++i)
+				std::cout << '\b';
+			std::cout << std::flush;
 		}
 	}
 }
@@ -319,17 +339,16 @@ Vec3 Scene::calculateColor(Ray ray, int depth)
 		}
 		else if(geom->_material.isTransparent())
 		{
+			//TODO replace with fresnel coef
+			//https://blog.demofox.org/2017/01/09/raytracing-reflection-refraction-fresnel-total-internal-reflection-and-bee rs-law/
 			float kt 		= .8; // Transmission probability
 			float kr 		= 1.f - kt; // Reflection probability
 			Ray reflectedRay(collisionPoint, reflect(normalize(collisionPoint - ray._origin), N), _rayOffset);
 			Ray refractedRay(collisionPoint, refract(normalize(collisionPoint - ray._origin), N, ambientIOR, geom->_material._eta), _rayOffset);
 			Vec3 Ir = calculateColor(reflectedRay, depth - 1);
 			Vec3 It = calculateColor(refractedRay, depth - 1);
-			color = (1.f-(kt+kr))*color + kr*Ir + kt*It;
+			color = color + kr*Ir + kt*It;
 		}
-
-		//https://blog.demofox.org/2017/01/09/raytracing-reflection-refraction-fresnel-total-internal-reflection-and-bee rs-law/
-		//TODO replace with fresnel coef
 	}
 	else
 		color = _backgroundColor;

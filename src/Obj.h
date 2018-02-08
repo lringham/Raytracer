@@ -19,9 +19,9 @@ class Obj : public Tracable
 private:
 	struct Face
 	{
-		unsigned v0, t0, n0,
-    				 v1, t1, n1,
-    				 v2, t2, n2;
+		unsigned v0 = 0, t0 = 0, n0 = 0,
+    				 v1 = 0, t1 = 0, n1 = 0,
+    				 v2 = 0, t2 = 0, n2 = 0;
 	};
 	enum OBJ_TYPE
 	{
@@ -52,19 +52,34 @@ public:
   bool raycast(Ray& ray) const override
   {
 		bool hit = false;
+		float u1, v1;
+		Face f1;
     for(auto& f : faces)
 		{
 			Ray tempRay = ray;
+			float u0, v0;
 			if(raycastTri(
 				_position + positions[f.v0],
 				_position + positions[f.v1],
 				_position + positions[f.v2],
-				tempRay))
+				tempRay, &u0, &v0))
 			{
 				hit = true;
 				if(tempRay._t < ray._t)
+				{
 					ray = tempRay;
+					u1 = u0;
+					v1 = v0;
+					f1 = f;
+				}
 			}
+		}
+
+		if(hit )
+		{
+			ray._normal = normalize(normals[f1.n0] * u1 +
+															normals[f1.n1] * v1 +
+														 	normals[f1.n2] * (1.f-(u1+v1)));
 		}
 		return hit;
   }
@@ -245,6 +260,10 @@ private:
 					f.t2 = parsel(extra, &extra) - 1;
 					f.n2 = parsel(extra) - 1;
 					break;
+				case F:
+					break;
+				case NONE:
+					break;
 				}
 				faces.push_back(f);
 				break;
@@ -275,6 +294,10 @@ private:
 				textureCoords.emplace_back(x, y);
 				break;
 			}
+			case VTN:
+				break;
+			case NONE:
+				break;
 		}
 	}
 
@@ -357,6 +380,10 @@ private:
 				positions[face.v2] = parsedPositions[face.v2];
 			}
 			break;
+		case F:
+				break;
+		case NONE:
+				break;
 		}
 	}
 };

@@ -2,12 +2,12 @@ name: Test Scene
 outputName: obj.ppm
 modelsDir: "../models/"
 backgroundColor: [.2, .2, .6]
-recursionDepth: 1
+recursionDepth: 0
 shadowSampleCount: 1
 materials:
     - name: plane
       type: blinnPhong
-      kd: [0.0, 1.0, 1.0]
+      kd: [0.6, .6, .6]
       ks: [1.0, 1.0, 1.0]
       Ia: 0.1
       gloss: 64
@@ -20,7 +20,7 @@ materials:
       gloss: 128
       eta: 1
     - name: sphere_red
-      type: metallic
+      type: blinnPhong
       kd: [1, 0, 0]
       ks: [1, 1, 1]
       Ia: .1
@@ -38,21 +38,26 @@ objects:
       normal: [0, 1, 0]
       position: [0, 0, 0]
       material: plane
+    #- type: model
+    #  position: [-10, 14.5, 48]
+    #  filename: f16b
+    #  texture: f16.png
+    #  material: sphere_red
     - type: model
-      position: [-10, 14.5, 48]
-      filename: f16
+      position: [0, .5, 46]
+      filename: bunny
       texture: f16.png
       material: sphere_red
 lights:
   - color: [1.0, 1.0, 1.0]
-    position: [200.0, 400.0, 0.0]
-    radius: 25.0
-    intensity: 100000.0
+    position: [0.0, 10.0, 50.0]
+    radius: 1
+    intensity: 100.0
 camera:
-  position: [-10.0, 15.0, 50.0]
+  position: [0.0, 1.0, 50.0]
   fov: 1.5708
   focalLength: 50.0
   lensRadius: 0
-  pxWidth: 1024
-  pxHeight: 800
-  sampleCount: 1
+  pxWidth: 800
+  pxHeight: 600
+  sampleCount: 6
