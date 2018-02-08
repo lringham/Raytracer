@@ -4,6 +4,10 @@
 #include "Utils.h"
 #include "Scene.h"
 #include "Ray.h"
+#include "Sphere.h"
+#include "Plane.h"
+#include "Triangle.h"
+#include "Obj.h"
 
 Scene::Scene(int argc, char** argv) :
 	 _name("scene"), _outputName(""), _threadCount(0)
@@ -109,6 +113,20 @@ bool Scene::parseArgs(int argc, char** argv) //argv
 							nodeToVec3(object["normal"]),
 							nodeToVec3(object["position"])));
 				}
+				else if(type == "model")
+				{
+					std::string modelsDir = "";
+					if(config["modelsDir"])
+						modelsDir = config["modelsDir"].as<std::string>();
+
+					_geometry.emplace_back(
+						new Obj(
+							nodeToVec3(object["position"]),
+							object["filename"].as<std::string>(),
+							modelsDir));
+				}
+				else
+					std::cout << "Invalid geometry type: " << type << std::endl;
 
 				std::string materialName = object["material"].as<std::string>();
 				if(_materialMap.count(materialName) == 1)

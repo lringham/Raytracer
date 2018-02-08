@@ -7,9 +7,7 @@
 #include "Light.h"
 #include "Camera.h"
 #include "Ray.h"
-#include "Sphere.h"
-#include "Plane.h"
-#include "Triangle.h"
+
 #include <yaml-cpp/yaml.h>
 
 class Scene

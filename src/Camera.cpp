@@ -39,7 +39,7 @@ std::vector<Ray> Camera::createRays(unsigned x, unsigned y) const
 {
   std::vector<Ray> rays;
   std::random_device rd;
-  std::mt19937 gen(rd());
+  std::mt19937 gen(1);
   std::uniform_real_distribution<> dis(0.f, 1.f);
 
   for(int rayID = 0; rayID < _sampleCount; ++rayID)

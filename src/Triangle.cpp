@@ -58,6 +58,51 @@ bool Triangle::raycast(Ray& ray) const
 	ray._normal = normalize(cross(e1, e0));
 	return true;
 }
+
+bool raycastTri(const Vec3& p0, const Vec3& p1, const Vec3& p2, Ray& ray, float* uRet, float* vRet)
+{
+	Vec3 e0 = p1 - p0;
+	Vec3 e1 = p2 - p0;
+	Vec3 rsubv0 = ray._origin - p0;
+
+	float a = -ray._dir._x, b = -ray._dir._y, c = -ray._dir._z;
+	float d = e0._x, e = e0._y, f = e0._z;
+	float g = e1._x, h = e1._y, i = e1._z;
+	float j = rsubv0._x, k = rsubv0._y, l = rsubv0._z;
+
+	float eisubhf = e*i - h*f;
+	float gfsubdi = g*f - d*i;
+	float dhsubeg = d*h - e*g;
+
+	float Minv = 1.f / (a*eisubhf + b*gfsubdi + c*dhsubeg);
+
+	ray._t = (j*eisubhf + k*gfsubdi + l*dhsubeg) * Minv;
+	if (ray._t < 0)
+		return false;
+
+	float aksubjb = a*k - j*b;
+	float jcsubal = j*c - a*l;
+	float blsubkc = b*l - k*c;
+
+	float u = (i*aksubjb + h*jcsubal + g*blsubkc) * Minv;
+	if (u < 0.f || u > 1.f)
+		return false;
+
+	float v = -(f*aksubjb + e*(jcsubal)+d*blsubkc) * Minv;
+	if (v < 0.f || v > 1.f - u)
+		return false;
+
+	ray._normal = -1.f*normalize(cross(e1, e0));
+
+	if(uRet != nullptr)
+		*uRet = u;
+
+	if(vRet != nullptr)
+		*vRet = v;
+
+	return true;
+}
+
 //
 // Vec3 circumcentre(const Vec3& p0, const Vec3& p1, const Vec3& p2, float* radius)
 // {
