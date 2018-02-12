@@ -20,4 +20,8 @@ make
 - FOG
 - Environment mapping
 - Fresnel
+- BVH or RTree?
+- review usage info
+- energy conserving phong
+
 https://bheisler.github.io/post/writing-raytracer-in-rust-part-3/

@@ -20,6 +20,7 @@ Scene::Scene(int argc, char** argv) :
 	else
 	{
 		std::cout << "Failed\n";
+		usage();
 		throw -1;
 	}
 }
@@ -34,41 +35,33 @@ Vec3 Scene::nodeToVec3(const YAML::Node& node) const
 
 bool Scene::parseArgs(int argc, char** argv) //argv
 {
-	if(argc <= 1 || argc > 3)
+	std::string sceneFile = "";
+	if(argc <= 1 || argc > 5)
 	{
-		usage();
 		return false;
 	}
-	else if (argc == 3)
+	else
 	{
-		std::string arg = argv[2];
-		std::string threadCountStr = "-threads=";
-		if(arg.compare(0, threadCountStr.length(), threadCountStr) == 0)
-			_threadCount = std::stoi(arg.substr(arg.find(threadCountStr)+threadCountStr.size()));
-		else
+		sceneFile = argv[1];
+		const std::string threadCountStr = "-threads=";
+		for(int i = 1; i < argc; ++i)
 		{
-			usage();
-			return false;
+			std::string arg = argv[i];
+			if(arg.compare(0, threadCountStr.length(), threadCountStr) == 0)
+				_threadCount = std::stoi(arg.substr(arg.find(threadCountStr)+threadCountStr.size()));
+				//FIXME account for other params
 		}
 	}
 
 	YAML::Node config;
 	try
 	{
-		//
-		YAML::Node config = YAML::LoadFile(argv[1]);
-
-		if(config["outputName"])
-			_outputName = config["outputName"].as<std::string>();
-
-		if(config["name"])
-			_name = config["name"].as<std::string>();
-
-		if(config["recursionDepth"])
-			_depth =  config["recursionDepth"].as<unsigned>();
-
-		if(config["shadowSampleCount"])
-			_shadowSampleCount =  config["shadowSampleCount"].as<unsigned>();
+		//TODO convert all optional args to use parseNode function		
+		YAML::Node config = YAML::LoadFile(sceneFile);
+		_outputName 				= parseNode<std::string>(config, "outputName", "scene.ppm");
+		_name 							= parseNode<std::string>(config, "name", "scene");
+		_depth 							= parseNode<unsigned>(config, "recursionDepth", 1);
+		_shadowSampleCount	= parseNode<unsigned>(config, "shadowSampleCount", 1);
 
 		const YAML::Node& materialsNode = config["materials"];
 		for (YAML::const_iterator it = materialsNode.begin(); it != materialsNode.end(); ++it)
@@ -111,7 +104,9 @@ bool Scene::parseArgs(int argc, char** argv) //argv
 					_geometry.emplace_back(
 						new Plane(
 							nodeToVec3(object["normal"]),
-							nodeToVec3(object["position"])));
+							nodeToVec3(object["position"]),
+							object["width"].as<float>(),
+							object["depth"].as<float>()));
 				}
 				else if(type == "model")
 				{
@@ -168,7 +163,7 @@ bool Scene::parseArgs(int argc, char** argv) //argv
 
 void Scene::usage()
 {
-	std::cout << "Invalid command line parameters.\nUsage: ./Raytracer scene.yaml [-threads=8] [-w=800] [-h=600] [recurDepth=6]";
+	std::cout << "Invalid command line parameters.\nUsage: ./Raytracer scene.yaml [-threads=8] [-w=800] [-h=600] [recurDepth=6]" << std::endl;
 }
 
 void Scene::trace()
@@ -231,13 +226,6 @@ void Scene::traceSection(Camera& _camera, unsigned threadID)
 	int depth = _depth;
 	for(unsigned x = startX; x < endX; ++x)
 	{
-		// thread 0 prints progress
-		if(threadID == 0)
-		{
-			progressString = std::to_string(int((100.f*x) / float(endX - startX))) + "%";
-			std::cout << progressString << std::flush;
-		}
-
 		for(unsigned y = 0; y < height; ++y)
 		{
 			std::vector<Ray> rays = _camera.createRays(x, y);
@@ -259,18 +247,28 @@ void Scene::traceSection(Camera& _camera, unsigned threadID)
 			_camera._pixels.set(x+y*width, color);
 		}
 
-		// erase progress indication
 		if(threadID == 0)
 		{
+			// erase progress indication
 			for(unsigned i = 0; i < progressString.size(); ++i)
 				std::cout << '\b';
 			for(unsigned i = 0; i < progressString.size(); ++i)
 				std::cout << ' ';
 			for(unsigned i = 0; i < progressString.size(); ++i)
 				std::cout << '\b';
-			std::cout << std::flush;
+			// thread 0 prints progress
+			progressString = std::to_string(int((100.f*x-1.f) / float(endX - startX))) + "%";
+			std::cout << progressString << std::flush;
 		}
 	}
+
+	// Erase perc
+	for(unsigned i = 0; i < progressString.size(); ++i)
+		std::cout << '\b';
+	for(unsigned i = 0; i < progressString.size(); ++i)
+		std::cout << ' ';
+	for(unsigned i = 0; i < progressString.size(); ++i)
+		std::cout << '\b';
 }
 
 int Scene::castRay(Ray& ray)

@@ -18,6 +18,15 @@ public:
 	void save();
 
 private:
+	template<typename T>
+	T parseNode(const YAML::Node& node, const std::string& name, T defaultVal)
+	{
+		if(node[name])
+			return node[name].as<T>();
+		else
+			return defaultVal;
+	}
+
 	bool parseArgs(int argc, char** argv);
 	void traceSection(Camera& camera, unsigned threadID);
 	int castRay(Ray& ray);
