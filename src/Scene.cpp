@@ -25,14 +25,6 @@ Scene::Scene(int argc, char** argv) :
 	}
 }
 
-Vec3 Scene::nodeToVec3(const YAML::Node& node) const
-{
-	return Vec3(
-		node[0].as<float>(),
-		node[1].as<float>(),
-		node[2].as<float>());
-}
-
 bool Scene::parseArgs(int argc, char** argv) //argv
 {
 	std::string sceneFile = "";
@@ -56,7 +48,9 @@ bool Scene::parseArgs(int argc, char** argv) //argv
 	YAML::Node config;
 	try
 	{
-		//TODO convert all optional args to use parseNode function		
+		//TODO convert all optional args to use parseNode function
+		//TODO extract default values / magic numbers
+		
 		YAML::Node config = YAML::LoadFile(sceneFile);
 		_outputName 				= parseNode<std::string>(config, "outputName", "scene.ppm");
 		_name 							= parseNode<std::string>(config, "name", "scene");
@@ -70,10 +64,10 @@ bool Scene::parseArgs(int argc, char** argv) //argv
 				_materialMap[materialNode["name"].as<std::string>()] = Material(
 						materialNode["name"].as<std::string>(),
 						materialNode["Ia"].as<float>(),
-						nodeToVec3(materialNode["kd"]),
-						nodeToVec3(materialNode["ks"]),
-						materialNode["gloss"].as<float>(),
-						materialNode["eta"].as<float>(),
+						parseNode(materialNode, "kd", Vec3(1, 1, 1)),
+						parseNode(materialNode, "ks", Vec3(1, 1, 1)),
+						parseNode<float>(materialNode, "gloss", 1.f),
+						parseNode<float>(materialNode, "eta", 1.f),
 						materialNode["type"].as<std::string>()
 					);
 		}
@@ -88,35 +82,32 @@ bool Scene::parseArgs(int argc, char** argv) //argv
 				{
 					_geometry.emplace_back(
 						new Sphere(
-							object["radius"].as<float>(),
-							nodeToVec3(object["position"])));
+							parseNode<float>(object, "radius", 1.f),
+							parseNode(object, "position", Vec3(0, 0, 0))));
 				}
 				else if(type == "triangle")
 				{
 					_geometry.emplace_back(
 						new Triangle(
-							nodeToVec3(object["x0"]),
-							nodeToVec3(object["x1"]),
-							nodeToVec3(object["x2"])));
+							parseNode(object, "x0", Vec3(-1, 0, 0)),
+							parseNode(object, "x1", Vec3(0, 1, 0)),
+							parseNode(object, "x2", Vec3(1, 0, 0))));
 				}
 				else if(type == "plane")
 				{
 					_geometry.emplace_back(
 						new Plane(
-							nodeToVec3(object["normal"]),
-							nodeToVec3(object["position"]),
-							object["width"].as<float>(),
-							object["depth"].as<float>()));
+							parseNode(object, "normal", Vec3(0, 1, 0)),
+							parseNode(object, "position", Vec3(0, 0, 0)),
+							parseNode<float>(object, "width", std::numeric_limits<float>::max()),
+							parseNode<float>(object, "depth", std::numeric_limits<float>::max())));
 				}
 				else if(type == "model")
 				{
-					std::string modelsDir = "";
-					if(config["modelsDir"])
-						modelsDir = config["modelsDir"].as<std::string>();
-
+					std::string modelsDir = parseNode<std::string>(config, "modelsDir", "");
 					_geometry.emplace_back(
 						new Obj(
-							nodeToVec3(object["position"]),
+							parseNode(object, "position", Vec3(0, 0, 0)),
 							object["filename"].as<std::string>(),
 							modelsDir));
 				}
@@ -133,24 +124,24 @@ bool Scene::parseArgs(int argc, char** argv) //argv
 		{
 			const YAML::Node& light = *it;
 			_lights.emplace_back(
-					nodeToVec3(light["color"]),
-					nodeToVec3(light["position"]),
-					light["radius"].as<float>(),
-					light["intensity"].as<float>()
+					parseNode(light, "color", Vec3(1, 1, 1)),
+					parseNode(light, "position", Vec3(0, 0, 0)),
+					parseNode<float>(light, "radius", 0.f),
+					parseNode<float>(light, "intensity", 100.f)
 				);
 		}
 
 		_camera.init(
-				nodeToVec3(config["camera"]["position"]),
-				config["camera"]["fov"].as<float>(),
-				config["camera"]["focalLength"].as<float>(),
+				parseNode(config["camera"], "position", Vec3(0, 0, 1)),
+				parseNode<float>(config["camera"], "fov", 1.f),
+				parseNode<float>(config["camera"], "focalLength", 1.f),
 				Pixels(
-					 config["camera"]["pxWidth"].as<unsigned>(),
-					 config["camera"]["pxHeight"].as<unsigned>()),
-				config["camera"]["sampleCount"].as<int>(),
-				config["camera"]["lensRadius"].as<float>());
+					 parseNode<unsigned>(config["camera"], "pxWidth", 100),
+					 parseNode<unsigned>(config["camera"], "pxHeight", 100)),
+				parseNode<int>(config["camera"], "sampleCount", 1),
+				parseNode<float>(config["camera"], "lensRadius", 0.f));
 
-		_backgroundColor.set(nodeToVec3(config["backgroundColor"]));
+		_backgroundColor.set(parseNode(config, "backgroundColor", Vec3(0, 0, 0)));
 	}
 	catch(YAML::BadFile e)
 	{

@@ -2,7 +2,7 @@ name: Test Scene
 outputName: spheres.ppm
 backgroundColor: [.2, .2, .6]
 recursionDepth: 2
-
+shadowSampleCount: 1
 materials:
     - name: plane
       type: blinnPhong
@@ -57,8 +57,6 @@ objects:
       normal: [0, 1, 0]
       position: [0, 0, 0]
       material: plane
-      width: 1000
-      depth: 1000
 lights:
   - color: [1.0, 1.0, 1.0]
     position: [200.0, 400.0, 0.0]

@@ -18,6 +18,24 @@ public:
 	void save();
 
 private:
+
+	Vec3 parseNode(const YAML::Node& node, const std::string& name, Vec3 defaultVal)
+	{
+		Vec3 result = defaultVal;
+		bool missingComponent = false;
+		if(node[name])
+		{
+			const YAML::Node& vec3Node = node[name];
+			missingComponent = !(vec3Node[0] && vec3Node[1] && vec3Node[2]);
+			result._x = vec3Node[0] ? vec3Node[0].as<float>() : defaultVal._x;
+			result._y = vec3Node[1] ? vec3Node[1].as<float>() : defaultVal._y;
+			result._z = vec3Node[2] ? vec3Node[2].as<float>() : defaultVal._z;
+			if(missingComponent)
+				std::cout << "yaml node " << name << " doesn't have 3 components" << std::endl;
+		}
+		return result;
+	}
+
 	template<typename T>
 	T parseNode(const YAML::Node& node, const std::string& name, T defaultVal)
 	{
@@ -25,6 +43,17 @@ private:
 			return node[name].as<T>();
 		else
 			return defaultVal;
+	}
+
+	template<typename T>
+	T parseNode(const YAML::Node& node, const std::string& name)
+	{
+		T t;
+		if(node[name])
+			t = node[name].as<T>();
+		else
+			std::cout << "Cannot find yaml node: " << name << "\n";
+		return t;
 	}
 
 	bool parseArgs(int argc, char** argv);
@@ -35,7 +64,6 @@ private:
 	Vec3 blinnPhong(const Ray& ray, const Tracable& geom);
 
 	void usage();
-	Vec3 nodeToVec3(const YAML::Node& node) const;
 
 	std::vector<std::unique_ptr<Tracable>> _geometry;
 	std::vector<Light> _lights;
