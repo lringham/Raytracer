@@ -16,7 +16,9 @@ make
 - Uses non PBR
 
 ## TODO
+- support png
 - FOG
+- Environment mapping
 - Fresnel
 - BVH or RTree?
 - review usage info

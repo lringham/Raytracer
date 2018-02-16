@@ -28,10 +28,11 @@ private:
 		V = 0, VT = 3, VTN = 6, VN, F, NONE
 	};
 
-  std::vector<Vec3> positions;
-  std::vector<Vec3> normals;
-  std::vector<Vec2> textureCoords;
-  std::vector<Face> faces;
+  std::vector<Vec3> _positions;
+  std::vector<Vec3> _normals;
+  std::vector<Vec2> _textureCoords;
+  std::vector<Face> _faces;
+	std::vector<unsigned> _indices;
 	Vec3 _position;
 
 public:
@@ -52,16 +53,16 @@ public:
   bool raycast(Ray& ray) const override
   {
 		bool hit = false;
-		float u1, v1;
+		float u1 = 0, v1 = 0;
 		Face f1;
-    for(auto& f : faces)
+    for(auto& f : _faces)
 		{
 			Ray tempRay = ray;
 			float u0, v0;
 			if(raycastTri(
-				_position + positions[f.v0],
-				_position + positions[f.v1],
-				_position + positions[f.v2],
+				_position + _positions[f.v0],
+				_position + _positions[f.v1],
+				_position + _positions[f.v2],
 				tempRay, &u0, &v0))
 			{
 				hit = true;
@@ -75,39 +76,42 @@ public:
 			}
 		}
 
-		if(hit )
+		if(hit)
 		{
-			ray._normal = normalize(normals[f1.n0] * u1 +
-															normals[f1.n1] * v1 +
-														 	normals[f1.n2] * (1.f-(u1+v1)));
+			float w1 = (1.f-(u1+v1));
+			if(_normals.size() > 0)
+			{
+				ray._normal = normalize(_normals[f1.n0] * w1 +
+																_normals[f1.n1] * u1 +
+														 		_normals[f1.n2] * v1);
+			}
+			else
+			{
+				ray._normal = normalize(cross(_positions[f1.v1] - _positions[f1.v0], _positions[f1.v2] - _positions[f1.v0]));
+			}
+
+			if(_textureCoords.size() > 0)
+			{
+				//TODO not sure why this order is needed
+				ray._uv = _textureCoords[f1.t0] * w1 +
+								 	_textureCoords[f1.t1] * u1 +
+								 	_textureCoords[f1.t2] * v1;
+			}
 		}
 		return hit;
   }
 
 	bool load(const std::string& filename, const std::string& path = "")
 	{
-		std::ifstream objReader(path + filename + ".obj");
+		std::ifstream objReader(path + filename);
 		if(objReader.is_open())
 		{
 			OBJ_TYPE objType = NONE;
-
 			char line[256];
 			while (objReader.getline(line, 256))
 			{
-				if (objType != NONE)
-					parseLine(line, objType, positions, normals, textureCoords, faces);
-				else //determine component type
+				if (objType == NONE && line[0] == 'f') //determine component type
 				{
-					// -----------------------------------------
-					// If componentType is not found,
-					// and the line defines a face,
-					// use the '/' count and placement
-					// to determine how to parse face lines.
-					// componentType designates if normals and or
-					// texture coordinates are avaliable
-					// -----------------------------------------
-					if (line[0] == 'f')
-					{
 						int slashCount = 0;
 						char c = ' ';
 						for (int i = 2; c != '\0' && objType == NONE; ++i)
@@ -122,12 +126,10 @@ public:
 						}
 						if(objType != VN)
 							objType = (OBJ_TYPE) slashCount;
-					}
-					parseLine(line, objType, positions, normals, textureCoords, faces);
 				}
+				parseLine(line, objType);
 			}
 			objReader.close();
-			parseFaces(objType, positions, normals, textureCoords, faces);
 		}
 		else
 		{
@@ -135,26 +137,11 @@ public:
 			return false;
 		}
 
-
-		// Material loading
-		//std::ifstream mtlReader(path + filename + ".mtl");
-		//if (mtlReader.is_open())
-		//{
-		//	char line[256];
-		//	while (objReader.getline(line, 256))
-		//	{
-		//		if (line[0] == '#')
-		//			continue;
-		//	}
-
-		//	mtlReader.close();
-		//	return true;
-		//}
-		//else
-		//{
-		//	std::cout << "Can't load material: " << filename << std::endl;
-		//	return false;
-		//}
+		std::cout << "Model loaded: " << filename << std::endl;
+		std::cout << "\tfaces: " << _faces.size() << std::endl;
+		std::cout << "\tvertices: " << _positions.size() << std::endl;
+		std::cout << "\tnormals: " << _normals.size() << std::endl;
+		std::cout << "\tuvs: " << _textureCoords.size() << std::endl;
 
 		return true;
 	}
@@ -170,7 +157,7 @@ private:
 		return strtol(data, extra, base);
 	}
 
-	void parseLine(char* line, OBJ_TYPE objType, std::vector<Vec3>& positions, std::vector<Vec3>& normals, std::vector<Vec2>& textureCoords, std::vector<Face>& faces)
+	void parseLine(char* line, OBJ_TYPE objType)
 	{
 		if(line == nullptr)
 			return;
@@ -265,7 +252,7 @@ private:
 				case NONE:
 					break;
 				}
-				faces.push_back(f);
+				_faces.push_back(f);
 				break;
 			}
 			case V: //Parse a position
@@ -274,7 +261,7 @@ private:
 				float x = parsef(line + offset, &extra);
 				float y = parsef(extra, &extra);
 				float z = parsef(extra);
-				positions.emplace_back(x, y, z);
+				_positions.emplace_back(x, y, z);
 				break;
 			}
 			case VN: //Parse a normal
@@ -283,7 +270,7 @@ private:
 				float x = parsef(line + offset, &extra);
 				float y = parsef(extra, &extra);
 				float z = parsef(extra);
-				normals.emplace_back(x, y, z);
+				_normals.emplace_back(x, y, z);
 				break;
 			}
 			case VT:  //Parse a texture coordinate
@@ -291,98 +278,12 @@ private:
 				char* extra = nullptr;
 				float x = parsef(line + offset, &extra);
 				float y = parsef(extra);
-				textureCoords.emplace_back(x, y);
+				_textureCoords.emplace_back(x, y);
 				break;
 			}
 			case VTN:
 				break;
 			case NONE:
-				break;
-		}
-	}
-
-	void parseFaces(OBJ_TYPE objType, std::vector<Vec3>& parsedPositions, std::vector<Vec3>& parsedNormals, std::vector<Vec2>& parsedTextureCoords, std::vector<Face>& faces)
-	{
-		std::vector<Vec3> positions;
-		std::vector<Vec3> normals;
-		std::vector<unsigned> indices;
-		std::vector<Vec2> textureCoords;
-
-		//set all the indices of the triangles
-		positions.resize(parsedPositions.size());
-		switch (objType)
-		{
-		case VTN:
-			normals.resize(parsedPositions.size());
-			textureCoords.resize(parsedPositions.size());
-			for (Face& face : faces)
-			{
-				indices.push_back(face.v0);
-				indices.push_back(face.v1);
-				indices.push_back(face.v2);
-
-				positions[face.v0] = parsedPositions[face.v0];
-				positions[face.v1] = parsedPositions[face.v1];
-				positions[face.v2] = parsedPositions[face.v2];
-
-				normals[face.v0] = parsedNormals[face.n0];
-				normals[face.v1] = parsedNormals[face.n1];
-				normals[face.v2] = parsedNormals[face.n2];
-
-				textureCoords[face.v0] = parsedTextureCoords[face.t0];
-				textureCoords[face.v1] = parsedTextureCoords[face.t1];
-				textureCoords[face.v2] = parsedTextureCoords[face.t2];
-			}
-			break;
-		case VN:
-			normals.resize(parsedPositions.size());
-			for (Face& face : faces)
-			{
-				indices.push_back(face.v0);
-				indices.push_back(face.v1);
-				indices.push_back(face.v2);
-
-				positions[face.v0] = parsedPositions[face.v0];
-				positions[face.v1] = parsedPositions[face.v1];
-				positions[face.v2] = parsedPositions[face.v2];
-
-				normals[face.v0] = parsedNormals[face.n0];
-				normals[face.v1] = parsedNormals[face.n1];
-				normals[face.v2] = parsedNormals[face.n2];
-			}
-			break;
-		case VT:
-			textureCoords.reserve(parsedPositions.size());
-			for (Face& face : faces)
-			{
-				indices.push_back(face.v0);
-				indices.push_back(face.v1);
-				indices.push_back(face.v2);
-
-				positions[face.v0] = parsedPositions[face.v0];
-				positions[face.v1] = parsedPositions[face.v1];
-				positions[face.v2] = parsedPositions[face.v2];
-
-				textureCoords[face.v0] = parsedTextureCoords[face.t0];
-				textureCoords[face.v1] = parsedTextureCoords[face.t1];
-				textureCoords[face.v2] = parsedTextureCoords[face.t2];
-			}
-			break;
-		case V:
-			for (Face& face : faces)
-			{
-				indices.push_back(face.v0);
-				indices.push_back(face.v1);
-				indices.push_back(face.v2);
-
-				positions[face.v0] = parsedPositions[face.v0];
-				positions[face.v1] = parsedPositions[face.v1];
-				positions[face.v2] = parsedPositions[face.v2];
-			}
-			break;
-		case F:
-				break;
-		case NONE:
 				break;
 		}
 	}

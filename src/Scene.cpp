@@ -12,14 +12,15 @@
 Scene::Scene(int argc, char** argv) :
 	 _name("scene"), _outputName(""), _threadCount(0)
 {
-	std::cout << "Loading... ";
+
+	std::cout << "Loading scene...\n";
 	if(parseArgs(argc, argv))
 	{
-		std::cout << "Finished\n";
+		std::cout << "Finished loading\n";
 	}
 	else
 	{
-		std::cout << "Failed\n";
+		std::cout << "Failed loading\n";
 		usage();
 		throw -1;
 	}
@@ -50,7 +51,7 @@ bool Scene::parseArgs(int argc, char** argv) //argv
 	{
 		//TODO convert all optional args to use parseNode function
 		//TODO extract default values / magic numbers
-		
+
 		YAML::Node config = YAML::LoadFile(sceneFile);
 		_outputName 				= parseNode<std::string>(config, "outputName", "scene.ppm");
 		_name 							= parseNode<std::string>(config, "name", "scene");
@@ -61,8 +62,9 @@ bool Scene::parseArgs(int argc, char** argv) //argv
 		for (YAML::const_iterator it = materialsNode.begin(); it != materialsNode.end(); ++it)
 		{
 		    const YAML::Node& materialNode = *it;
-				_materialMap[materialNode["name"].as<std::string>()] = Material(
-						materialNode["name"].as<std::string>(),
+				std::string materialName = materialNode["name"].as<std::string>();
+				_materialMap[materialName] = Material(
+						materialName,
 						materialNode["Ia"].as<float>(),
 						parseNode(materialNode, "kd", Vec3(1, 1, 1)),
 						parseNode(materialNode, "ks", Vec3(1, 1, 1)),
@@ -70,6 +72,8 @@ bool Scene::parseArgs(int argc, char** argv) //argv
 						parseNode<float>(materialNode, "eta", 1.f),
 						materialNode["type"].as<std::string>()
 					);
+				if(materialNode["texture"])
+					_materialMap[materialName].setTexture(materialNode["texture"].as<std::string>());
 		}
 
 		const YAML::Node& objectsNode = config["objects"];
@@ -104,12 +108,12 @@ bool Scene::parseArgs(int argc, char** argv) //argv
 				}
 				else if(type == "model")
 				{
-					std::string modelsDir = parseNode<std::string>(config, "modelsDir", "");
-					_geometry.emplace_back(
-						new Obj(
-							parseNode(object, "position", Vec3(0, 0, 0)),
-							object["filename"].as<std::string>(),
-							modelsDir));
+						std::string modelsDir = parseNode<std::string>(config, "modelsDir", "");
+						_geometry.emplace_back(
+							new Obj(
+								parseNode(object, "position", Vec3(0, 0, 0)),
+								object["filename"].as<std::string>(),
+								modelsDir));
 				}
 				else
 					std::cout << "Invalid geometry type: " << type << std::endl;
@@ -313,6 +317,9 @@ Vec3 Scene::calculateColor(Ray ray, int depth)
 		color._r /= _shadowSampleCount;
 		color._g /= _shadowSampleCount;
 		color._b /= _shadowSampleCount;
+
+		if(geom->_material.hasTexture())
+			color =  color * geom->_material.sampleTexture(ray._uv);
 
 		// Exit if recursive depth is met
 		if(depth == 0)

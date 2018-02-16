@@ -3,7 +3,7 @@
 #include <math.h>
 
 Material::Material(const std::string& name, float Ia, const Vec3& kd, const Vec3& ks, float gloss, float eta, const std::string& materialType) :
-  _name(name), _Ia(Ia), _kd(kd), _ks(ks), _gloss(gloss), _eta(eta)
+  _name(name), _Ia(Ia), _kd(kd), _ks(ks), _gloss(gloss), _eta(eta), _hasTexture(false)
 {
   if(materialType == "metallic")
   {
@@ -19,7 +19,7 @@ Material::Material(const std::string& name, float Ia, const Vec3& kd, const Vec3
   }
 }
 
-Vec3 Material::color(const Vec3& N,const Vec3& V, const Vec3& L, const Vec3& pos, const Light& light) const
+Vec3 Material::color(const Vec3& N, const Vec3& V, const Vec3& L, const Vec3& pos, const Light& light) const
 {
   Vec3 color = ambientColor();
 	Vec3 H = normalize(L + V);
@@ -40,6 +40,16 @@ Vec3 Material::color(const Vec3& N,const Vec3& V, const Vec3& L, const Vec3& pos
   }
 
   return color;
+}
+
+Vec3 Material::sampleTexture(const Vec2& uv)
+{
+  return _texture.sample(uv._u, uv._v);
+}
+
+void Material::setTexture(const std::string& filename)
+{
+  _hasTexture = _texture.loadTexture(filename);
 }
 
 float schlick(float eta1, float eta2, const Vec3& N, const Vec3& I)

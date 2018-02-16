@@ -1,4 +1,5 @@
 #include "Plane.h"
+#include <cmath>
 
 Plane::Plane(Vec3 normal, Vec3 position, float width, float depth) :
   _normal(normal), _position(position), _width(width), _depth(depth)
@@ -25,8 +26,18 @@ bool Plane::raycast(Ray& ray) const
 	if (rayDirDotNormal == 0)
 		return false;
 
-	ray._t = (_position - ray._origin).dot(_normal) / rayDirDotNormal;
+
+  ray._t = (_position - ray._origin).dot(_normal) / rayDirDotNormal;
   ray._normal = _normal;
+
   Vec3 dist = m * (ray.intersection() - _position);
-	return abs(dist._x) < _halfWidth && abs(dist._z) < _halfDepth;
+  if(std::abs(dist._x) < _halfWidth && std::abs(dist._z) < _halfDepth)
+  {
+    ray._uv.set(
+      (dist._x + _halfWidth) / _width,
+      (dist._z + _halfDepth) / _depth);
+
+    return true;
+  }
+	return false;
 }
