@@ -7,6 +7,7 @@
 class AABB : public Tracable
 {
 public:
+  AABB();
   AABB(const Vec3& corner0,const Vec3& corner1);
   bool raycast(Ray& ray) const override;
 

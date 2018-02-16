@@ -1,5 +1,8 @@
 #include "AABB.h"
 
+AABB::AABB()
+{}
+
 AABB::AABB(const Vec3& corner0,const Vec3& corner1)
 {
   _min._x = std::min(corner0._x, corner1._x);

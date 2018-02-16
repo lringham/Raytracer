@@ -11,7 +11,7 @@
 
 #include "Vec3.h"
 #include "Vec2.h"
-
+#include "AABB.h"
 
 class Obj : public Tracable
 {
@@ -19,19 +19,19 @@ class Obj : public Tracable
 private:
 	struct Face
 	{
-		unsigned v0 = 0, t0 = 0, n0 = 0,
-    				 v1 = 0, t1 = 0, n1 = 0,
-    				 v2 = 0, t2 = 0, n2 = 0;
+		unsigned	v0 = 0, t0 = 0, n0 = 0,
+    				v1 = 0, t1 = 0, n1 = 0,
+    				v2 = 0, t2 = 0, n2 = 0;
 	};
 	enum OBJ_TYPE
 	{
 		V = 0, VT = 3, VTN = 6, VN, F, NONE
 	};
 
-  std::vector<Vec3> _positions;
-  std::vector<Vec3> _normals;
-  std::vector<Vec2> _textureCoords;
-  std::vector<Face> _faces;
+	std::vector<Vec3> _positions;
+	std::vector<Vec3> _normals;
+	std::vector<Vec2> _textureCoords;
+	std::vector<Face> _faces;
 	std::vector<unsigned> _indices;
 	Vec3 _position;
 
@@ -52,54 +52,78 @@ public:
 
   bool raycast(Ray& ray) const override
   {
-		bool hit = false;
-		float u1 = 0, v1 = 0;
-		Face f1;
-    for(auto& f : _faces)
+	bool hit = false;
+	float u1 = 0, v1 = 0;
+	Face f1;
+
+	Ray testRay = ray;
+	if(!_boundingBox.raycast(testRay))
+		return false;
+
+	for(auto& f : _faces)
+	{
+		Ray tempRay = ray;
+		float u0, v0;
+		if(raycastTri(
+			_position + _positions[f.v0],
+			_position + _positions[f.v1],
+			_position + _positions[f.v2],
+			tempRay, &u0, &v0))
 		{
-			Ray tempRay = ray;
-			float u0, v0;
-			if(raycastTri(
-				_position + _positions[f.v0],
-				_position + _positions[f.v1],
-				_position + _positions[f.v2],
-				tempRay, &u0, &v0))
+			hit = true;
+			if(tempRay._t < ray._t)
 			{
-				hit = true;
-				if(tempRay._t < ray._t)
-				{
-					ray = tempRay;
-					u1 = u0;
-					v1 = v0;
-					f1 = f;
-				}
+				ray = tempRay;
+				u1 = u0;
+				v1 = v0;
+				f1 = f;
 			}
 		}
+	}
 
-		if(hit)
+	if(hit)
+	{
+		float w1 = (1.f-(u1+v1));
+		if(_normals.size() > 0)
 		{
-			float w1 = (1.f-(u1+v1));
-			if(_normals.size() > 0)
-			{
-				ray._normal = normalize(_normals[f1.n0] * w1 +
-																_normals[f1.n1] * u1 +
-														 		_normals[f1.n2] * v1);
-			}
-			else
-			{
-				ray._normal = normalize(cross(_positions[f1.v1] - _positions[f1.v0], _positions[f1.v2] - _positions[f1.v0]));
-			}
-
-			if(_textureCoords.size() > 0)
-			{
-				//TODO not sure why this order is needed
-				ray._uv = _textureCoords[f1.t0] * w1 +
-								 	_textureCoords[f1.t1] * u1 +
-								 	_textureCoords[f1.t2] * v1;
-			}
+			ray._normal = normalize(_normals[f1.n0] * w1 +
+															_normals[f1.n1] * u1 +
+															_normals[f1.n2] * v1);
 		}
-		return hit;
+		else
+		{
+			ray._normal = normalize(cross(_positions[f1.v1] - _positions[f1.v0], _positions[f1.v2] - _positions[f1.v0]));
+		}
+
+		if(_textureCoords.size() > 0)
+		{
+			//TODO not sure why this order is needed
+			ray._uv = _textureCoords[f1.t0] * w1 +
+								_textureCoords[f1.t1] * u1 +
+								_textureCoords[f1.t2] * v1;
+		}
+	}
+	return hit;
   }
+
+	void calcAABB()
+	{
+		Vec3 minPos(std::numeric_limits<float>::max());
+		Vec3 maxPos(std::numeric_limits<float>::min());
+
+		for(const Vec3& v : _positions)
+		{
+			minPos._x = std::min(minPos._x, v._x);
+			minPos._y = std::min(minPos._y, v._y);
+			minPos._z = std::min(minPos._z, v._z);
+
+			maxPos._x = std::max(maxPos._x, v._x);
+			maxPos._y = std::max(maxPos._y, v._y);
+			maxPos._z = std::max(maxPos._z, v._z);
+		}
+
+		_boundingBox = AABB(_position + minPos, _position + maxPos);
+	}
 
 	bool load(const std::string& filename, const std::string& path = "")
 	{
@@ -137,6 +161,10 @@ public:
 			return false;
 		}
 
+		// Calculate bounding box
+		calcAABB();
+
+		// Print stats
 		std::cout << "Model loaded: " << filename << std::endl;
 		std::cout << "\tfaces: " << _faces.size() << std::endl;
 		std::cout << "\tvertices: " << _positions.size() << std::endl;
@@ -287,4 +315,6 @@ private:
 				break;
 		}
 	}
+
+	AABB _boundingBox;
 };
