@@ -8,6 +8,7 @@
 #include "Plane.h"
 #include "Triangle.h"
 #include "Obj.h"
+#include "AABB.h"
 
 Scene::Scene(int argc, char** argv) :
 	 _name("scene"), _outputName(""), _threadCount(0)
@@ -114,6 +115,14 @@ bool Scene::parseArgs(int argc, char** argv) //argv
 								parseNode(object, "position", Vec3(0, 0, 0)),
 								object["filename"].as<std::string>(),
 								modelsDir));
+				}
+				else if(type == "box")
+				{
+						_geometry.emplace_back(
+							new AABB(
+								parseNode(object, "maxCorner", Vec3(0, 0, 0)),
+								parseNode(object, "minCorner", Vec3(1, 1, 1))
+							));
 				}
 				else
 					std::cout << "Invalid geometry type: " << type << std::endl;
@@ -251,19 +260,23 @@ void Scene::traceSection(Camera& _camera, unsigned threadID)
 				std::cout << ' ';
 			for(unsigned i = 0; i < progressString.size(); ++i)
 				std::cout << '\b';
+
 			// thread 0 prints progress
-			progressString = std::to_string(int((100.f*x-1.f) / float(endX - startX))) + "%";
+			progressString = std::to_string(int((100.f*(x-startX)) / float(endX - startX))) + "%";
 			std::cout << progressString << std::flush;
 		}
 	}
 
-	// Erase perc
-	for(unsigned i = 0; i < progressString.size(); ++i)
-		std::cout << '\b';
-	for(unsigned i = 0; i < progressString.size(); ++i)
-		std::cout << ' ';
-	for(unsigned i = 0; i < progressString.size(); ++i)
-		std::cout << '\b';
+	if(threadID == 0)
+	{
+		// Erase perc
+		for(unsigned i = 0; i < progressString.size(); ++i)
+			std::cout << '\b';
+		for(unsigned i = 0; i < progressString.size(); ++i)
+			std::cout << ' ';
+		for(unsigned i = 0; i < progressString.size(); ++i)
+			std::cout << '\b';
+	}
 }
 
 int Scene::castRay(Ray& ray)

@@ -7,6 +7,5 @@ class Tracable
 public:
   Tracable();
   virtual bool raycast(Ray& ray) const;
-
   Material _material;
 };
