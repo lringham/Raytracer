@@ -16,10 +16,17 @@ make
 - Uses non PBR
 
 ## TODO
-- FOG
+- BVH
+- fix transparency
 - Fresnel
-- BVH or RTree?
+- spot lights / directional lights
 - review usage info
+- linear texture sampling
+- FOG
 - energy conserving phong
+- openGL preview?
+- make a few interesting scenes showing off features
+- add to github
+- networked support 
 
 https://bheisler.github.io/post/writing-raytracer-in-rust-part-3/

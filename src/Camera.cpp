@@ -39,8 +39,7 @@ std::vector<Ray> Camera::createRays(unsigned x, unsigned y) const
 {
   std::vector<Ray> rays;
   std::random_device rd;
-  std::mt19937 gen(1);
-  std::uniform_real_distribution<> dis(0.f, 1.f);
+  std::mt19937 gen(1); 
 
   for(int rayID = 0; rayID < _sampleCount; ++rayID)
   {
@@ -50,24 +49,26 @@ std::vector<Ray> Camera::createRays(unsigned x, unsigned y) const
       pos = _position;
     else
     {
-      Vec3 offset(0, 0, 0);
+      Vec3 offset(0, 0, 0);      
       std::uniform_real_distribution<> dis(-1.f, 1.f);
+
       do
       {
-      	offset.set(dis(gen), dis(gen), 0);
-      } while(dot(offset, offset) >= 1.f);
+      	offset._x = dis(gen);
+        offset._y = dis(gen);
+      } while(dot(offset, offset) > 1.f);
+
       pos = _position + offset * _lensRadius;
     }
 
+    std::uniform_real_distribution<> dis(0.f, 1.f);
     rays.push_back( Ray(pos,
      normalize(
-       Vec3(_x0 + x * _pxWidth + dis(gen)*_pxWidth, _y0 - y * _pxHeight + dis(gen)*_pxHeight, _position._z - _focalLength)
+       Vec3(
+         _x0 + x * _pxWidth + dis(gen)*_pxWidth, 
+         _y0 - y * _pxHeight + dis(gen)*_pxHeight, 
+         _position._z - _focalLength)
       - pos)));
-
-    // rays.push_back( Ray(pos,
-    //   normalize(
-    //     Vec3(_x0 + x * _pxWidth + .5f * _pxWidth, _y0 - y * _pxHeight + .5f * _pxHeight, _position._z - _focalLength)
-    //    - pos)));
   }
 
   return rays;

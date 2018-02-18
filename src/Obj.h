@@ -1,17 +1,14 @@
 #pragma once
 #include "Tracable.h"
 #include "Triangle.h"
-#include <vector>
-
-#include <fstream>
-#include <vector>
-#include <iostream>
-#include <string>
-
-
 #include "Vec3.h"
 #include "Vec2.h"
 #include "AABB.h"
+
+#include <fstream>
+#include <iostream>
+#include <string>
+#include <vector>
 
 class Obj : public Tracable
 {
@@ -23,6 +20,7 @@ private:
     				v1 = 0, t1 = 0, n1 = 0,
     				v2 = 0, t2 = 0, n2 = 0;
 	};
+	
 	enum OBJ_TYPE
 	{
 		V = 0, VT = 3, VTN = 6, VN, F, NONE
@@ -108,21 +106,10 @@ public:
 
 	void calcAABB()
 	{
-		Vec3 minPos(std::numeric_limits<float>::max());
-		Vec3 maxPos(std::numeric_limits<float>::min());
-
-		for(const Vec3& v : _positions)
-		{
-			minPos._x = std::min(minPos._x, v._x);
-			minPos._y = std::min(minPos._y, v._y);
-			minPos._z = std::min(minPos._z, v._z);
-
-			maxPos._x = std::max(maxPos._x, v._x);
-			maxPos._y = std::max(maxPos._y, v._y);
-			maxPos._z = std::max(maxPos._z, v._z);
-		}
-
-		_boundingBox = AABB(_position + minPos, _position + maxPos);
+		// Calculate AABB of vertices in models space
+		// and then translate them into world space
+		_boundingBox = AABB(_positions);
+		_boundingBox.setPosition(_position);
 	}
 
 	bool load(const std::string& filename, const std::string& path = "")

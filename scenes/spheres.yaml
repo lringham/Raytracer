@@ -1,8 +1,8 @@
 name: Test Scene
 outputName: spheres.ppm
 backgroundColor: [.2, .2, .6]
-recursionDepth: 3
-shadowSampleCount: 10
+recursionDepth: 1
+shadowSampleCount: 1
 materials:
     - name: plane
       type: blinnPhong
@@ -42,25 +42,13 @@ objects:
     # - type: sphere
     #   position: [-10.0, 15.0, 40.0]
     #   radius: 5
-    #   material: world
-    # - type: plane
-    #   position: [-10, 15, -50]
-    #   normal: [0, 0, 1]
-    #   width: 200
-    #   depth: 110
-    #   material: world
-    - type: box
-      minCorner: [0, 0, 0]
-      maxCorner: [1.0, 1.0, 1.0]
-      material: plane
-    - type: box
-      minCorner: [2, 0, 0]
-      maxCorner: [3, 1.0, 1.0]
-      material: plane
-    - type: box
-      minCorner: [5, 0, 0]
-      maxCorner: [8, 2.0, 1.0]
-      material: plane
+      # material: world
+    - type: plane
+      position: [-10, 15, -50]
+      normal: [0, 0, 1]
+      width: 200
+      depth: 110
+      material: world
 lights:
   - color: [1.0, 1.0, 1.0]
     position: [-10.0, 17, 47.0]
@@ -69,8 +57,8 @@ lights:
 camera:
   position: [-10.0, 15, 50.0]
   fov: 1.5708
-  focalLength: 50.0
-  lensRadius: 0.1
+  focalLength: 2.0
+  lensRadius: 0.0
   pxWidth: 1024
   pxHeight: 563
-  sampleCount: 10
+  sampleCount: 1
