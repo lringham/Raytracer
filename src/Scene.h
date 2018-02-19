@@ -66,7 +66,7 @@ private:
 	void usage();
 
 	std::vector<std::unique_ptr<Tracable>> _geometry;
-	std::vector<Light> _lights;
+	std::vector<std::unique_ptr<Light>> _lights;
 	std::map<std::string, Material> _materialMap;
 	Camera _camera;
 	Vec3 _backgroundColor;

@@ -14,6 +14,7 @@ make
 ```
 ## Bugs and Limitations
 - Uses non PBR
+- shadow sample count has to be greater than 0
 
 ## TODO
 - BVH
@@ -28,5 +29,6 @@ make
 - make a few interesting scenes showing off features
 - add to github
 - networked support 
+- make algorithms cache friendly 
 
 https://bheisler.github.io/post/writing-raytracer-in-rust-part-3/

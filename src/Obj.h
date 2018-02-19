@@ -12,28 +12,14 @@
 
 class Obj : public Tracable
 {
-
-private:
+public:
 	struct Face
 	{
 		unsigned	v0 = 0, t0 = 0, n0 = 0,
-    				v1 = 0, t1 = 0, n1 = 0,
-    				v2 = 0, t2 = 0, n2 = 0;
-	};
-	
-	enum OBJ_TYPE
-	{
-		V = 0, VT = 3, VTN = 6, VN, F, NONE
+					v1 = 0, t1 = 0, n1 = 0,
+					v2 = 0, t2 = 0, n2 = 0;
 	};
 
-	std::vector<Vec3> _positions;
-	std::vector<Vec3> _normals;
-	std::vector<Vec2> _textureCoords;
-	std::vector<Face> _faces;
-	std::vector<unsigned> _indices;
-	Vec3 _position;
-
-public:
 	Obj()
 	{
 	}
@@ -48,15 +34,15 @@ public:
 	{
 	}
 
-  bool raycast(Ray& ray) const override
-  {
+	bool raycast(Ray& ray) const override
+	{
 	bool hit = false;
 	float u1 = 0, v1 = 0;
 	Face f1;
 
-	Ray testRay = ray;
-	if(!_boundingBox.raycast(testRay))
-		return false;
+	// Ray testRay = ray;
+	// if(!_boundingBox.raycast(testRay))
+	// 	return false;
 
 	for(auto& f : _faces)
 	{
@@ -102,15 +88,15 @@ public:
 		}
 	}
 	return hit;
-  }
-
-	void calcAABB()
-	{
-		// Calculate AABB of vertices in models space
-		// and then translate them into world space
-		_boundingBox = AABB(_positions);
-		_boundingBox.setPosition(_position);
 	}
+
+	// void calcAABB()
+	// {
+	// 	// Calculate AABB of vertices in models space
+	// 	// and then translate them into world space
+	// 	_boundingBox = AABB(_positions);
+	// 	_boundingBox.setPosition(_position);
+	// }
 
 	bool load(const std::string& filename, const std::string& path = "")
 	{
@@ -149,7 +135,7 @@ public:
 		}
 
 		// Calculate bounding box
-		calcAABB();
+		//calcAABB();
 
 		// Print stats
 		std::cout << "Model loaded: " << filename << std::endl;
@@ -161,7 +147,19 @@ public:
 		return true;
 	}
 
-private:
+	std::vector<Vec3> _positions;
+	std::vector<Vec3> _normals;
+	std::vector<Vec2> _textureCoords;
+	std::vector<Face> _faces;
+	std::vector<unsigned> _indices;
+	Vec3 _position;
+
+private:	
+	enum OBJ_TYPE
+	{
+		V = 0, VT = 3, VTN = 6, VN, F, NONE
+	};
+
 	inline float parsef(const char* data, char** extra = nullptr)
 	{
 		return strtof(data, extra);
@@ -302,6 +300,4 @@ private:
 				break;
 		}
 	}
-
-	AABB _boundingBox;
 };

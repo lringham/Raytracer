@@ -19,7 +19,7 @@ Material::Material(const std::string& name, float Ia, const Vec3& kd, const Vec3
   }
 }
 
-Vec3 Material::color(const Vec3& N, const Vec3& V, const Vec3& L, const Vec3& pos, const Light& light) const
+Vec3 Material::color(const Vec3& N, const Vec3& V, const Vec3& L, const Vec3& lightColor) const
 {
   Vec3 color = ambientColor();
 	Vec3 H = normalize(L + V);
@@ -28,15 +28,15 @@ Vec3 Material::color(const Vec3& N, const Vec3& V, const Vec3& L, const Vec3& po
 
   if(isMetallic())
   {
-    color = color + (1.f-_Ia) * light._color * light.attenuation(pos) * (kd + ks);
+    color = color + (1.f-_Ia) * lightColor * (kd + ks);
   }
   else if(isTransparent())
   {
-    color = color + (1.f-_Ia) * light._color * light.attenuation(pos) * ks;
+    color = color + (1.f-_Ia) * lightColor * ks;
   }
   else
   {
-    color = color + (1.f-_Ia) * light._color * light.attenuation(pos) * (kd + ks);
+    color = color + (1.f-_Ia) * lightColor * (kd + ks);
   }
 
   return color;

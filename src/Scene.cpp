@@ -109,20 +109,20 @@ bool Scene::parseArgs(int argc, char** argv) //argv
 				}
 				else if(type == "model")
 				{
-						std::string modelsDir = parseNode<std::string>(config, "modelsDir", "");
-						_geometry.emplace_back(
-							new Obj(
-								parseNode(object, "position", Vec3(0, 0, 0)),
-								object["filename"].as<std::string>(),
-								modelsDir));
+					std::string modelsDir = parseNode<std::string>(config, "modelsDir", "");
+					_geometry.emplace_back(
+						new Obj(
+							parseNode(object, "position", Vec3(0, 0, 0)),
+							object["filename"].as<std::string>(),
+							modelsDir));
 				}
 				else if(type == "box")
 				{
-						_geometry.emplace_back(
-							new AABB(
-								parseNode(object, "maxCorner", Vec3(0, 0, 0)),
-								parseNode(object, "minCorner", Vec3(1, 1, 1))
-							));
+					_geometry.emplace_back(
+						new AABB(
+							parseNode(object, "maxCorner", Vec3(0, 0, 0)),
+							parseNode(object, "minCorner", Vec3(1, 1, 1))
+						));
 				}
 				else
 					std::cout << "Invalid geometry type: " << type << std::endl;
@@ -136,12 +136,18 @@ bool Scene::parseArgs(int argc, char** argv) //argv
 		for (YAML::const_iterator it = lights.begin(); it != lights.end(); ++it)
 		{
 			const YAML::Node& light = *it;
-			_lights.emplace_back(
-					parseNode(light, "color", Vec3(1, 1, 1)),
-					parseNode(light, "position", Vec3(0, 0, 0)),
-					parseNode<float>(light, "radius", 0.f),
-					parseNode<float>(light, "intensity", 100.f)
-				);
+			std::string type = light["type"].as<std::string>();
+
+			if(type == "point")
+			{
+				_lights.emplace_back(
+					new PointLight(
+						parseNode(light, "color", Vec3(1, 1, 1)),
+						parseNode(light, "position", Vec3(0, 0, 0)),
+						parseNode<float>(light, "intensity", 100.f),
+						parseNode<float>(light, "radius", 0.f)
+				));
+			}
 		}
 
 		_camera.init(
@@ -200,9 +206,9 @@ void Scene::trace()
 
 void Scene::traceSection(Camera& _camera, unsigned threadID)
 {
+	// Calculate tracing bounds
 	unsigned width = _camera._pixels.width();
 	unsigned height = _camera._pixels.height();
-
 	unsigned rem = width % _threadCount;
 	unsigned xRes = width / _threadCount;
 	unsigned startX, endX;
@@ -226,6 +232,7 @@ void Scene::traceSection(Camera& _camera, unsigned threadID)
 		endX	 = startX + xRes;
 	}
 
+	// trace scene
 	std::string progressString = "";
 	int depth = _depth;
 	for(unsigned x = startX; x < endX; ++x)
@@ -267,9 +274,10 @@ void Scene::traceSection(Camera& _camera, unsigned threadID)
 		}
 	}
 
+	// Erase progress
 	if(threadID == 0)
 	{
-		// Erase perc
+		
 		for(unsigned i = 0; i < progressString.size(); ++i)
 			std::cout << '\b';
 		for(unsigned i = 0; i < progressString.size(); ++i)
@@ -311,20 +319,20 @@ Vec3 Scene::calculateColor(Ray ray, int depth)
 		Vec3 V = normalize(_camera._position - collisionPoint);
 
 		// Lights
-		for(Light& l : _lights)
+		for(auto& l : _lights)
 		{
-			Vec3 L = l._position - collisionPoint;
+			Vec3 L = l->vectorFrom(collisionPoint);
 			float distToLight = L.length();
 			L.normalize();
 
 			// Shadows
 			for(unsigned i = 0; i < _shadowSampleCount; ++i)
 			{
-				Ray shadowRay = l.getShadowRay(collisionPoint, _rayOffset);
+				Ray shadowRay = l->getShadowRay(collisionPoint, _rayOffset);
 				if(castShadowRay(shadowRay, distToLight))
 					color = color + geom->_material.ambientColor();
 				else
-					color = color + geom->_material.color(N, V, L, collisionPoint, l);
+					color = color + geom->_material.color(N, V, L, l->getColor(collisionPoint));
 			}
 		}
 		color._r /= _shadowSampleCount;
