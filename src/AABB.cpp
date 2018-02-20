@@ -2,8 +2,7 @@
 
 AABB::AABB() :
   	_min(std::numeric_limits<float>::max()),
-		_max(std::numeric_limits<float>::min()),
-    _position(0, 0, 0)
+		_max(std::numeric_limits<float>::min())
 {}
 
 AABB::AABB(const AABB& b0,const AABB& b1)
@@ -17,19 +16,7 @@ AABB::AABB(const AABB& b0,const AABB& b1)
   _max._z = std::max(b0._max._z, b1._max._z);
 }
 
-AABB::AABB(const Vec3& v0, const Vec3& v1, const Vec3& v2)
-{
-  _min._x = std::min(v0._x, std::min(v1._x, v2._x));
-  _min._y = std::min(v0._y, std::min(v1._y, v2._y));
-  _min._z = std::min(v0._z, std::min(v1._z, v2._z));
-
-  _max._x = std::max(v0._x, std::max(v1._x, v2._x));
-  _max._y = std::max(v0._y, std::max(v1._y, v2._y));
-  _max._z = std::max(v0._z, std::max(v1._z, v2._z));
-}
-
-AABB::AABB(const std::vector<Vec3>& vertices) :
-  _position(0, 0, 0)
+AABB::AABB(const std::vector<Vec3>& vertices)
 {
 	  _min = Vec3(std::numeric_limits<float>::max());
 		_max = Vec3(std::numeric_limits<float>::min());
@@ -46,8 +33,7 @@ AABB::AABB(const std::vector<Vec3>& vertices) :
 		}
 }
 
-AABB::AABB(const Vec3& corner0,const Vec3& corner1) :
-  _position(0, 0, 0)
+AABB::AABB(const Vec3& corner0,const Vec3& corner1)
 {
   _min._x = std::min(corner0._x, corner1._x);
   _min._y = std::min(corner0._y, corner1._y);
@@ -93,16 +79,3 @@ bool AABB::raycast(Ray& ray) const
   ray._t = tMin;
   return tMin <= tMax && tMin >= 0;
 }
-
-void AABB::setPosition(const Vec3& position)
-{
-  // translate to the origin and then translate to new position
-  _min = _min - _position + position;
-  _max = _max - _position + position;
-  _position = position;
-}
-
-  Vec3 AABB::getPosition() const
-  {
-    return _position;
-  }

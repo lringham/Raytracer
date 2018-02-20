@@ -103,6 +103,12 @@ bool raycastTri(const Vec3& p0, const Vec3& p1, const Vec3& p2, Ray& ray, float*
 	return true;
 }
 
+Vec3 barycentre(const Triangle& triangle)
+{
+	return (triangle._p0 + triangle._p1 + triangle._p2) * (1.f/3.f);
+}
+
+
 //
 // Vec3 circumcentre(const Vec3& p0, const Vec3& p1, const Vec3& p2, float* radius)
 // {

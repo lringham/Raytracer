@@ -15,8 +15,14 @@ public:
 private:
     struct Node
     {
-        Tracable* left;
-        Tracable* right;
+        Tracable _t;
+        Vec3 _position;
+        Node* _left = nullptr;
+        Node* _right = nullptr;
+
+        Node(Tracable t, Vec3 position) :
+            _t(t), _position(position)
+        {}
     };
 
     inline int leftChild(int i) const
@@ -38,5 +44,5 @@ private:
     }
 
 
-    std::vector<Tracable> _tree;
+    std::vector<Node*> _tree;
 };

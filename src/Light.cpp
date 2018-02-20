@@ -64,7 +64,7 @@ Ray DirectionalLight::getShadowRay(const Vec3& collisionPoint, float offset) con
 
 Vec3 DirectionalLight::getColor(const Vec3&) const
 {
-  return _color;
+  return _color * _intensity;
 }
 
 Vec3 DirectionalLight::vectorFrom(const Vec3&) const
@@ -75,8 +75,8 @@ Vec3 DirectionalLight::vectorFrom(const Vec3&) const
 // -----------------
 // Spotlight
 // -----------------
-SpotLight::SpotLight(Vec3 position, Vec3 color, float intensity, const Vec3& direction, float cosThetaP, float cosThetaU, float exp) :
-  Light(color, intensity), _position(position), _direction(direction), _cosThetaP(cosThetaP), _cosThetaU(cosThetaU), _exp(exp)
+SpotLight::SpotLight(Vec3 color, Vec3 position, float intensity, const Vec3& direction, float cosThetaP, float cosThetaU, float exp) :
+  Light(color, intensity), _position(position), _direction(normalize(direction)), _cosThetaP(cosThetaP), _cosThetaU(cosThetaU), _exp(exp)
 {}
 
 Ray SpotLight::getShadowRay(const Vec3& collisionPoint, float offset) const
@@ -86,7 +86,10 @@ Ray SpotLight::getShadowRay(const Vec3& collisionPoint, float offset) const
 
 Vec3 SpotLight::getColor(const Vec3& collisionPoint) const
 {
-  float cosThetaS = dot(collisionPoint, _direction);
+  Vec3 L = collisionPoint - _position;
+  float dist = L.length();
+  L = L / dist;
+  float cosThetaS = dot(L, _direction);
 
   // In the centre of spotlight
   if(cosThetaS >= _cosThetaP)		
@@ -94,11 +97,13 @@ Vec3 SpotLight::getColor(const Vec3& collisionPoint) const
     return _color;
   }
   // In the penumbra
-  else if(cosThetaS < _cosThetaP && cosThetaS > _cosThetaU)
+  else if(cosThetaS > _cosThetaU)
   {
     float denom = _cosThetaP - _cosThetaU;
-    if(denom > 0.f)
+    if(denom != 0.f)
+    {
       return _color * std::pow((cosThetaS  - _cosThetaU) / denom, _exp);
+    }
     else
       return _color;
   }

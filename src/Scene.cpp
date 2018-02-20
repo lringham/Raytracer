@@ -148,6 +148,28 @@ bool Scene::parseArgs(int argc, char** argv) //argv
 						parseNode<float>(light, "radius", 0.f)
 				));
 			}
+			else if(type == "spot")
+			{
+				_lights.emplace_back(
+					new SpotLight(
+						parseNode(light, "color", Vec3(1, 1, 1)),
+						parseNode(light, "position", Vec3(0, 0, 0)),
+						parseNode<float>(light, "intensity", 100.f),
+						parseNode(light, "direction", Vec3(0, -1, 0)),
+						parseNode<float>(light, "cosThetaP", .5),
+						parseNode<float>(light, "cosThetaU", .7),
+						parseNode<float>(light, "exp", 1.f)
+				));
+			}
+			else if(type == "directional")
+			{
+				_lights.emplace_back(
+					new DirectionalLight(
+						parseNode(light, "color", Vec3(1, 1, 1)),
+						parseNode<float>(light, "intensity", 100.f),
+						parseNode(light, "direction", Vec3(0, -1, 0))
+				));
+			}
 		}
 
 		_camera.init(

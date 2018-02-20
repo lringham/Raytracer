@@ -57,7 +57,7 @@ private:
 class SpotLight : public Light
 {
 public:
-	SpotLight(Vec3 position = Vec3(0, 0, 0), Vec3 color = Vec3(1, 1, 1), float intensity = 1000.f, const Vec3& direction = Vec3(0, -1, 0), float cosThetaP = .5f, float cosThetaU = .7f, float exp = 1);
+	SpotLight(Vec3 color = Vec3(0, 0, 0), Vec3 position = Vec3(1, 1, 1), float intensity = 1000.f, const Vec3& direction = Vec3(0, -1, 0), float cosThetaP = .5f, float cosThetaU = .7f, float exp = 1);
 	Ray getShadowRay(const Vec3& collisionPoint, float offset) const override;
 	Vec3 getColor(const Vec3& collisionPoint) const override;
 	Vec3 vectorFrom(const Vec3& collisionPoint) const override;
