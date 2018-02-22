@@ -7,29 +7,55 @@ AABB::AABB() :
 
 AABB::AABB(const AABB& b0,const AABB& b1)
 {
-  _min._x = std::min(b0._min._x, b1._min._x);
-  _min._y = std::min(b0._min._y, b1._min._y);
-  _min._z = std::min(b0._min._z, b1._min._z);
+    _min._x = std::min(b0._min._x, b1._min._x);  
+    _min._y = std::min(b0._min._y, b1._min._y);
+    _min._z = std::min(b0._min._z, b1._min._z);
 
-  _max._x = std::max(b0._max._x, b1._max._x);
-  _max._y = std::max(b0._max._y, b1._max._y);
-  _max._z = std::max(b0._max._z, b1._max._z);
+    _max._x = std::max(b0._max._x, b1._max._x);
+    _max._y = std::max(b0._max._y, b1._max._y);
+    _max._z = std::max(b0._max._z, b1._max._z);
 }
 
 AABB::AABB(const std::vector<Vec3>& points)
 {
-	  _min = Vec3(std::numeric_limits<float>::max());
-		_max = Vec3(std::numeric_limits<float>::min());
+    if(points.size() == 0)
+        return;
 
-		for(const Vec3& v : points)
-		{
-			_min._x = std::min(_min._x, v._x);
-			_min._y = std::min(_min._y, v._y);
-			_min._z = std::min(_min._z, v._z);
-			_max._x = std::max(_max._x, v._x);
-			_max._y = std::max(_max._y, v._y);
-			_max._z = std::max(_max._z, v._z);
-		}
+    _min = points[0];
+    _max = points[0];
+    for(const Vec3& v : points)
+    {
+        _min._x = std::min(_min._x, v._x);
+        _min._y = std::min(_min._y, v._y);
+        _min._z = std::min(_min._z, v._z);
+        _max._x = std::max(_max._x, v._x);
+        _max._y = std::max(_max._y, v._y);
+        _max._z = std::max(_max._z, v._z);
+    }
+}
+
+AABB::AABB(const Triangle& t)
+{
+    _min._x = t._p0._x;
+    _min._y = t._p0._y;
+    _min._z = t._p0._z;
+    _max._x = t._p0._x;
+    _max._y = t._p0._y;
+    _max._z = t._p0._z;
+
+    _min._x = std::min(_min._x, t._p1._x);
+    _min._y = std::min(_min._y, t._p1._y);
+    _min._z = std::min(_min._z, t._p1._z);
+    _max._x = std::max(_max._x, t._p1._x);
+    _max._y = std::max(_max._y, t._p1._y);
+    _max._z = std::max(_max._z, t._p1._z);
+
+    _min._x = std::min(_min._x, t._p2._x);
+    _min._y = std::min(_min._y, t._p2._y);
+    _min._z = std::min(_min._z, t._p2._z);
+    _max._x = std::max(_max._x, t._p2._x);
+    _max._y = std::max(_max._y, t._p2._y);
+    _max._z = std::max(_max._z, t._p2._z);
 }
 
 AABB::AABB(const std::vector<Triangle>& triangles)
@@ -117,4 +143,9 @@ void AABB::move(Vec3 translation)
 {
   _min = _min + translation;
   _max = _max + translation;
+}
+
+Vec3 AABB::center() const
+{
+  return _min + (_min + _max) * .5f;
 }

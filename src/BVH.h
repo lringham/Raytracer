@@ -8,13 +8,11 @@
 class BVH : public Tracable
 {
     struct Node;
-    
+
 public:
 
     BVH();
     BVH(const Obj& obj);
-    ~BVH();
-    void cleanup(Node* n);
 
     void build(const Obj& obj);
     bool raycast(Ray& ray) const override;
@@ -28,40 +26,53 @@ private:
 
     struct Node
     {
-        Node* _left = nullptr;
-        Node* _right = nullptr;
-        Tracable* _volume;
+        AABB _bounds;
+        int _triangleIndex;
 
-        Node(Tracable* volume) :
-            _volume(volume)
+        Node(){}
+
+        Node(AABB bounds, int triangleIndex = -1) :
+            _bounds(bounds), _triangleIndex(triangleIndex)
         {}
 
-        Node()
-        {}
+        bool isLeaf() const
+        {
+            return _triangleIndex != -1;
+        }
+
+        bool hasLeft() const
+        {
+            return true;
+        }
+
+        bool hasRight() const
+        {
+            return true;
+        }
     };
 
-    Pair split(const std::vector<Triangle>& triangles, int axis) const;
-    void buildChildern(Node& root, const std::vector<Triangle>& triangles, int level = 0);
-    bool search(const Node* node, Ray& ray) const;
+    inline int leftChild(int i) const
+    {
+        return 2*i+1;
+    }
 
+    inline int rightChild(int i) const
+    {
+        return 2*i+2;
+    }
+
+    inline int parent(int i) const
+    {
+        if(i < 3)
+            return 0;
+        else
+            return (i-2)/2 + (i%2);
+    }
+
+    bool insert(unsigned destIndex, std::vector<Node>& destTree, unsigned fromIndex, std::vector<Node>& fromTree);
+    bool search(int nodeIndex, Ray& ray) const;
+
+    std::vector<Node> _tree;
+    std::vector<Triangle> _triangles;
     Vec3 _position;
-    Node _root;
 };
-  
-// inline int leftChild(int i) const
-// {
-//     return 2*i+1;
-// }
-
-// inline int rightChild(int i) const
-// {
-//     return 2*i+2;
-// }
-
-// inline int parent(int i) const
-// {
-//     if(i < 3)
-//         return 0;
-//     else
-//         return (i-2)/2 + (i%2);
-// }

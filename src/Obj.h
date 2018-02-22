@@ -36,57 +36,57 @@ public:
 
 	bool raycast(Ray& ray) const override
 	{
-	bool hit = false;
-	float u1 = 0, v1 = 0;
-	Face f1;
+		bool hit = false;
+		float u1 = 0, v1 = 0;
+		Face f1;
 
-	if(!_boundingBox.raycast(ray))
-		return false;
+		if(!_boundingBox.raycast(ray))
+			return false;
 
-	for(auto& f : _faces)
-	{
-		Ray tempRay = ray;
-		float u0, v0;
-		if(raycastTri(
-			_position + _positions[f.v0],
-			_position + _positions[f.v1],
-			_position + _positions[f.v2],
-			tempRay, &u0, &v0))
+		for(auto& f : _faces)
 		{
-			hit = true;
-			if(tempRay._t < ray._t)
+			Ray tempRay = ray;
+			float u0, v0;
+			if(raycastTri(
+				_position + _positions[f.v0],
+				_position + _positions[f.v1],
+				_position + _positions[f.v2],
+				tempRay, &u0, &v0))
 			{
-				ray = tempRay;
-				u1 = u0;
-				v1 = v0;
-				f1 = f;
+				hit = true;
+				if(tempRay._t < ray._t)
+				{
+					ray = tempRay;
+					u1 = u0;
+					v1 = v0;
+					f1 = f;
+				}
 			}
 		}
-	}
 
-	if(hit)
-	{
-		float w1 = (1.f-(u1+v1));
-		if(_normals.size() > 0)
+		if(hit)
 		{
-			ray._normal = normalize(_normals[f1.n0] * w1 +
-															_normals[f1.n1] * u1 +
-															_normals[f1.n2] * v1);
-		}
-		else
-		{
-			ray._normal = normalize(cross(_positions[f1.v1] - _positions[f1.v0], _positions[f1.v2] - _positions[f1.v0]));
-		}
+			float w1 = (1.f-(u1+v1));
+			if(_normals.size() > 0)
+			{
+				ray._normal = normalize(_normals[f1.n0] * w1 +
+																_normals[f1.n1] * u1 +
+																_normals[f1.n2] * v1);
+			}
+			else
+			{
+				ray._normal = normalize(cross(_positions[f1.v1] - _positions[f1.v0], _positions[f1.v2] - _positions[f1.v0]));
+			}
 
-		if(_textureCoords.size() > 0)
-		{
-			//TODO not sure why this order is needed
-			ray._uv = _textureCoords[f1.t0] * w1 +
-					  _textureCoords[f1.t1] * u1 +
-					  _textureCoords[f1.t2] * v1;
+			if(_textureCoords.size() > 0)
+			{
+				//TODO not sure why this order is needed
+				ray._uv = _textureCoords[f1.t0] * w1 +
+						_textureCoords[f1.t1] * u1 +
+						_textureCoords[f1.t2] * v1;
+			}
 		}
-	}
-	return hit;
+		return hit;
 	}
 
 	void calcAABB()
