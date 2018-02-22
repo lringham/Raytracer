@@ -40,9 +40,8 @@ public:
 	float u1 = 0, v1 = 0;
 	Face f1;
 
-	// Ray testRay = ray;
-	// if(!_boundingBox.raycast(testRay))
-	// 	return false;
+	if(!_boundingBox.raycast(ray))
+		return false;
 
 	for(auto& f : _faces)
 	{
@@ -83,20 +82,20 @@ public:
 		{
 			//TODO not sure why this order is needed
 			ray._uv = _textureCoords[f1.t0] * w1 +
-								_textureCoords[f1.t1] * u1 +
-								_textureCoords[f1.t2] * v1;
+					  _textureCoords[f1.t1] * u1 +
+					  _textureCoords[f1.t2] * v1;
 		}
 	}
 	return hit;
 	}
 
-	// void calcAABB()
-	// {
-	// 	// Calculate AABB of vertices in models space
-	// 	// and then translate them into world space
-	// 	_boundingBox = AABB(_positions);
-	// 	_boundingBox.setPosition(_position);
-	// }
+	void calcAABB()
+	{
+		// Calculate AABB of vertices in models space
+		// and then translate them into world space
+		_boundingBox = AABB(_positions);
+		_boundingBox.move(_position);
+	}
 
 	bool load(const std::string& filename, const std::string& path = "")
 	{
@@ -135,7 +134,7 @@ public:
 		}
 
 		// Calculate bounding box
-		//calcAABB();
+		calcAABB();
 
 		// Print stats
 		std::cout << "Model loaded: " << filename << std::endl;
@@ -300,4 +299,6 @@ private:
 				break;
 		}
 	}
+
+	AABB _boundingBox;
 };

@@ -20,7 +20,6 @@ make
 - BVH
 - fix transparency
 - Fresnel
-- spot lights / directional lights
 - review usage info
 - linear texture sampling
 - FOG
@@ -30,5 +29,6 @@ make
 - add to github
 - networked support 
 - make algorithms cache friendly 
+- deal with mem leaks in BVH
 
 https://bheisler.github.io/post/writing-raytracer-in-rust-part-3/

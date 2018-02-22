@@ -16,20 +16,49 @@ AABB::AABB(const AABB& b0,const AABB& b1)
   _max._z = std::max(b0._max._z, b1._max._z);
 }
 
-AABB::AABB(const std::vector<Vec3>& vertices)
+AABB::AABB(const std::vector<Vec3>& points)
 {
 	  _min = Vec3(std::numeric_limits<float>::max());
 		_max = Vec3(std::numeric_limits<float>::min());
 
-		for(const Vec3& v : vertices)
+		for(const Vec3& v : points)
 		{
 			_min._x = std::min(_min._x, v._x);
 			_min._y = std::min(_min._y, v._y);
 			_min._z = std::min(_min._z, v._z);
-
 			_max._x = std::max(_max._x, v._x);
 			_max._y = std::max(_max._y, v._y);
 			_max._z = std::max(_max._z, v._z);
+		}
+}
+
+AABB::AABB(const std::vector<Triangle>& triangles)
+{
+	  _min = Vec3(std::numeric_limits<float>::max());
+		_max = Vec3(std::numeric_limits<float>::min());
+
+		for(const Triangle& t : triangles)
+		{
+			_min._x = std::min(_min._x, t._p0._x);
+			_min._y = std::min(_min._y, t._p0._y);
+			_min._z = std::min(_min._z, t._p0._z);
+			_max._x = std::max(_max._x, t._p0._x);
+			_max._y = std::max(_max._y, t._p0._y);
+			_max._z = std::max(_max._z, t._p0._z);
+
+      _min._x = std::min(_min._x, t._p1._x);
+			_min._y = std::min(_min._y, t._p1._y);
+			_min._z = std::min(_min._z, t._p1._z);
+			_max._x = std::max(_max._x, t._p1._x);
+			_max._y = std::max(_max._y, t._p1._y);
+			_max._z = std::max(_max._z, t._p1._z);
+
+      _min._x = std::min(_min._x, t._p2._x);
+			_min._y = std::min(_min._y, t._p2._y);
+			_min._z = std::min(_min._z, t._p2._z);
+			_max._x = std::max(_max._x, t._p2._x);
+			_max._y = std::max(_max._y, t._p2._y);
+			_max._z = std::max(_max._z, t._p2._z);
 		}
 }
 
@@ -75,7 +104,17 @@ bool AABB::raycast(Ray& ray) const
     tMax = std::min(tMax, std::max(tz0, tz1));
   }
 
-  ray._normal.set(0,0,1);
-  ray._t = tMin;
-  return tMin <= tMax && tMin >= 0;
+  if(tMin <= tMax && tMin >= 0)
+  {
+    ray._normal.set(0,0,1);
+    ray._t = tMin;
+    return true;
+  }
+  return false;
+}
+
+void AABB::move(Vec3 translation)
+{
+  _min = _min + translation;
+  _max = _max + translation;
 }

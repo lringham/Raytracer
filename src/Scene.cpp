@@ -9,6 +9,7 @@
 #include "Triangle.h"
 #include "Obj.h"
 #include "AABB.h"
+#include "BVH.h"
 
 Scene::Scene(int argc, char** argv) :
 	 _name("scene"), _outputName(""), _threadCount(0)
@@ -110,11 +111,14 @@ bool Scene::parseArgs(int argc, char** argv) //argv
 				else if(type == "model")
 				{
 					std::string modelsDir = parseNode<std::string>(config, "modelsDir", "");
-					_geometry.emplace_back(
-						new Obj(
-							parseNode(object, "position", Vec3(0, 0, 0)),
-							object["filename"].as<std::string>(),
-							modelsDir));
+					const Obj model(parseNode(object, "position", Vec3(0, 0, 0)), object["filename"].as<std::string>(), modelsDir);
+					_geometry.emplace_back(new BVH(model));
+
+					// _geometry.emplace_back(
+					// 	new Obj(
+					// 		parseNode(object, "position", Vec3(0, 0, 0)),
+					// 		object["filename"].as<std::string>(),
+					// 		modelsDir));
 				}
 				else if(type == "box")
 				{

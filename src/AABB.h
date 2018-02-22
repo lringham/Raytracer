@@ -1,6 +1,7 @@
 #pragma once
 #include "Vec3.h"
 #include "Tracable.h"
+#include "Triangle.h"
 #include <limits>
 #include <algorithm>
 #include <vector>
@@ -10,10 +11,13 @@ class AABB : public Tracable
 public:
   AABB();
   AABB(const AABB& b0,const AABB& b1);
-  AABB(const std::vector<Vec3>& vertices);
+  AABB(const std::vector<Vec3>& points);
+  AABB(const std::vector<Triangle>& triangles);
   AABB(const Vec3& corner0,const Vec3& corner1);
   bool raycast(Ray& ray) const override;
+  void move(Vec3 translation);
 
-private:
   Vec3 _min, _max;
+private:
+
 };

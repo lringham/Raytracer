@@ -7,42 +7,61 @@
 
 class BVH : public Tracable
 {
+    struct Node;
+    
 public:
+
     BVH();
+    BVH(const Obj& obj);
+    ~BVH();
+    void cleanup(Node* n);
+
     void build(const Obj& obj);
     bool raycast(Ray& ray) const override;
 
 private:
+    struct Pair 
+    {
+        std::vector<Triangle> _first;
+        std::vector<Triangle> _second;
+    };
+
     struct Node
     {
-        Tracable _t;
-        Vec3 _position;
         Node* _left = nullptr;
         Node* _right = nullptr;
+        Tracable* _volume;
 
-        Node(Tracable t, Vec3 position) :
-            _t(t), _position(position)
+        Node(Tracable* volume) :
+            _volume(volume)
+        {}
+
+        Node()
         {}
     };
 
-    inline int leftChild(int i) const
-    {
-        return 2*i+1;
-    }
-    
-    inline int rightChild(int i) const
-    {
-        return 2*i+2;
-    }
+    Pair split(const std::vector<Triangle>& triangles, int axis) const;
+    void buildChildern(Node& root, const std::vector<Triangle>& triangles, int level = 0);
+    bool search(const Node* node, Ray& ray) const;
 
-    inline int parent(int i) const
-    {
-        if(i < 3)
-            return 0;
-        else
-            return (i-2)/2 + (i%2);
-    }
-
-
-    std::vector<Node*> _tree;
+    Vec3 _position;
+    Node _root;
 };
+  
+// inline int leftChild(int i) const
+// {
+//     return 2*i+1;
+// }
+
+// inline int rightChild(int i) const
+// {
+//     return 2*i+2;
+// }
+
+// inline int parent(int i) const
+// {
+//     if(i < 3)
+//         return 0;
+//     else
+//         return (i-2)/2 + (i%2);
+// }

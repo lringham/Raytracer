@@ -11,4 +11,4 @@ public:
 };
 
 bool raycastTri(const Vec3& p0, const Vec3& p1, const Vec3& p2, Ray& ray, float* uRet = nullptr, float* vRet = nullptr);
-Vec3 barcycentre(const Triangle& triangle);
+Vec3 barycentre(const Triangle& triangle);
