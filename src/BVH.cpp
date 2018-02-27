@@ -32,6 +32,13 @@ void BVH::build(const Obj& obj)
                 triangles[i]._t2 = obj._textureCoords[f._t2];
             }
 
+            if(obj.hasNormals())
+            {
+                triangles[i]._n0 = obj._normals[f._n0];            
+                triangles[i]._n1 = obj._normals[f._n1];
+                triangles[i]._n2 = obj._normals[f._n2];
+            }
+
             i++;
         }
     }

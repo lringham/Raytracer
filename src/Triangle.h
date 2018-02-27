@@ -9,6 +9,7 @@ public:
 
 	Vec3 _p0, _p1, _p2;
 	Vec2 _t0, _t1, _t2;
+	Vec3 _n0, _n1, _n2;
 };
 
 bool raycastTri(const Vec3& p0, const Vec3& p1, const Vec3& p2, Ray& ray, float* uRet = nullptr, float* vRet = nullptr);

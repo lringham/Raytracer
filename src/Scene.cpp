@@ -118,6 +118,12 @@ bool Scene::parseArgs(int argc, char** argv) //argv
 							modelsDir
 						)
 					));
+					// _geometry.emplace_back(new Obj(
+					// 		parseNode(object, "position", Vec3(0, 0, 0)),
+					// 		object["filename"].as<std::string>(), 
+					// 		modelsDir
+					// 	)
+					// );
 				}
 				else if(type == "box")
 				{
@@ -381,10 +387,10 @@ Vec3 Scene::calculateColor(Ray ray, int depth)
 		// Calculate reflection and refraction rays
 		if(geom->_material.isMetallic())
 		{
-			float kr 		= 0.25f; // Reflection probability
+			float kr = 1.f; // Reflection probability
 			Ray reflectedRay(collisionPoint, reflect(normalize(collisionPoint - ray._origin), N), _rayOffset);
 			Vec3 Ir = calculateColor(reflectedRay, depth - 1);
-			color = color + kr*Ir;
+			color = kr*Ir;
 		}
 		else if(geom->_material.isTransparent())
 		{

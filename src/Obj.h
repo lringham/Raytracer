@@ -39,6 +39,11 @@ public:
 		return _textureCoords.size() > 0;
 	}
 
+	bool hasNormals() const
+	{
+		return _normals.size() > 0;
+	}
+
 	bool raycast(Ray& ray) const override
 	{
 		bool hit = false;
@@ -89,7 +94,6 @@ public:
 
 			if(hasTextureCoordinates())
 			{
-				//TODO not sure why this order is needed
 				ray._uv = _textureCoords[f1._t0] * w1 +
 						  _textureCoords[f1._t1] * u1 +
 						  _textureCoords[f1._t2] * v1;

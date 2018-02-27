@@ -2,7 +2,11 @@
 
 Triangle::Triangle(Vec3 p0, Vec3 p1, Vec3 p2) :
 	_p0(p0), _p1(p1), _p2(p2)
-{}
+{
+	_n0 = normalize(cross(_p1 - _p0, _p2 - _p0));
+	_n1 = _n0;
+	_n2 = _n0;
+}
 
 /* From pg 78 in Fundamentals of Computer Graphics 3rd Edition
 
@@ -54,8 +58,11 @@ bool Triangle::raycast(Ray& ray) const
 	float v = -(f*aksubjb + e*(jcsubal)+d*blsubkc) * Minv;
 	if (v < 0.f || v > 1.f - u)
 		return false;
+	
+	ray._normal = _n0 * (1.f-u-v) +
+			  	  _n1 * u +
+			  	  _n2 * v;
 
-	ray._normal = normalize(cross(e0, e1));
 	ray._uv = _t0 * (1.f-u-v) +
 			  _t1 * u +
 			  _t2 * v;
@@ -96,7 +103,7 @@ bool raycastTri(const Vec3& p0, const Vec3& p1, const Vec3& p2, Ray& ray, float*
 	if (v < 0.f || v > 1.f - u)
 		return false;
 
-	ray._normal = -1.f*normalize(cross(e1, e0));
+	ray._normal = normalize(cross(e0, e1));
 
 	if(uRet != nullptr)
 		*uRet = u;
