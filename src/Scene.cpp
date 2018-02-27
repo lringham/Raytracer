@@ -111,14 +111,13 @@ bool Scene::parseArgs(int argc, char** argv) //argv
 				else if(type == "model")
 				{
 					std::string modelsDir = parseNode<std::string>(config, "modelsDir", "");
-					const Obj model(parseNode(object, "position", Vec3(0, 0, 0)), object["filename"].as<std::string>(), modelsDir);
-					_geometry.emplace_back(new BVH(model));
-
-					// _geometry.emplace_back(
-					// 	new Obj(
-					// 		parseNode(object, "position", Vec3(0, 0, 0)),
-					// 		object["filename"].as<std::string>(),
-					// 		modelsDir));
+					_geometry.emplace_back(new BVH(
+						Obj(
+							parseNode(object, "position", Vec3(0, 0, 0)),
+							object["filename"].as<std::string>(), 
+							modelsDir
+						)
+					));
 				}
 				else if(type == "box")
 				{
@@ -351,6 +350,9 @@ Vec3 Scene::calculateColor(Ray ray, int depth)
 			float distToLight = L.length();
 			L.normalize();
 
+			if(_shadowSampleCount == 0)
+				color = geom->_material.color(N, V, L, l->getColor(collisionPoint));
+
 			// Shadows
 			for(unsigned i = 0; i < _shadowSampleCount; ++i)
 			{
@@ -361,9 +363,13 @@ Vec3 Scene::calculateColor(Ray ray, int depth)
 					color = color + geom->_material.color(N, V, L, l->getColor(collisionPoint));
 			}
 		}
-		color._r /= _shadowSampleCount;
-		color._g /= _shadowSampleCount;
-		color._b /= _shadowSampleCount;
+
+		if(_shadowSampleCount > 0)
+		{
+			color._r /= _shadowSampleCount;
+			color._g /= _shadowSampleCount;
+			color._b /= _shadowSampleCount;
+		}
 
 		if(geom->_material.hasTexture())
 			color =  color * geom->_material.sampleTexture(ray._uv);

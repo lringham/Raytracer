@@ -1,8 +1,8 @@
 name: Test Scene
 outputName: spheres.ppm
 backgroundColor: [.2, .2, .6]
-recursionDepth: 1
-shadowSampleCount: 1
+recursionDepth: 3
+shadowSampleCount: 3
 materials:
     - name: plane
       type: blinnPhong
@@ -12,7 +12,7 @@ materials:
       gloss: 64
       eta: 1.0
     - name: modelPlane
-      type: metallic
+      type: blinnPhong
       kd: [.8, .8, .8]
       ks: [1, 1, 1]
       Ia: .1
@@ -37,22 +37,22 @@ materials:
 objects:
     - type: model
       filename: f16.obj #eb_sconce_light_01.obj
-      position: [-10.0, 14.5, 45.0]
+      position: [-10.0, 14.5, 48.0]
       material: modelPlane
     # - type: sphere
     #   position: [-10.0, 15.0, 40.0]
     #   radius: 5
       # material: world
-    # - type: plane
-    #   position: [-10, 15, -50]
-    #   normal: [0, 0, 1]
-    #   width: 200
-    #   depth: 110
-    #   material: world
+    - type: plane
+      position: [-10, 15, -50]
+      normal: [0, 0, 1]
+      width: 200
+      depth: 120
+      material: world
 lights:
   - type: point
     color: [1.0, 1.0, 1.0]
-    position: [-10.0, 17, 40.0]
+    position: [-10.0, 17, 48.0]
     radius: 0.1
     intensity: 7.0
 camera:
@@ -62,4 +62,4 @@ camera:
   lensRadius: 0.0
   pxWidth: 1024
   pxHeight: 563
-  sampleCount: 1
+  sampleCount: 3

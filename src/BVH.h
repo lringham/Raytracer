@@ -7,10 +7,7 @@
 
 class BVH : public Tracable
 {
-    struct Node;
-
 public:
-
     BVH();
     BVH(const Obj& obj);
 
@@ -26,51 +23,26 @@ private:
 
     struct Node
     {
-        AABB _bounds;
+        AABB _boundingBox;
         int _triangleIndex;
+        int _rightChildOffset;
 
         Node(){}
 
-        Node(AABB bounds, int triangleIndex = -1) :
-            _bounds(bounds), _triangleIndex(triangleIndex)
+        Node(AABB boundingBox, int triangleIndex = -1, int rightChildOffset = -1) :
+            _boundingBox(boundingBox), _triangleIndex(triangleIndex), _rightChildOffset(rightChildOffset)
         {}
 
-        bool isLeaf() const
+        inline bool isLeaf() const
         {
             return _triangleIndex != -1;
         }
-
-        bool hasLeft() const
-        {
-            return true;
-        }
-
-        bool hasRight() const
-        {
-            return true;
-        }
     };
 
-    inline int leftChild(int i) const
-    {
-        return 2*i+1;
-    }
-
-    inline int rightChild(int i) const
-    {
-        return 2*i+2;
-    }
-
-    inline int parent(int i) const
-    {
-        if(i < 3)
-            return 0;
-        else
-            return (i-2)/2 + (i%2);
-    }
-
+    void buildChildern(std::vector<Triangle>& triangles, int parentIndex = 0, int axis = 0);
+    BVH::Pair split(const std::vector<Triangle>& triangles, int axis) const;
     bool insert(unsigned destIndex, std::vector<Node>& destTree, unsigned fromIndex, std::vector<Node>& fromTree);
-    bool search(int nodeIndex, Ray& ray) const;
+    bool search(Ray& ray, int parentIndex = 0) const;
 
     std::vector<Node> _tree;
     std::vector<Triangle> _triangles;

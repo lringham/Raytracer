@@ -16,6 +16,7 @@ public:
   AABB(const std::vector<Triangle>& triangles);
   AABB(const Vec3& corner0,const Vec3& corner1);
   bool raycast(Ray& ray) const override;
+  bool fastRaycast(Ray& ray,const Vec3& invDir) const;
   void move(Vec3 translation);
   Vec3 center() const;
 

@@ -15,9 +15,9 @@ class Obj : public Tracable
 public:
 	struct Face
 	{
-		unsigned	v0 = 0, t0 = 0, n0 = 0,
-					v1 = 0, t1 = 0, n1 = 0,
-					v2 = 0, t2 = 0, n2 = 0;
+		unsigned _v0 = 0, _t0 = 0, _n0 = 0,
+				 _v1 = 0, _t1 = 0, _n1 = 0,
+				 _v2 = 0, _t2 = 0, _n2 = 0;
 	};
 
 	Obj()
@@ -34,6 +34,11 @@ public:
 	{
 	}
 
+	bool hasTextureCoordinates() const
+	{
+		return _textureCoords.size() > 0;
+	}
+
 	bool raycast(Ray& ray) const override
 	{
 		bool hit = false;
@@ -48,9 +53,9 @@ public:
 			Ray tempRay = ray;
 			float u0, v0;
 			if(raycastTri(
-				_position + _positions[f.v0],
-				_position + _positions[f.v1],
-				_position + _positions[f.v2],
+				_position + _positions[f._v0],
+				_position + _positions[f._v1],
+				_position + _positions[f._v2],
 				tempRay, &u0, &v0))
 			{
 				hit = true;
@@ -69,21 +74,25 @@ public:
 			float w1 = (1.f-(u1+v1));
 			if(_normals.size() > 0)
 			{
-				ray._normal = normalize(_normals[f1.n0] * w1 +
-																_normals[f1.n1] * u1 +
-																_normals[f1.n2] * v1);
+				ray._normal = normalize(_normals[f1._n0] * w1 +
+										_normals[f1._n1] * u1 +
+										_normals[f1._n2] * v1);
 			}
 			else
 			{
-				ray._normal = normalize(cross(_positions[f1.v1] - _positions[f1.v0], _positions[f1.v2] - _positions[f1.v0]));
+				ray._normal = normalize(
+						cross(
+							_positions[f1._v1] - _positions[f1._v0], 
+							_positions[f1._v2] - _positions[f1._v0])
+						);
 			}
 
-			if(_textureCoords.size() > 0)
+			if(hasTextureCoordinates())
 			{
 				//TODO not sure why this order is needed
-				ray._uv = _textureCoords[f1.t0] * w1 +
-						_textureCoords[f1.t1] * u1 +
-						_textureCoords[f1.t2] * v1;
+				ray._uv = _textureCoords[f1._t0] * w1 +
+						  _textureCoords[f1._t1] * u1 +
+						  _textureCoords[f1._t2] * v1;
 			}
 		}
 		return hit;
@@ -222,42 +231,42 @@ private:
 				switch (objType)
 				{
 				case V:
-					f.v0 = parsel(line + offset, &extra) - 1;
-					f.v1 = parsel(extra, &extra) - 1;
-					f.v2 = parsel(extra) - 1;
+					f._v0 = parsel(line + offset, &extra) - 1;
+					f._v1 = parsel(extra, &extra) - 1;
+					f._v2 = parsel(extra) - 1;
 					break;
 				case VT:
-					f.v0 = parsel(line + offset, &extra) - 1;
-					f.t0 = parsel(extra, &extra) - 1;
+					f._v0 = parsel(line + offset, &extra) - 1;
+					f._t0 = parsel(extra, &extra) - 1;
 
-					f.v1 = parsel(extra, &extra) - 1;
-					f.t1 = parsel(extra, &extra) - 1;
+					f._v1 = parsel(extra, &extra) - 1;
+					f._t1 = parsel(extra, &extra) - 1;
 
-					f.v2 = parsel(extra, &extra) - 1;
-					f.t2 = parsel(extra) - 1;
+					f._v2 = parsel(extra, &extra) - 1;
+					f._t2 = parsel(extra) - 1;
 					break;
 				case VN:
-					f.v0 = parsel(line + offset, &extra) - 1;
-					f.n0 = parsel(extra, &extra) - 1;
+					f._v0 = parsel(line + offset, &extra) - 1;
+					f._n0 = parsel(extra, &extra) - 1;
 
-					f.v1 = parsel(extra, &extra) - 1;
-					f.n1 = parsel(extra, &extra) - 1;
+					f._v1 = parsel(extra, &extra) - 1;
+					f._n1 = parsel(extra, &extra) - 1;
 
-					f.v2 = parsel(extra, &extra) - 1;
-					f.n2 = parsel(extra) - 1;
+					f._v2 = parsel(extra, &extra) - 1;
+					f._n2 = parsel(extra) - 1;
 					break;
 				case VTN:
-					f.v0 = parsel(line + offset, &extra) - 1;
-					f.t0 = parsel(extra, &extra) - 1;
-					f.n0 = parsel(extra, &extra) - 1;
+					f._v0 = parsel(line + offset, &extra) - 1;
+					f._t0 = parsel(extra, &extra) - 1;
+					f._n0 = parsel(extra, &extra) - 1;
 
-					f.v1 = parsel(extra, &extra) - 1;
-					f.t1 = parsel(extra, &extra) - 1;
-					f.n1 = parsel(extra, &extra) - 1;
+					f._v1 = parsel(extra, &extra) - 1;
+					f._t1 = parsel(extra, &extra) - 1;
+					f._n1 = parsel(extra, &extra) - 1;
 
-					f.v2 = parsel(extra, &extra) - 1;
-					f.t2 = parsel(extra, &extra) - 1;
-					f.n2 = parsel(extra) - 1;
+					f._v2 = parsel(extra, &extra) - 1;
+					f._t2 = parsel(extra, &extra) - 1;
+					f._n2 = parsel(extra) - 1;
 					break;
 				case F:
 					break;

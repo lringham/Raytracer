@@ -1,7 +1,6 @@
 #include "BVH.h"
 #include "Triangle.h"
 #include <memory>
-#include <limits>
 
 BVH::BVH()
 {
@@ -13,26 +12,165 @@ BVH::BVH(const Obj& obj)
     build(obj);
 }
 
-bool BVH::raycast(Ray& ray) const
+void BVH::build(const Obj& obj)
 {
-    if(_tree.size() == 0)
-        return false;
+    // Find all triangles        
+    _position = obj._position;
+    std::vector<Triangle> triangles(obj._faces.size());
+    {
+        int i = 0;
+        for(auto& f : obj._faces)
+        {
+            triangles[i] = Triangle(obj._positions[f._v0] + _position,
+                                    obj._positions[f._v1] + _position,
+                                    obj._positions[f._v2] + _position);
+
+            if(obj.hasTextureCoordinates())
+            {
+                triangles[i]._t0 = obj._textureCoords[f._t0];            
+                triangles[i]._t1 = obj._textureCoords[f._t1];
+                triangles[i]._t2 = obj._textureCoords[f._t2];
+            }
+
+            i++;
+        }
+    }
     
-    return search(0, ray);
+    // Create root and childern
+    _tree.emplace_back(AABB(triangles));
+    buildChildern(triangles);      
+    _tree.shrink_to_fit();
+    _triangles.shrink_to_fit();
+
+    // std::cout << "BVH created" << std::endl;
+    // std::cout << "\tleaf count " << _triangles.size() << std::endl;
+    // std::cout << "\ttree size " << _tree.size() << std::endl;
 }
 
-bool BVH::search(int nodeIndex, Ray& ray) const
-{
-    if(!_tree[nodeIndex].isLeaf())
+
+// create childern in depth first order
+void BVH::buildChildern(std::vector<Triangle>& triangles, int parentIndex, int axis)
+{      
+    if(triangles.size() == 1)
     {
+        _triangles.push_back(triangles[0]);
+        _tree[parentIndex]._triangleIndex = _triangles.size()-1;
+    }
+    else if(triangles.size() > 1)
+    {
+        Pair pair = split(triangles, axis);
+        axis = (axis + 1) % 3;
+
+        // Insert left
+        _tree.emplace_back(AABB(pair._first));
+        buildChildern(pair._first, _tree.size() - 1, axis);
+
+        // Insert right
+        _tree.emplace_back(AABB(pair._second));
+        _tree[parentIndex]._rightChildOffset = _tree.size() - 1;
+        buildChildern(pair._second, _tree.size() - 1, axis);
+    }
+}
+
+BVH::Pair BVH::split(const std::vector<Triangle>& triangles, int axis) const
+{
+    Pair pair;
+    if(triangles.size() == 0)
+        return pair;
+
+    // TODO: find better splitting metric
+    // calculate centre of triangles
+    float divider = 0.f;
+    // split on x
+    if(axis == 0) 
+        for(auto& t : triangles)
+            divider += barycentre(t)._x;
+    // split on y
+    else if(axis == 1) 
+        for(auto& t : triangles)
+            divider += barycentre(t)._y;
+    // split on z
+    else if(axis == 2)
+        for(auto& t : triangles)
+            divider += barycentre(t)._z;
+    divider /= static_cast<float>(triangles.size());
+
+    // sort triangles    
+    if(axis == 0) 
+    {
+        for(auto& t : triangles)
+        {
+            if(barycentre(t)._x <= divider)
+                pair._first.push_back(t);
+            else
+                pair._second.push_back(t);
+        }
+    }
+    else if(axis == 1) 
+    {
+        for(auto& t : triangles)
+        {
+            if(barycentre(t)._y <= divider)
+                pair._first.push_back(t);
+            else
+                pair._second.push_back(t);
+        }
+    }
+    else if(axis == 2)
+    {
+        for(auto& t : triangles)
+        {
+            if(barycentre(t)._z <= divider)
+                pair._first.push_back(t);
+            else
+                pair._second.push_back(t);
+        }
+    }
+
+    if(pair._first.size() == 0 && pair._second.size() > 1)
+    {
+        pair._first.push_back(pair._second.back());
+        pair._second.erase(pair._second.end()-1);
+    }
+    else if(pair._second.size() == 0 && pair._first.size() > 1)
+    {
+        pair._second.push_back(pair._first.back());
+        pair._first.erase(pair._first.end()-1);
+    }
+
+    return pair;
+}
+
+bool BVH::raycast(Ray& ray) const
+{
+    return search(ray);
+}
+
+
+bool BVH::search(Ray& ray, int parentIndex) const
+{
+    Ray parentRay = ray;
+    const Node& node = _tree[parentIndex];
+    if(node.isLeaf())
+    {
+        if(_triangles[node._triangleIndex].raycast(parentRay))
+        {
+            ray = parentRay;
+            return true;
+        }
+        return false;
+    }
+    else if(node._boundingBox.raycast(parentRay))
+    {        
         Ray leftRay = ray, rightRay = ray;
         bool hitLeft = false, hitRight = false;
 
-        if(_tree[nodeIndex].hasLeft())
-            hitLeft = search(leftChild(nodeIndex), leftRay);
-        if(_tree[nodeIndex].hasRight())
-            hitRight = search(rightChild(nodeIndex), rightRay);
-
+        bool hasLeft = !node.isLeaf() && node._rightChildOffset != parentIndex + 1; 
+        if(hasLeft) // has left child
+            hitLeft = search(leftRay, parentIndex + 1); // search left
+        if(node._rightChildOffset != -1) // has right child
+            hitRight = search(rightRay, node._rightChildOffset); // search right
+            
         if(hitLeft && hitRight)
         {
             if(leftRay._t < rightRay._t)
@@ -54,91 +192,5 @@ bool BVH::search(int nodeIndex, Ray& ray) const
         else
             return false;
     }
-    return _triangles[_tree[nodeIndex]._triangleIndex].raycast(ray);
-}
-
-//==================
-void BVH::build(const Obj& obj)
-{
-    // Init
-    _position = obj._position;
-    std::vector<std::vector<Node>> subtrees;
-    _triangles.resize(obj._faces.size());
-    {
-        int i = 0;
-        for(auto& f : obj._faces)
-        {
-            _triangles[i] = Triangle( _position + obj._positions[f.v0],
-                                      _position + obj._positions[f.v1],
-                                      _position + obj._positions[f.v2]);
-            Node node(AABB(_triangles[i]), i);
-            subtrees.emplace_back(1, node);            
-            i++;
-        }
-    }
-
-    // build tree    
-    while(subtrees.size() > 1)
-    {
-        // Find the closest root
-        std::vector<Node> leftTree = subtrees.back();
-  
-        int closestIndex = -1;
-        float distance = std::numeric_limits<float>::max();
-        for(unsigned j = 0; j < subtrees.size() - 1; ++j)
-        {
-            // find closest 
-            float tempDistance = length(leftTree[0]._bounds.center() - subtrees[j][0]._bounds.center());
-            if(tempDistance < distance)
-            {
-                distance = tempDistance;
-                closestIndex = j;
-            }
-        }
-
-        // pair up nodes (and their subtrees)
-        if(closestIndex != -1)
-        {
-            // Add a new subtree and root node
-            std::vector<Node> rightTree = subtrees[closestIndex];
-            subtrees.pop_back();
-            subtrees.erase(subtrees.begin() + closestIndex);
-
-            // 
-            Node root(AABB(leftTree[0]._bounds, rightTree[0]._bounds));
-            std::vector<Node> newTree(1, root);
-            subtrees.insert(subtrees.begin(), newTree);            
-
-            // Add childern to new subtree
-            insert(leftChild(0), subtrees[0], 0, leftTree);
-            insert(rightChild(0), subtrees[0], 0, rightTree);
-        }
-    }
-    _tree = subtrees[0];
-
-    std::cout << "built BVH\n";
-    std::cout << "\t triangles "<< _triangles.size() <<"\n";
-    std::cout << "\t nodes "<< _tree.size() <<"\n";
-}
-
-bool BVH::insert(unsigned destIndex, std::vector<Node>& destTree, unsigned fromIndex, std::vector<Node>& fromTree)
-{
-    if(fromIndex >= fromTree.size())
-        return false;
-
-    if(destIndex >= destTree.size())
-        destTree.resize(destIndex+1);
-
-    // insert
-    destTree[destIndex] = fromTree[fromIndex];
-
-    // This check should be sufficient because
-    // the tree is constructed by pairing sets of two
-    if(!fromTree[fromIndex].isLeaf())
-    {
-        insert(leftChild(destIndex), destTree, leftChild(fromIndex), fromTree);
-        insert(rightChild(destIndex), destTree, rightChild(fromIndex), fromTree);
-    }
-
-    return true;
+    return false;
 }

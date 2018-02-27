@@ -34,7 +34,7 @@ bool Texture::loadTexture(const std::string& filename)
   if(data != nullptr)
   {
     std::cout << "Texture loaded: " << filename << "\n\twidth: " << _width << "\n\theight: " << _height << "\n\tnum comps: " << _numComp << "\n";
-    for(int i = 0; i < _width*_height*_numComp; ++i)
+    for(int i = 0; i < _width*_height*3; ++i)
       _pixels.push_back(data[i]);
     _pixels.shrink_to_fit();
     stbi_image_free(data);

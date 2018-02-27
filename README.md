@@ -14,10 +14,8 @@ make
 ```
 ## Bugs and Limitations
 - Uses non PBR
-- shadow sample count has to be greater than 0
 
 ## TODO
-- BVH
 - fix transparency
 - Fresnel
 - review usage info
@@ -29,6 +27,5 @@ make
 - add to github
 - networked support 
 - make algorithms cache friendly 
-- deal with mem leaks in BVH
 
 https://bheisler.github.io/post/writing-raytracer-in-rust-part-3/

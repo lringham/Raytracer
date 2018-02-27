@@ -56,6 +56,10 @@ bool Triangle::raycast(Ray& ray) const
 		return false;
 
 	ray._normal = normalize(cross(e0, e1));
+	ray._uv = _t0 * (1.f-u-v) +
+			  _t1 * u +
+			  _t2 * v;
+			  
 	return true;
 }
 
