@@ -1,8 +1,9 @@
 name: Test Scene
 outputName: spheres.ppm
-backgroundColor: [.2, .2, .6]
-recursionDepth: 1
+backgroundColor: [.2, .2, .6] # overridden if skySphere is specified
+recursionDepth: 3
 shadowSampleCount: 10
+#skySphere: sky1.jpg
 materials:
     - name: plane
       type: metallic
@@ -12,7 +13,7 @@ materials:
       gloss: 64
       eta: 1.0
     - name: modelPlane
-      type: blinnPhong
+      type: metallic
       kd: [.8, .8, .8]
       ks: [1, 1, 1]
       Ia: .1
@@ -60,4 +61,4 @@ camera:
   lensRadius: 0.0
   pxWidth: 1024
   pxHeight: 563
-  sampleCount: 1
+  sampleCount: 30

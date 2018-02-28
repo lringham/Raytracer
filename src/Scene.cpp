@@ -54,11 +54,12 @@ bool Scene::parseArgs(int argc, char** argv) //argv
 		//TODO convert all optional args to use parseNode function
 		//TODO extract default values / magic numbers
 
-		YAML::Node config = YAML::LoadFile(sceneFile);
-		_outputName 				= parseNode<std::string>(config, "outputName", "scene.ppm");
-		_name 							= parseNode<std::string>(config, "name", "scene");
-		_depth 							= parseNode<unsigned>(config, "recursionDepth", 1);
-		_shadowSampleCount	= parseNode<unsigned>(config, "shadowSampleCount", 1);
+		YAML::Node config  = YAML::LoadFile(sceneFile);
+		_outputName 	   = parseNode<std::string>(config, "outputName", "scene.ppm");
+		_name 			   = parseNode<std::string>(config, "name", "scene");
+		_depth 			   = parseNode<unsigned>(config, "recursionDepth", 1);
+		_shadowSampleCount = parseNode<unsigned>(config, "shadowSampleCount", 1);
+		_skySphere.loadTexture(parseNode<std::string>(config, "skySphere", ""));
 
 		const YAML::Node& materialsNode = config["materials"];
 		for (YAML::const_iterator it = materialsNode.begin(); it != materialsNode.end(); ++it)
@@ -387,10 +388,10 @@ Vec3 Scene::calculateColor(Ray ray, int depth)
 		// Calculate reflection and refraction rays
 		if(geom->_material.isMetallic())
 		{
-			float kr = 1.f; // Reflection probability
+			float kr = .25f; // Reflection probability
 			Ray reflectedRay(collisionPoint, reflect(normalize(collisionPoint - ray._origin), N), _rayOffset);
 			Vec3 Ir = calculateColor(reflectedRay, depth - 1);
-			color = kr*Ir;
+			color = color + kr*Ir;
 		}
 		else if(geom->_material.isTransparent())
 		{
@@ -406,7 +407,7 @@ Vec3 Scene::calculateColor(Ray ray, int depth)
 		}
 	}
 	else
-		color = _backgroundColor;
+		color = sampleBackground(ray._dir);
 
 	return color;
 }
@@ -422,4 +423,16 @@ void Scene::save()
 	std::cout << "Saving Image...";
 	_camera._pixels.save(_outputName.c_str());
 	std::cout << "Finished\n";
+}
+
+Vec3 Scene::sampleBackground(const Vec3 dir) const
+{
+	if(_skySphere.isInitialized())
+	{
+		Vec2 uv = calculateUV(dir);
+		return _skySphere.sample(uv._u, uv._v);
+		std::cout << "Hello\n";
+	}
+	else
+		return _backgroundColor;
 }

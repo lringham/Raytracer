@@ -24,6 +24,7 @@ public:
 	Vec3 projOnto(const Vec3& v);
 	float areaBetween(const Vec3& v);
 	float acuteAngleBetween(const Vec3& v);
+	Vec3 sampleBackground(const Vec3 dir) const;
 
 	friend std::ostream& operator<<(std::ostream& os, const Vec3& v);
 	friend Vec3 operator+(const Vec3& v1, const Vec3& v2);

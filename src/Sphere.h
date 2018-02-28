@@ -19,11 +19,11 @@ public:
 	  Create a triangle using p1, sphere origin, and the vector from the ray origin to the centre
 	  of the sphere projected onto the ray direction.
 
-		 			   P1
+		 			 P1
                      /|
                   h / | t1c (|tc| - |p1-)
-	   Sphere Centre /__|
-					  d
+	 Sphere Centre /__|
+				    d
 	*/
 	bool raycast(Ray& ray) const override;
 
@@ -46,4 +46,11 @@ inline Vec3 randomPosInSphere()
 	} while(dot(result, result) >= 1.f); // Reject point if outside the sphere
 
 	return result;
+}
+
+inline Vec2 calculateUV(const Vec3& vec) 
+{
+	return Vec2(
+		 atan2(vec._x, vec._z) / (3.1415926f*2.f),
+		 1.f - acos(vec._y) / 3.1415926f);
 }

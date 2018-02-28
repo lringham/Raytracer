@@ -62,12 +62,15 @@ private:
 	Vec3 calculateColor(const Ray origRay, int depth);
 	bool castShadowRay(Ray& ray, float distToLight);
 	Vec3 blinnPhong(const Ray& ray, const Tracable& geom);
-
+	Vec3 sampleBackground(const Vec3 dir) const;
+	
 	void usage();
 
 	std::vector<std::unique_ptr<Tracable>> _geometry;
 	std::vector<std::unique_ptr<Light>> _lights;
 	std::map<std::string, Material> _materialMap;
+
+	Texture _skySphere;
 	Camera _camera;
 	Vec3 _backgroundColor;
 	std::string _name;
