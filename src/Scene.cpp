@@ -107,7 +107,7 @@ bool Scene::parseArgs(int argc, char** argv) //argv
 							parseNode(object, "normal", Vec3(0, 1, 0)),
 							parseNode(object, "position", Vec3(0, 0, 0)),
 							parseNode<float>(object, "width", std::numeric_limits<float>::max()),
-							parseNode<float>(object, "depth", std::numeric_limits<float>::max())));
+							parseNode<float>(object, "height", std::numeric_limits<float>::max())));
 				}
 				else if(type == "model")
 				{
@@ -379,7 +379,7 @@ Vec3 Scene::calculateColor(Ray ray, int depth)
 		}
 
 		if(geom->_material.hasTexture())
-			color =  color * geom->_material.sampleTexture(ray._uv);
+			color =  geom->_material.sampleTexture(ray._uv);
 
 		// Exit if recursive depth is met
 		if(depth == 0)
@@ -396,7 +396,7 @@ Vec3 Scene::calculateColor(Ray ray, int depth)
 		else if(geom->_material.isTransparent())
 		{
 			//TODO replace with fresnel coef
-			//https://blog.demofox.org/2017/01/09/raytracing-reflection-refraction-fresnel-total-internal-reflection-and-bee rs-law/
+			//https://blog.demofox.org/2017/01/09/raytracing-reflection-refraction-fresnel-total-internal-reflection-and-beers-law/
 			float kt 		= .8; // Transmission probability
 			float kr 		= 1.f - kt; // Reflection probability
 			Ray reflectedRay(collisionPoint, reflect(normalize(collisionPoint - ray._origin), N), _rayOffset);

@@ -40,10 +40,10 @@ objects:
       filename: f16.obj
       position: [-10.0, 14.5, 48.0]
       material: modelPlane
-    # - type: sphere
-    #   position: [-10.0, 14.5, 40.0]
-    #   radius: 3
-    #   material: world
+    - type: sphere
+      position: [-10.0, 14.5, 40.0]
+      radius: 5
+      material: world
     # - type: sphere
     #   position: [-10.0, 15, 50.0]
     #   radius: 5000

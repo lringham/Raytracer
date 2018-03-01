@@ -6,12 +6,12 @@
 class Plane : public Tracable
 {
 public:
-	Plane(Vec3 normal = Vec3(0,1,0), Vec3 position = Vec3(0, 0, 0), float width = std::numeric_limits<float>::max(), float depth = std::numeric_limits<float>::max());
+	Plane(Vec3 normal = Vec3(0,1,0), Vec3 position = Vec3(0, 0, 0), float width = std::numeric_limits<float>::max(), float height = std::numeric_limits<float>::max());
 	bool raycast(Ray& ray) const override;
 
 private:
 	Mat3 m;
 	Vec3 _normal;
 	Vec3 _position;
-	float _width, _depth, _halfWidth, _halfDepth;
+	float _width, _height, _halfWidth, _halfHeight;
 };
