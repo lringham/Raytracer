@@ -2,8 +2,8 @@
 #include "Utils.h"
 #include <math.h>
 
-Material::Material(const std::string& name, float Ia, const Vec3& kd, const Vec3& ks, float gloss, float eta, const std::string& materialType) :
-  _name(name), _Ia(Ia), _kd(kd), _ks(ks), _gloss(gloss), _eta(eta), _hasTexture(false)
+Material::Material(const std::string& name, float Ia, const Vec3& kd, const Vec3& ks, float gloss, float eta, const std::string& materialType, bool checkered) :
+  _name(name), _Ia(Ia), _kd(kd), _ks(ks), _gloss(gloss), _eta(eta), _hasTexture(false), _checkered(checkered)
 {
   if(materialType == "metallic")
   {
@@ -72,4 +72,19 @@ float schlick(float eta1, float eta2, const Vec3& N, const Vec3& I)
 
         //ret = (OBJECT_REFLECTIVITY + (1.0-OBJECT_REFLECTIVITY) * ret);
         return ret;
+}
+
+bool Material::isCheckered(const Vec3& point, int width, int height) const
+{
+    // Checkered plane
+    if(_checkered)
+    {
+      float x = point._x, y = point._z;
+      int x1 = ((int)x / width) % 2;
+      int y1 = ((int)y / height) % 2;
+      //TODO: make this more readable
+      return (y > 0) ^ y1 ? ((x <= 0 && x1) || (x > 0 && !x1)) : ((x <= 0 && !x1) || (x > 0 && x1)); 
+    }
+    else 
+      return false;
 }

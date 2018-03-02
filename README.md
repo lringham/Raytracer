@@ -17,15 +17,11 @@ make
 
 ## TODO
 - fix transparency
-- Fresnel
+- add fresnel
 - review usage info
 - linear texture sampling
 - FOG
-- energy conserving phong
-- openGL preview?
 - make a few interesting scenes showing off features
-- add to github
-- networked support 
-- make algorithms cache friendly 
 
 https://bheisler.github.io/post/writing-raytracer-in-rust-part-3/
+https://blog.demofox.org/2017/01/09/raytracing-reflection-refraction-fresnel-total-internal-reflection-and-beers-law/

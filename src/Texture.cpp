@@ -14,13 +14,6 @@ Texture::Texture(const std::string& filename)
 
 Vec3 Texture::sample(float u, float v) const
 {
-    // Checkered plane
-    // int width = 10, height = 10;
-    // float x = collisionPoint._x, y = collisionPoint._z;
-    // int x1 = ((int)x / width) % 2;
-    // int y1 = ((int)y / height) % 2;
-    // bool gray = (y > 0) ^ y1 ? ((x <= 0 && x1) || (x > 0 && !x1)) : ((x <= 0 && !x1) || (x > 0 && x1));  
-
     unsigned x = static_cast<unsigned>(u * (_width  - 1));
     unsigned y = static_cast<unsigned>(v * (_height - 1));
     int i = (x + y*_width) * _numComp;

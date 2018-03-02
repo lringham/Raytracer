@@ -73,7 +73,8 @@ bool Scene::parseArgs(int argc, char** argv) //argv
 						parseNode(materialNode, "ks", Vec3(1, 1, 1)),
 						parseNode<float>(materialNode, "gloss", 1.f),
 						parseNode<float>(materialNode, "eta", 1.f),
-						materialNode["type"].as<std::string>()
+						materialNode["type"].as<std::string>(),
+						parseNode<bool>(materialNode, "checkered", false)
 					);
 				if(materialNode["texture"])
 					_materialMap[materialName].setTexture(materialNode["texture"].as<std::string>());
@@ -380,6 +381,8 @@ Vec3 Scene::calculateColor(Ray ray, int depth)
 
 		if(geom->_material.hasTexture())
 			color =  geom->_material.sampleTexture(ray._uv);
+		if(geom->_material.isCheckered(collisionPoint))
+			color = color * .5f;
 
 		// Exit if recursive depth is met
 		if(depth == 0)
@@ -396,7 +399,6 @@ Vec3 Scene::calculateColor(Ray ray, int depth)
 		else if(geom->_material.isTransparent())
 		{
 			//TODO replace with fresnel coef
-			//https://blog.demofox.org/2017/01/09/raytracing-reflection-refraction-fresnel-total-internal-reflection-and-beers-law/
 			float kt 		= .8; // Transmission probability
 			float kr 		= 1.f - kt; // Reflection probability
 			Ray reflectedRay(collisionPoint, reflect(normalize(collisionPoint - ray._origin), N), _rayOffset);
