@@ -1,4 +1,5 @@
 #include "Camera.h"
+#include "Utils.h"
 #include <cmath>
 #include <random>
 
@@ -47,12 +48,8 @@ std::vector<Ray> Camera::createRays(unsigned x, unsigned y) const
     else
     {           
       std::uniform_real_distribution<> lengthDist(0.f, _lensRadius);
-      std::uniform_real_distribution<> angleDist(0.f, 6.28318530718f);
-
-      float ang = angleDist(gen);
-      float len = lengthDist(gen);
-
-      pos = _position + _right*cos(ang)*len + _up*sin(ang)*len;
+      Vec3 p = pointInCircle() * lengthDist(gen);
+      pos = _position + _right*p._x + _up*p._y;
     }
 
     std::uniform_real_distribution<> dis(0.f, 1.f);

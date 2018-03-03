@@ -36,14 +36,14 @@ materials:
       eta: 1
       texture: earth.jpg
 objects:
-    - type: model
-      filename: dragon.obj
-      position: [0.0, 0, 38.0]
-      material: modelPlane
-    # - type: sphere
-    #   position: [-10.0, 14.5, 40.0]
-    #   radius: 5
-    #   material: world
+    # - type: model
+    #   filename: dragon.obj
+    #   position: [0.0, 0, 38.0]
+    #   material: modelPlane
+    - type: sphere
+      position: [0, 3, 35]
+      radius: 3
+      material: world
     - type: plane
       position: [0.0, 0, 0.0]
       normal: [0.0, 1, 0.0]
@@ -55,11 +55,11 @@ lights:
     radius: 0.1
     intensity: 200.0
 camera:
-  position: [-10.0, 15, 50.0]
-  direction: [1, -1, -1]
+  position: [0, 5, 50.0]
+  direction: [0, 0, -1]
   fov: 1.5708
   focalLength: 14.0
-  lensRadius: 0.4
+  lensRadius: 0
   pxWidth: 1024
   pxHeight: 563
-  sampleCount: 40
+  sampleCount: 1

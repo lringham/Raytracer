@@ -1,5 +1,5 @@
 #include "Light.h"
-#include "Sphere.h"
+#include "Utils.h"
 #include <math.h>
 
 // -----------------
@@ -23,7 +23,7 @@ Ray PointLight::getShadowRay(const Vec3& collisionPoint, float offset) const
     return Ray(collisionPoint, L, offset);
   else
   {
-    Vec3 shadowDir = normalize((_position - _radius*(L*.5f + randomPosInSphere())) - collisionPoint);
+    Vec3 shadowDir = normalize((_position - _radius*(L*.5f + pointInCircle())) - collisionPoint);
     if(dot(shadowDir, L) < 0)
         shadowDir = -1 * shadowDir;
     return Ray(collisionPoint, shadowDir, offset);
