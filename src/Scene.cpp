@@ -185,6 +185,7 @@ bool Scene::parseArgs(int argc, char** argv) //argv
 
 		_camera.init(
 				parseNode(config["camera"], "position", Vec3(0, 0, 1)),
+				parseNode(config["camera"], "direction", Vec3(0, 0, -1)),
 				parseNode<float>(config["camera"], "fov", 1.f),
 				parseNode<float>(config["camera"], "focalLength", 1.f),
 				Pixels(

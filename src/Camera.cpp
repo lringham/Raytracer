@@ -5,35 +5,32 @@
 Camera::Camera()
 {}
 
-Camera::Camera(Vec3 position, float fov, float focalLength, Pixels pixels, int sampleCount, float lensRadius) :
-   _pixels(pixels), _position(position), _fov(fov), _focalLength(focalLength), _sampleCount(sampleCount), _lensRadius(lensRadius)
-{}
+Camera::Camera(const Vec3& position, const Vec3& direction, float fov, float focalLength, Pixels pixels, int sampleCount, float lensRadius)
+{
+  init(position, direction, fov, focalLength, pixels, sampleCount, lensRadius);
+}
 
-void Camera::init(Vec3 position, float fov, float focalLength, Pixels pixels, int sampleCount, float lensRadius)
+void Camera::init(const Vec3& position, const Vec3& direction, float fov, float focalLength, Pixels pixels, int sampleCount, float lensRadius)
 {
   _pixels = pixels;
   _position = position;
+  _direction = normalize(direction);
   _fov = fov;
   _focalLength = focalLength;
   _lensRadius = lensRadius;
-
-  float ratio = static_cast<float>(_pixels.width()) / static_cast<float>(_pixels.height());
-  float theta = _fov / 2.f;
-  float dx = std::tan(theta) * focalLength;
-
-  _x0 = _position._x - dx;
-  _x1 = _position._x + dx;
-
-  float dy = (_x1 - _x0) / (ratio * 2.f);
-
-  _y0 = _position._y + dy;
-  _y1 = _position._y - dy;
-
-  _pxWidth  = (_x1 - _x0)  / _pixels.width();
-  _pxHeight = (_y0 - _y1) / _pixels.height();
-
   _sampleCount = sampleCount;
+
+  float dx = std::tan(_fov / 2.f) * focalLength;
+  float dy = dx * (static_cast<float>(_pixels.height()) / static_cast<float>(_pixels.width()));
+  _pxWidth  = (2.f * dx)  / _pixels.width();
+  _pxHeight = (2.f * dy) / _pixels.height();
+  
+  _up.set(0, 1, 0);
+  _right = normalize(cross(_direction, _up));
+  _up    = normalize(cross(_right, _direction));
+  _topLeft = _position + _direction * _focalLength - _right * dx + _up * dy;
 }
+
 
 std::vector<Ray> Camera::createRays(unsigned x, unsigned y) const
 {
@@ -48,27 +45,24 @@ std::vector<Ray> Camera::createRays(unsigned x, unsigned y) const
     if(_lensRadius == 0.f)
       pos = _position;
     else
-    {
-      Vec3 offset(0, 0, 0);      
-      std::uniform_real_distribution<> dis(-1.f, 1.f);
+    {           
+      std::uniform_real_distribution<> lengthDist(0.f, _lensRadius);
+      std::uniform_real_distribution<> angleDist(0.f, 6.28318530718f);
 
-      do
-      {
-      	offset._x = dis(gen);
-        offset._y = dis(gen);
-      } while(dot(offset, offset) > 1.f);
+      float ang = angleDist(gen);
+      float len = lengthDist(gen);
 
-      pos = _position + offset * _lensRadius;
+      pos = _position + _right*cos(ang)*len + _up*sin(ang)*len;
     }
 
     std::uniform_real_distribution<> dis(0.f, 1.f);
-    rays.push_back( Ray(pos,
-     normalize(
-       Vec3(
-         _x0 + x * _pxWidth + dis(gen)*_pxWidth, 
-         _y0 - y * _pxHeight + dis(gen)*_pxHeight, 
-         _position._z - _focalLength)
-      - pos)));
+
+    Vec3 dir = normalize(_topLeft + 
+        x*_right*_pxWidth + dis(gen)*_right*_pxWidth -
+        y*_pxHeight*_up - dis(gen)*_pxHeight*_up 
+        - pos);
+
+    rays.emplace_back(pos, dir);
   }
 
   return rays;
