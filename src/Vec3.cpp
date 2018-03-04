@@ -264,25 +264,21 @@ Vec3 reflect(const Vec3& I, const Vec3& N)
 
 Vec3 refract(const Vec3& I, const Vec3& N, float eta1, float eta2)
 {
-	Vec3 normalVec = N;
-	float cosi = N.dot(I);
-	if(cosi < 0.f)
-		cosi = -cosi;
-	else
+	Vec3 x0 = N;
+	float eta = eta1/eta2;
+	float cosI = dot(x0, I);
+	if(cosI > 0.f)
 	{
-		normalVec = -1*N;
-		float temp = eta1;
-		eta1 = eta2;
-		eta2 = temp;
+		x0 = -1.f * x0;
+		cosI = -cosI;
+		if(dot(x0, I) != cosI)
+			std::cout << "Hello world" << std::endl;
 	}
 
-	float eta = eta1 / eta2;
-	float c2 = std::sqrt(1.f-eta*eta*(1.f-cosi*cosi));
-
-	if(c2 < 0)
-		return Vec3(0);
-	else
-		return eta*I + (eta*cosi - c2) * normalVec;
+	float sinT2 = eta*eta*(1.f-cosI*cosI);
+	if(sinT2 > 1.f)
+		return Vec3(0,0,0);
+	return eta*(I-x0*cosI) - std::sqrt(1.f-sinT2)*x0;
 }
 
 Vec3 rotate(const Vec3& v, float angle, const Vec3& axis)

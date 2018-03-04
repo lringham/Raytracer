@@ -55,9 +55,8 @@ std::vector<Ray> Camera::createRays(unsigned x, unsigned y) const
     std::uniform_real_distribution<> dis(0.f, 1.f);
 
     Vec3 dir = normalize(_topLeft + 
-        x*_right*_pxWidth + dis(gen)*_right*_pxWidth -
-        y*_pxHeight*_up - dis(gen)*_pxHeight*_up 
-        - pos);
+        (x*_pxWidth  + dis(gen)*_pxWidth) * _right -
+        (y*_pxHeight - dis(gen)*_pxHeight)* _up    - pos);
 
     rays.emplace_back(pos, dir);
   }

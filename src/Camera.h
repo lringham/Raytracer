@@ -2,7 +2,6 @@
 #include <vector>
 #include "Pixels.h"
 #include "Ray.h"
-#include "Utils.h"
 
 class Camera
 {

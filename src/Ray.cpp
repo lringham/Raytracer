@@ -6,6 +6,7 @@ Ray::Ray(Vec3 origin, Vec3 dir, float offset) :
 {
   _t = std::numeric_limits<float>::max();
   _origin = _origin + _dir * offset;
+  _ior = 1.f;
 }
 
 Ray::Ray() :

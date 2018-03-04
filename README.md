@@ -22,6 +22,3 @@ make
 - linear texture sampling
 - FOG
 - make a few interesting scenes showing off features
-
-https://bheisler.github.io/post/writing-raytracer-in-rust-part-3/
-https://blog.demofox.org/2017/01/09/raytracing-reflection-refraction-fresnel-total-internal-reflection-and-beers-law/

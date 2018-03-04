@@ -311,7 +311,6 @@ void Scene::traceSection(Camera& _camera, unsigned threadID)
 	// Erase progress
 	if(threadID == 0)
 	{
-		
 		for(unsigned i = 0; i < progressString.size(); ++i)
 			std::cout << '\b';
 		for(unsigned i = 0; i < progressString.size(); ++i)
@@ -383,7 +382,7 @@ Vec3 Scene::calculateColor(Ray ray, int depth)
 		if(geom->_material.hasTexture())
 			color =  geom->_material.sampleTexture(ray._uv);
 		if(geom->_material.isCheckered(collisionPoint))
-			color = color * .5f;
+			color = color * 0.25f;
 
 		// Exit if recursive depth is met
 		if(depth == 0)
@@ -393,20 +392,38 @@ Vec3 Scene::calculateColor(Ray ray, int depth)
 		if(geom->_material.isMetallic())
 		{
 			float kr = .25f; // Reflection probability
-			Ray reflectedRay(collisionPoint, reflect(normalize(collisionPoint - ray._origin), N), _rayOffset);
+			Ray reflectedRay(collisionPoint, reflect(ray._dir, N), _rayOffset);
 			Vec3 Ir = calculateColor(reflectedRay, depth - 1);
 			color = color + kr*Ir;
 		}
 		else if(geom->_material.isTransparent())
 		{
 			//TODO replace with fresnel coef
-			float kt 		= .8; // Transmission probability
+			float kt 		= 0.8f; // Transmission probability
 			float kr 		= 1.f - kt; // Reflection probability
-			Ray reflectedRay(collisionPoint, reflect(normalize(collisionPoint - ray._origin), N), _rayOffset);
-			Ray refractedRay(collisionPoint, refract(normalize(collisionPoint - ray._origin), N, ambientIOR, geom->_material._eta), _rayOffset);
-			Vec3 Ir = calculateColor(reflectedRay, depth - 1);
-			Vec3 It = calculateColor(refractedRay, depth - 1);
-			color = color + kr*Ir + kt*It;
+			Vec3 Ir;
+			Vec3 It;
+
+			if(ray._dir.dot(N) > 0)
+				N = -1.f*N;
+
+			Vec3 refDir = refract(ray._dir, N, _ambientIOR, geom->_material._eta);
+			//std::cout << ray._dir.dot(refDir) << std::endl;
+			if(refDir.length() > 0.f)
+			{
+				Ray refractedRay(collisionPoint, refDir, _rayOffset);			
+				It = calculateColor(refractedRay, depth - 1);
+			}
+			else
+			{
+				kt = 0;
+				color.set(1,0,0);
+			}	
+
+			Ray reflectedRay(collisionPoint, reflect(ray._dir, N), _rayOffset);
+			Ir = calculateColor(reflectedRay, depth - 1);
+			
+			color = color + It*kt + Ir*kr;
 		}
 	}
 	else
@@ -428,14 +445,16 @@ void Scene::save()
 	std::cout << "Finished\n";
 }
 
-Vec3 Scene::sampleBackground(const Vec3 dir) const
+Vec3 Scene::sampleBackground(const Vec3& dir) const
 {
 	if(_skySphere.isInitialized())
 	{
 		Vec2 uv = calculateUV(dir);
 		return _skySphere.sample(uv._u, uv._v);
-		std::cout << "Hello\n";
 	}
 	else
-		return _backgroundColor;
+	{
+		float s = cos(((dir._y + 1.f) / 2.f) * 3.141592); 
+		return (1.f-s)*normalize(Vec3(135, 206, 235)) + s*normalize(Vec3(250, 214, 165));
+	}
 }

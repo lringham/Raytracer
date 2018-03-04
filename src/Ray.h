@@ -13,5 +13,5 @@ public:
   Vec3 _dir;
   Vec3 _normal;
   Vec2 _uv;
-  float _t;
+  float _t, _ior;
 };

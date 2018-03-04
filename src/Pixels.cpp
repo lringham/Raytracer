@@ -1,5 +1,6 @@
 #include "Pixels.h"
 #include "PPM.h"
+#include <math.h>
 
 Pixels::Pixels(unsigned width, unsigned height) :
   _width(width), _height(height), _data(width*height, Vec3(1,1,1))
@@ -16,9 +17,9 @@ bool Pixels::save(std::string filename)
   size_t i = 0;
   for(Vec3& c : _data)
   {
-    chars[i]    = static_cast<char>(c._x * 255);
-    chars[i+1]  = static_cast<char>(c._y * 255);
-    chars[i+2]  = static_cast<char>(c._z * 255);
+    chars[i]    = static_cast<char>(std::pow(c._x, 1.f/2.2f) * 255);
+    chars[i+1]  = static_cast<char>(std::pow(c._y, 1.f/2.2f) * 255);
+    chars[i+2]  = static_cast<char>(std::pow(c._z, 1.f/2.2f) * 255);
     i += 3;
   }
 

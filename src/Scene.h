@@ -62,7 +62,7 @@ private:
 	Vec3 calculateColor(const Ray origRay, int depth);
 	bool castShadowRay(Ray& ray, float distToLight);
 	Vec3 blinnPhong(const Ray& ray, const Tracable& geom);
-	Vec3 sampleBackground(const Vec3 dir) const;
+	Vec3 sampleBackground(const Vec3& dir) const;
 	
 	void usage();
 
@@ -76,5 +76,5 @@ private:
 	std::string _name;
 	std::string _outputName;
 	unsigned _threadCount, _depth, _shadowSampleCount;
-	float _rayOffset = .01f, ambientIOR = 1.f;
+	float _rayOffset = .01f, _ambientIOR = 1.f;
 };
