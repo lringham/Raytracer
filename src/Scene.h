@@ -1,13 +1,14 @@
 #pragma once
-#include <vector>
-#include <map>
-#include <memory>
-
 #include "Tracable.h"
 #include "Light.h"
 #include "Camera.h"
 #include "Ray.h"
 
+#include <vector>
+#include <stack>
+#include <map>
+#include <memory>
+#include <mutex>
 #include <yaml-cpp/yaml.h>
 
 class Scene
@@ -18,6 +19,17 @@ public:
 	void save();
 
 private:
+	struct Block 
+	{
+		unsigned _startX, _endX, _startY, _endY;
+
+		Block(unsigned startX, unsigned endX, unsigned startY, unsigned endY) :
+			_startX(startX), _endX(endX), _startY(startY), _endY(endY)
+		{}
+
+		Block() 
+		{}
+	};
 
 	Vec3 parseNode(const YAML::Node& node, const std::string& name, Vec3 defaultVal)
 	{
@@ -57,24 +69,26 @@ private:
 	}
 
 	bool parseArgs(int argc, char** argv);
-	void traceSection(Camera& camera, unsigned threadID);
+	void traceSection(Camera& camera);
 	int castRay(Ray& ray);
 	Vec3 calculateColor(const Ray origRay, int depth);
 	bool castShadowRay(Ray& ray, float distToLight);
 	Vec3 blinnPhong(const Ray& ray, const Tracable& geom);
 	Vec3 sampleBackground(const Vec3& dir) const;
-	
+	bool getBlock(unsigned& startX, unsigned& endX, unsigned& startY, unsigned& endY);
 	void usage();
 
 	std::vector<std::unique_ptr<Tracable>> _geometry;
 	std::vector<std::unique_ptr<Light>> _lights;
 	std::map<std::string, Material> _materialMap;
+	std::stack<Block> blocks;
 
 	Texture _skySphere;
 	Camera _camera;
 	Vec3 _backgroundColor;
 	std::string _name;
 	std::string _outputName;
+	std::mutex _mutex;
 	unsigned _threadCount, _depth, _shadowSampleCount;
 	float _rayOffset = .01f, _ambientIOR = 1.f;
 };

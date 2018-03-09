@@ -2,7 +2,7 @@ name: Test Scene
 outputName: spheres.ppm
 backgroundColor: [.2, .2, .6] # overridden if skySphere is specified
 recursionDepth: 6
-shadowSampleCount: 40
+shadowSampleCount: 10
 #skySphere: sky.jpg
 materials:
     - name: plane

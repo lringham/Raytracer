@@ -229,11 +229,36 @@ void Scene::trace()
 	std::cout << "Shadow sample count " << _shadowSampleCount << "\n";
 	std::cout << "Tracing " << _name << "...";
 
-	// Create threads and trace
-	std::vector<std::thread> threads(_threadCount);
-	for(unsigned i = 0; i < _threadCount; ++i)
-		threads[i] = std::thread(&Scene::traceSection, this, std::ref(_camera), i);
+	// Divide image into blocks
+	unsigned width = _camera._pixels.width();
+	unsigned height = _camera._pixels.height();
+	unsigned blockWidth = 64;
+	unsigned blockHeight = 64;
+	unsigned xRes = width / blockWidth;
+	unsigned yRes = height / blockHeight;
+	if(width % blockWidth > 0)
+		xRes++;
+	if(height % blockHeight > 0)
+		yRes++;
 
+	//TODO: replace with space filling curve for better cache locality
+	for (unsigned y = 0; y < yRes; ++y)
+	{
+		for (unsigned x = 0; x < xRes; ++x)
+		{
+			unsigned startX = x*blockWidth;
+			unsigned startY = y*blockHeight;
+			blocks.push(Block(startX, std::min(startX+blockWidth-1, width-1), 
+							  startY, std::min(startY+blockHeight-1, height-1)));			
+		}
+	}
+
+	// Create threads and trace
+	std::vector<std::thread> threads(_threadCount-1);
+	for(unsigned i = 0; i < _threadCount-1; ++i)
+		threads[i] = std::thread(&Scene::traceSection, this, std::ref(_camera));
+	traceSection(_camera);
+	
 	// Join threads
 	for(auto& thread : threads)
 		thread.join();
@@ -241,86 +266,58 @@ void Scene::trace()
 	std::cout << "Finished\n";
 }
 
-void Scene::traceSection(Camera& _camera, unsigned threadID)
+void Scene::traceSection(Camera& _camera)
 {
-	// Calculate tracing bounds
-	unsigned width = _camera._pixels.width();
-	unsigned height = _camera._pixels.height();
-	unsigned rem = width % _threadCount;
-	unsigned xRes = width / _threadCount;
-	unsigned startX, endX;
-
-	if(rem != 0)
-	{
-		if(threadID >= rem)
-		{
-			startX = rem * (xRes + 1) + (threadID-rem) * xRes;
-			endX = startX + xRes;
-		}
-		else
-		{
-			startX = threadID * (xRes + 1);
-			endX = startX + xRes + 1;
-		}
-	}
-	else
-	{
-		startX = threadID * xRes;
-		endX	 = startX + xRes;
-	}
-
 	// trace scene
-	std::string progressString = "";
-	int depth = _depth;
-	for(unsigned x = startX; x < endX; ++x)
-	{
-		for(unsigned y = 0; y < height; ++y)
+	unsigned width = _camera._pixels.width();
+	unsigned startX, endX, startY, endY;
+	while(getBlock(startX, endX, startY, endY))
+	{		
+		for(unsigned x = startX; x <= endX; ++x)
 		{
-			std::vector<Ray> rays = _camera.createRays(x, y);
-
-			Vec3 color(0,0,0);
-			for(auto& ray : rays)
+			for(unsigned y = startY; y <= endY; ++y)
 			{
-				color = color + calculateColor(ray, depth);
+				std::vector<Ray> rays = _camera.createRays(x, y);
+
+				Vec3 color(0,0,0);
+				for(auto& ray : rays)
+				{
+					color = color + calculateColor(ray, _depth);
+				}
+
+				float rayCount = rays.size();
+				color._r /= rayCount;
+				color._g /= rayCount;
+				color._b /= rayCount;
+				color._r = clamp(color._r, 0.f, 1.f);
+				color._g = clamp(color._g, 0.f, 1.f);
+				color._b = clamp(color._b, 0.f, 1.f);
+
+				_camera._pixels.set(x+y*width, color);
 			}
-
-			float rayCount = rays.size();
-			color._r /= rayCount;
-			color._g /= rayCount;
-			color._b /= rayCount;
-			color._r = clamp(color._r, 0.f, 1.f);
-			color._g = clamp(color._g, 0.f, 1.f);
-			color._b = clamp(color._b, 0.f, 1.f);
-
-			_camera._pixels.set(x+y*width, color);
-		}
-
-		if(threadID == 3)
-		{
-			// erase progress indication
-			for(unsigned i = 0; i < progressString.size(); ++i)
-				std::cout << '\b';
-			for(unsigned i = 0; i < progressString.size(); ++i)
-				std::cout << ' ';
-			for(unsigned i = 0; i < progressString.size(); ++i)
-				std::cout << '\b';
-
-			// thread 0 prints progress
-			progressString = std::to_string(int((100.f*(x-startX)) / float(endX - startX))) + "%";
-			std::cout << progressString << std::flush;
 		}
 	}
+}
 
-	// Erase progress
-	if(threadID == 3)
-	{
-		for(unsigned i = 0; i < progressString.size(); ++i)
-			std::cout << '\b';
-		for(unsigned i = 0; i < progressString.size(); ++i)
-			std::cout << ' ';
-		for(unsigned i = 0; i < progressString.size(); ++i)
-			std::cout << '\b';
+bool Scene::getBlock(unsigned& startX, unsigned& endX, unsigned& startY, unsigned& endY)
+{
+	if(blocks.size() > 0)
+	{		
+       	std::unique_lock<std::mutex> lock(_mutex);
+		
+		Block b = blocks.top();
+		blocks.pop();
+
+		startX = b._startX;
+		endX = b._endX;
+		startY = b._startY;
+		endY = b._endY;
+
+		std::cout << blocks.size() << std::endl;
+
+		return true;
 	}
+	return false;
 }
 
 int Scene::castRay(Ray& ray)
