@@ -2,8 +2,8 @@
 #include "Utils.h"
 #include <math.h>
 
-Material::Material(const std::string& name, float Ia, const Vec3& kd, const Vec3& ks, float gloss, float eta, const std::string& materialType, bool checkered) :
-  _name(name), _Ia(Ia), _kd(kd), _ks(ks), _gloss(gloss), _eta(eta), _hasTexture(false), _checkered(checkered)
+Material::Material(const std::string& name, float Ia, const Vec3& kd, const Vec3& ks, const Vec3& attenuation, float gloss, float eta, float reflectivity, const std::string& materialType, bool checkered) :
+  _name(name), _Ia(Ia), _kd(kd), _ks(ks), _attenuation(attenuation), _gloss(gloss), _eta(eta), _reflectivity(reflectivity), _hasTexture(false), _checkered(checkered)
 {
   if(materialType == "metallic")
   {
@@ -36,7 +36,7 @@ Vec3 Material::color(const Vec3& N, const Vec3& V, const Vec3& L, const Vec3& li
   }
   else
   {
-    color = color + (1.f-_Ia) * lightColor * (kd + ks);
+    color = color + (1.f-_Ia) * (kd + lightColor * ks);
   }
 
   return color;
@@ -47,31 +47,24 @@ Vec3 Material::sampleTexture(const Vec2& uv)
   return _texture.sample(uv._u, uv._v);
 }
 
+Vec3 Material::attenuationColor(float distance)
+{  
+  return Vec3(
+    std::exp(-_attenuation._r * distance), 
+    std::exp(-_attenuation._g * distance), 
+    std::exp(-_attenuation._b * distance));
+}
+
 void Material::setTexture(const std::string& filename)
 {
   _hasTexture = _texture.loadTexture(filename);
 }
 
-float schlick(float eta1, float eta2, const Vec3& N, const Vec3& I)
+float Material::schlick(float eta1, float eta2, float cosTheta) const
 {
-        // Schlick aproximation
-        float r0 = (eta1-eta2) / (eta1+eta2);
-        r0 *= r0;
-        float cosX = -dot(N, I);
-        if (eta1 > eta2)
-        {
-            float eta = eta1/eta2;
-            float sinT2 = eta*eta*(1.0-cosX*cosX);
-            // Total internal reflection
-            if (sinT2 > 1.0)
-                return 1.0;
-            cosX = sqrt(1.0-sinT2);
-        }
-        float x = 1.0-cosX;
-        float ret = r0+(1.0-r0)*x*x*x*x*x;
-
-        //ret = (OBJECT_REFLECTIVITY + (1.0-OBJECT_REFLECTIVITY) * ret);
-        return ret;
+			float R = ((eta1-eta2)*(eta1-eta2)) / ((eta1+eta2)*(eta1+eta2));
+			R = R + (1.f - R) * pow((1.f-cosTheta), 5);	
+			return (_reflectivity + (1.0 - _reflectivity) * R);
 }
 
 bool Material::isCheckered(const Vec3& point, int width, int height) const

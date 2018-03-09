@@ -65,19 +65,22 @@ bool Scene::parseArgs(int argc, char** argv) //argv
 		for (YAML::const_iterator it = materialsNode.begin(); it != materialsNode.end(); ++it)
 		{
 		    const YAML::Node& materialNode = *it;
-				std::string materialName = materialNode["name"].as<std::string>();
-				_materialMap[materialName] = Material(
-						materialName,
-						materialNode["Ia"].as<float>(),
-						parseNode(materialNode, "kd", Vec3(1, 1, 1)),
-						parseNode(materialNode, "ks", Vec3(1, 1, 1)),
-						parseNode<float>(materialNode, "gloss", 1.f),
-						parseNode<float>(materialNode, "eta", 1.f),
-						materialNode["type"].as<std::string>(),
-						parseNode<bool>(materialNode, "checkered", false)
-					);
-				if(materialNode["texture"])
-					_materialMap[materialName].setTexture(materialNode["texture"].as<std::string>());
+			std::string materialName = materialNode["name"].as<std::string>();
+
+			_materialMap[materialName] = Material(
+					materialName,
+					materialNode["Ia"].as<float>(),
+					parseNode(materialNode, "kd", Vec3(1, 1, 1)),
+					parseNode(materialNode, "ks", Vec3(1, 1, 1)),
+					parseNode(materialNode, "attenuation", Vec3(1, 1, 1)),
+					parseNode<float>(materialNode, "gloss", 1.f),
+					parseNode<float>(materialNode, "eta", 1.f),
+					parseNode<float>(materialNode, "reflectivity", 0.f),
+					materialNode["type"].as<std::string>(),
+					parseNode<bool>(materialNode, "checkered", false)
+				);
+			if(materialNode["texture"])
+				_materialMap[materialName].setTexture(materialNode["texture"].as<std::string>());
 		}
 
 		const YAML::Node& objectsNode = config["objects"];
@@ -292,7 +295,7 @@ void Scene::traceSection(Camera& _camera, unsigned threadID)
 			_camera._pixels.set(x+y*width, color);
 		}
 
-		if(threadID == 0)
+		if(threadID == 3)
 		{
 			// erase progress indication
 			for(unsigned i = 0; i < progressString.size(); ++i)
@@ -309,7 +312,7 @@ void Scene::traceSection(Camera& _camera, unsigned threadID)
 	}
 
 	// Erase progress
-	if(threadID == 0)
+	if(threadID == 3)
 	{
 		for(unsigned i = 0; i < progressString.size(); ++i)
 			std::cout << '\b';
@@ -391,39 +394,48 @@ Vec3 Scene::calculateColor(Ray ray, int depth)
 		// Calculate reflection and refraction rays
 		if(geom->_material.isMetallic())
 		{
-			float kr = .25f; // Reflection probability
+			float r = geom->_material.schlick(geom->_material._eta, _ambientIOR, ray._dir.dot(N));
 			Ray reflectedRay(collisionPoint, reflect(ray._dir, N), _rayOffset);
 			Vec3 Ir = calculateColor(reflectedRay, depth - 1);
-			color = color + kr*Ir;
+			color = color + r*Ir;
 		}
 		else if(geom->_material.isTransparent())
 		{
-			//TODO replace with fresnel coef
-			float kt 		= 0.8f; // Transmission probability
-			float kr 		= 1.f - kt; // Reflection probability
 			Vec3 Ir;
 			Vec3 It;
+			Vec3 k(1);
+			float cosTheta;
+			Ray reflectedRay(collisionPoint, reflect(ray._dir, N), _rayOffset);
 
-			if(ray._dir.dot(N) > 0)
-				N = -1.f*N;
-
-			Vec3 refDir = refract(ray._dir, N, _ambientIOR, geom->_material._eta);
-			//std::cout << ray._dir.dot(refDir) << std::endl;
-			if(refDir.length() > 0.f)
+			// Ray is outside
+			float dDotN = ray._dir.dot(N);
+			if(dDotN < 0)
 			{
-				Ray refractedRay(collisionPoint, refDir, _rayOffset);			
-				It = calculateColor(refractedRay, depth - 1);
+				Vec3 dir;			
+				refract(ray._dir, N, _ambientIOR, geom->_material._eta, dir); //TIR can't happen because air is <= goem ior
+				It = calculateColor(Ray(collisionPoint, dir, _rayOffset), depth - 1);
+				Ir = calculateColor(Ray(collisionPoint, reflect(ray._dir, N), _rayOffset), depth - 1);
+				cosTheta = -dDotN;
 			}
+			// Ray is inside
 			else
 			{
-				kt = 0;
-				color.set(1,0,0);
-			}	
-
-			Ray reflectedRay(collisionPoint, reflect(ray._dir, N), _rayOffset);
-			Ir = calculateColor(reflectedRay, depth - 1);
+				Vec3 dir;
+				k = geom->_material.attenuationColor(ray._t);	
 			
-			color = color + It*kt + Ir*kr;
+				if(refract(ray._dir, -1*N, geom->_material._eta, _ambientIOR, dir)) // check for TIR
+				{
+					It = calculateColor(Ray(collisionPoint, dir, _rayOffset), depth - 1);
+					Ir = calculateColor(Ray(collisionPoint, reflect(ray._dir, -1.f*N), _rayOffset), depth - 1);
+					cosTheta = dir.dot(N);
+				}
+				// Reflection only
+				else
+					return k*calculateColor(Ray(collisionPoint, reflect(ray._dir, N), _rayOffset), depth - 1);
+			}
+
+			float r = geom->_material.schlick(geom->_material._eta, _ambientIOR, cosTheta);
+			color = color + k * (r * Ir + (1.f-r) * It);
 		}
 	}
 	else

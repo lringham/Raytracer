@@ -262,23 +262,15 @@ Vec3 reflect(const Vec3& I, const Vec3& N)
 	return I - 2.f*N.dot(I)*N;
 }
 
-Vec3 refract(const Vec3& I, const Vec3& N, float eta1, float eta2)
+bool refract(const Vec3& I, const Vec3& N, float eta1, float eta2, Vec3& result)
 {
-	Vec3 x0 = N;
 	float eta = eta1/eta2;
-	float cosI = dot(x0, I);
-	if(cosI > 0.f)
-	{
-		x0 = -1.f * x0;
-		cosI = -cosI;
-		if(dot(x0, I) != cosI)
-			std::cout << "Hello world" << std::endl;
-	}
-
+	float cosI = dot(N, I);
 	float sinT2 = eta*eta*(1.f-cosI*cosI);
-	if(sinT2 > 1.f)
-		return Vec3(0,0,0);
-	return eta*(I-x0*cosI) - std::sqrt(1.f-sinT2)*x0;
+	if(sinT2 > 1.f || cosI > 0.f)
+		return false;
+	result = eta*(I-N*cosI) - std::sqrt(1.f-sinT2)*N;
+	return true;
 }
 
 Vec3 rotate(const Vec3& v, float angle, const Vec3& axis)

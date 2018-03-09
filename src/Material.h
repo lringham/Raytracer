@@ -13,11 +13,13 @@ public:
     metallic
   };
 
-  Material(const std::string& name = "", float Ia = .1f, const Vec3& kd = Vec3(1,1,1), const Vec3& ks = Vec3(1,1,1), float gloss = 64.f, float eta = 1.f, const std::string& type = "blinnPhong", bool checkered = false);
+  Material(const std::string& name = "", float Ia = .1f, const Vec3& kd = Vec3(1,1,1), const Vec3& ks = Vec3(1,1,1), const Vec3& attenuation = Vec3(1,1,1), float gloss = 64.f, float eta = 1.f, float reflectivity = 0.f, const std::string& type = "blinnPhong", bool checkered = false);
   void setTexture(const std::string& filename);
   Vec3 color(const Vec3& N,const Vec3& V, const Vec3& L, const Vec3& lightColor) const;
   Vec3 sampleTexture(const Vec2& uv);
+  Vec3 attenuationColor(float distance);
   bool isCheckered(const Vec3& point, int width = 10, int height = 10) const;
+  float schlick(float eta1, float eta2, float cosTheta) const;
 
   inline Vec3 ambientColor() const
   {
@@ -44,13 +46,11 @@ public:
 
   std::string _name;
   float _Ia;
-  Vec3 _kd, _ks;
-  float _gloss, _eta;
+  Vec3 _kd, _ks, _attenuation;
+  float _gloss, _eta, _reflectivity;
   MaterialType _type;
   Texture _texture;
 
 private:
   bool _hasTexture, _checkered;
 };
-
-float schlick(float eta1, float eta2, const Vec3& N, const Vec3& I);

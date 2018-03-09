@@ -1,48 +1,35 @@
 name: Test Scene
 outputName: spheres.ppm
 backgroundColor: [.2, .2, .6] # overridden if skySphere is specified
-recursionDepth: 2
-shadowSampleCount: 10
-skySphere: sky.jpg
+recursionDepth: 6
+shadowSampleCount: 40
+#skySphere: sky.jpg
 materials:
     - name: plane
-      type: metallic
+      type: blinnPhong
       kd: [1, 1, 1]
       ks: [.0, .0, .0]
-      Ia: 0
+      Ia: 0.1
       gloss: 64
-      eta: 1.0
+      eta: 1
       checkered: true
     - name: modelPlane
       type: transparent
-      kd: [1, 0, 0]
+      kd: [0, .66, .42]
       ks: [1, 1, 1]
+      attenuation: [1, 1, 1]
       Ia: .1
-      gloss: 256
-      eta: 2
-    - name: sphere_red
-      type: metallic
-      kd: [1, 0, 0]
-      ks: [1, 1, 1]
-      Ia: .1
-      gloss: 256
-      eta: 1
-    - name: world
-      type: blinnPhong
-      kd: [1, 1, 1]
-      ks: [0, 0, 0]
-      Ia: 1
-      gloss: 1
-      eta: 1
-      texture: earth.jpg
+      gloss: 64
+      reflectivity: 0
+      eta: 1.2
 objects:
     - type: model
-      filename: dragon1.obj
-      position: [0.0, 0, 38.0]
+      filename: bunny.obj
+      position: [.5, .5, 43.0]
       material: modelPlane
     # - type: sphere
-    #   position: [0, 4, 35]
-    #   radius: 3
+    #   position: [0, 2, 43]
+    #   radius: 2
     #   material: modelPlane
     - type: plane
       position: [0.0, 0, 0.0]
@@ -51,15 +38,15 @@ objects:
 lights:
   - type: point
     color: [1.0, 1.0, 1.0]
-    position: [-5.0, 17, 50.0]
-    radius: 0.1
-    intensity: 100.0
+    position: [0.0, 10, 40.0]
+    radius: .2
+    intensity: 25.0
 camera:
-  position: [0, 5, 50.0]
-  direction: [0, 0, -1]
+  position: [0, 3.25, 47.5]
+  direction: [0, -.5, -1]
   fov: 1.5708
-  focalLength: 14.0
-  lensRadius: 0
+  focalLength: 4
+  lensRadius: 0.05
   pxWidth: 1920
   pxHeight: 1080
-  sampleCount: 10
+  sampleCount: 40

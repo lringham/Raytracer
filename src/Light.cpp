@@ -17,7 +17,7 @@ PointLight::PointLight(Vec3 color, Vec3 position, float intensity, float radius)
 {}
 
 Ray PointLight::getShadowRay(const Vec3& collisionPoint, float offset) const
-{
+{  
   Vec3 L = normalize(_position - collisionPoint);
   if(_radius == 0)
     return Ray(collisionPoint, L, offset);

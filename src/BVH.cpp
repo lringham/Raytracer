@@ -48,10 +48,6 @@ void BVH::build(const Obj& obj)
     buildChildern(triangles);      
     _tree.shrink_to_fit();
     _triangles.shrink_to_fit();
-
-    // std::cout << "BVH created" << std::endl;
-    // std::cout << "\tleaf count " << _triangles.size() << std::endl;
-    // std::cout << "\ttree size " << _tree.size() << std::endl;
 }
 
 
