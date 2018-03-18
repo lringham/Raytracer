@@ -34,3 +34,12 @@ inline Vec3 pointInCircle(std::mt19937& gen)
 
 	return result;
 }
+
+inline bool startsWith(const std::string& string, const std::string& start)
+{	
+    size_t smallest = std::min(string.size(), start.size());
+    for(size_t i = 0; i < smallest; ++i)
+        if(start[i] != string[i])
+            return false;
+    return true;
+}

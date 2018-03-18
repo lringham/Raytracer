@@ -47,18 +47,19 @@ bool Scene::parseArgs(int argc, char** argv) //argv
 				//FIXME account for other params
 		}
 	}
-
+	
+	std::map<std::string, int> materialMap;
 	YAML::Node config;
 	try
 	{
 		//TODO convert all optional args to use parseNode function
 		//TODO extract default values / magic numbers
-
-		YAML::Node config  = YAML::LoadFile(sceneFile);
-		_outputName 	   = parseNode<std::string>(config, "outputName", "scene.ppm");
-		_name 			   = parseNode<std::string>(config, "name", "scene");
-		_depth 			   = parseNode<unsigned>(config, "recursionDepth", 1);
-		_shadowSampleCount = parseNode<unsigned>(config, "shadowSampleCount", 1);
+		YAML::Node config  	  = YAML::LoadFile(sceneFile);
+		std::string modelsDir = parseNode<std::string>(config, "modelsDir", "");
+		_outputName 	   	  = parseNode<std::string>(config, "outputName", "scene.ppm");
+		_name 			   	  = parseNode<std::string>(config, "name", "scene");
+		_depth 			   	  = parseNode<unsigned>(config, "recursionDepth", 1);
+		_shadowSampleCount 	  = parseNode<unsigned>(config, "shadowSampleCount", 1);
 		_skySphere.loadTexture(parseNode<std::string>(config, "skySphere", ""));
 
 		const YAML::Node& materialsNode = config["materials"];
@@ -67,7 +68,8 @@ bool Scene::parseArgs(int argc, char** argv) //argv
 		    const YAML::Node& materialNode = *it;
 			std::string materialName = materialNode["name"].as<std::string>();
 
-			_materialMap[materialName] = Material(
+			materialMap[materialName] = _materials.size();
+			_materials.emplace_back(
 					materialName,
 					materialNode["Ia"].as<float>(),
 					parseNode(materialNode, "kd", Vec3(1, 1, 1)),
@@ -77,10 +79,10 @@ bool Scene::parseArgs(int argc, char** argv) //argv
 					parseNode<float>(materialNode, "eta", 1.f),
 					parseNode<float>(materialNode, "reflectivity", 0.f),
 					materialNode["type"].as<std::string>(),
-					parseNode<bool>(materialNode, "checkered", false)
-				);
+					parseNode<bool>(materialNode, "checkered", false));
+
 			if(materialNode["texture"])
-				_materialMap[materialName].setTexture(materialNode["texture"].as<std::string>());
+				_materials.back().setTexture(materialNode["texture"].as<std::string>());
 		}
 
 		const YAML::Node& objectsNode = config["objects"];
@@ -89,61 +91,55 @@ bool Scene::parseArgs(int argc, char** argv) //argv
 		    const YAML::Node& object = *it;
 		    std::string type = object["type"].as<std::string>();
 
-				if(type == "sphere")
-				{
-					_geometry.emplace_back(
-						new Sphere(
-							parseNode<float>(object, "radius", 1.f),
-							parseNode(object, "position", Vec3(0, 0, 0))));
-				}
-				else if(type == "triangle")
-				{
-					_geometry.emplace_back(
-						new Triangle(
-							parseNode(object, "x0", Vec3(-1, 0, 0)),
-							parseNode(object, "x1", Vec3(0, 1, 0)),
-							parseNode(object, "x2", Vec3(1, 0, 0))));
-				}
-				else if(type == "plane")
-				{
-					_geometry.emplace_back(
-						new Plane(
-							parseNode(object, "normal", Vec3(0, 1, 0)),
-							parseNode(object, "position", Vec3(0, 0, 0)),
-							parseNode<float>(object, "width", std::numeric_limits<float>::max()),
-							parseNode<float>(object, "height", std::numeric_limits<float>::max())));
-				}
-				else if(type == "model")
-				{
-					std::string modelsDir = parseNode<std::string>(config, "modelsDir", "");
-					_geometry.emplace_back(new BVH(
-						Obj(
-							parseNode(object, "position", Vec3(0, 0, 0)),
-							object["filename"].as<std::string>(), 
-							modelsDir
-						)
+			if(type == "sphere")
+			{
+				_geometry.emplace_back(
+					new Sphere(
+						parseNode<float>(object, "radius", 1.f),
+						parseNode(object, "position", Vec3(0, 0, 0))));
+			}
+			else if(type == "triangle")
+			{
+				_geometry.emplace_back(
+					new Triangle(
+						parseNode(object, "x0", Vec3(-1, 0, 0)),
+						parseNode(object, "x1", Vec3(0, 1, 0)),
+						parseNode(object, "x2", Vec3(1, 0, 0))));
+			}
+			else if(type == "plane")
+			{
+				_geometry.emplace_back(
+					new Plane(
+						parseNode(object, "normal", Vec3(0, 1, 0)),
+						parseNode(object, "position", Vec3(0, 0, 0)),
+						parseNode<float>(object, "width", std::numeric_limits<float>::max()),
+						parseNode<float>(object, "height", std::numeric_limits<float>::max())));
+			}
+			else if(type == "model")
+			{				
+				std::string matName = parseNode<std::string>(object, "material", "");
+				_geometry.emplace_back(new BVH(
+					Obj(
+						parseNode(object, "position", Vec3(0, 0, 0)),
+						object["filename"].as<std::string>(), 
+						modelsDir,
+						matName != "" ? materialMap[matName] : -1,
+						_materials,
+						materialMap)));	
+			}
+			else if(type == "box")
+			{
+				_geometry.emplace_back(
+					new AABB(
+						parseNode(object, "maxCorner", Vec3(0, 0, 0)),
+						parseNode(object, "minCorner", Vec3(1, 1, 1))
 					));
-					// _geometry.emplace_back(new Obj(
-					// 		parseNode(object, "position", Vec3(0, 0, 0)),
-					// 		object["filename"].as<std::string>(), 
-					// 		modelsDir
-					// 	)
-					// );
-				}
-				else if(type == "box")
-				{
-					_geometry.emplace_back(
-						new AABB(
-							parseNode(object, "maxCorner", Vec3(0, 0, 0)),
-							parseNode(object, "minCorner", Vec3(1, 1, 1))
-						));
-				}
-				else
-					std::cout << "Invalid geometry type: " << type << std::endl;
+			}
+			else
+				std::cout << "Invalid geometry type: " << type << std::endl;
 
-				std::string materialName = object["material"].as<std::string>();
-				if(_materialMap.count(materialName) == 1)
-					_geometry.back()->_material = _materialMap[materialName];
+			if(object["material"])
+				_geometry.back()->_materialID = materialMap[object["material"].as<std::string>()];
 		}
 
 		const YAML::Node& lights = config["lights"];
@@ -205,6 +201,17 @@ bool Scene::parseArgs(int argc, char** argv) //argv
 		return false;
 	}
 
+	// for(auto& m : _materials)
+	// {
+	// 	std::cout << "Material: " << m._name << "\n";
+	// 	std::cout << "\t kd: " << m._kd << "\n";
+	// 	std::cout << "\t ks: " << m._ks << "\n";
+	// 	std::cout << "\t Ia: " << m._Ia << "\n";
+	// 	std::cout << "\t Type: " << m._type << "\n";	
+	// 	std::cout << "\t Tex: " << (m.hasTexture() ? "yes\n" : "no\n");	
+	// 	std::cout << "\t gloss: " << m._gloss << "\n";	
+	// }
+
 	return true;
 }
 
@@ -226,8 +233,8 @@ void Scene::trace()
 	std::cout << "Thread count: " << _threadCount << "\n";
 	std::cout << "Recursion depth: " << _depth << "\n";
 	std::cout << "Pixel sample count: " << _camera.sampleCount() << "\n";
-	std::cout << "Shadow sample count " << _shadowSampleCount << "\n";
-	std::cout << "Tracing " << _name << "...";
+	std::cout << "Shadow sample count: " << _shadowSampleCount << "\n";
+	//std::cout << "Tracing " << _name << "...";
 
 	// Divide image into blocks
 	unsigned width = _camera._pixels.width();
@@ -252,6 +259,7 @@ void Scene::trace()
 							  startY, std::min(startY+blockHeight-1, height-1)));			
 		}
 	}
+	_totalBlockCount = blocks.size();
 
 	// Create threads and trace
 	std::vector<std::thread> threads(_threadCount-1);
@@ -313,7 +321,25 @@ bool Scene::getBlock(unsigned& startX, unsigned& endX, unsigned& startY, unsigne
 		startY = b._startY;
 		endY = b._endY;
 
-		std::cout << blocks.size() << std::endl;
+		int progressRes = 10;
+		float progress = 1.f - static_cast<float>(blocks.size()) / static_cast<float>(_totalBlockCount);
+		std::cout.flush();
+		std::cout << "Tracing " << _name << " ";
+		std::cout << "\033[1;32m[\033[0m";
+		for(int i = 0; i < progressRes; ++i)
+		{
+			if(progress*progressRes > i)
+				std::cout << "\033[1;32m#\033[0m";		
+			else
+				std::cout << "\033[1;32m \033[0m";		
+		}
+		std::cout << "\033[1;32m]\033[0m";		
+		progress = static_cast<int>(progress * 100);
+		if(progress < 10)
+			std::cout << "  ";	
+		else if(progress < 100)
+			std::cout << " ";
+		std::cout << "\033[1;32m" << progress << "%\033[0m" << "\r";
 
 		return true;
 	}
@@ -343,9 +369,10 @@ Vec3 Scene::calculateColor(Ray ray, int depth)
 	// Calculate shading
 	int geomIndex = castRay(ray);
 	if(geomIndex != -1)
-	{
+	{		
 		Vec3 collisionPoint = ray.intersection();
 		auto& geom = _geometry[geomIndex];
+		auto& material = _materials[ray._materialID];
 
 		// Calculate light contribution
 		Vec3 N = ray._normal;
@@ -359,16 +386,16 @@ Vec3 Scene::calculateColor(Ray ray, int depth)
 			L.normalize();
 
 			if(_shadowSampleCount == 0)
-				color = geom->_material.color(N, V, L, l->getColor(collisionPoint));
+				color = material.color(N, V, L, l->getColor(collisionPoint));
 
 			// Shadows
 			for(unsigned i = 0; i < _shadowSampleCount; ++i)
 			{
 				Ray shadowRay = l->getShadowRay(collisionPoint, _rayOffset);
 				if(castShadowRay(shadowRay, distToLight))
-					color = color + geom->_material.ambientColor();
+					color = color + material.ambientColor();
 				else
-					color = color + geom->_material.color(N, V, L, l->getColor(collisionPoint));
+					color = color + material.color(N, V, L, l->getColor(collisionPoint));
 			}
 		}
 
@@ -379,9 +406,11 @@ Vec3 Scene::calculateColor(Ray ray, int depth)
 			color._b /= _shadowSampleCount;
 		}
 
-		if(geom->_material.hasTexture())
-			color =  geom->_material.sampleTexture(ray._uv);
-		if(geom->_material.isCheckered(collisionPoint))
+		if(material.hasTexture())
+		{
+			color = color * material.sampleTexture(ray._uv);
+		}
+		if(material.isCheckered(collisionPoint))
 			color = color * 0.25f;
 
 		// Exit if recursive depth is met
@@ -389,14 +418,14 @@ Vec3 Scene::calculateColor(Ray ray, int depth)
 			return color;
 
 		// Calculate reflection and refraction rays
-		if(geom->_material.isMetallic())
+		if(material.isMetallic())
 		{
-			float r = geom->_material.schlick(geom->_material._eta, _ambientIOR, ray._dir.dot(N));
+			float r = material.schlick(material._eta, _ambientIOR, ray._dir.dot(N));
 			Ray reflectedRay(collisionPoint, reflect(ray._dir, N), _rayOffset);
 			Vec3 Ir = calculateColor(reflectedRay, depth - 1);
 			color = color + r*Ir;
 		}
-		else if(geom->_material.isTransparent())
+		else if(material.isTransparent())
 		{
 			Vec3 Ir;
 			Vec3 It;
@@ -409,7 +438,7 @@ Vec3 Scene::calculateColor(Ray ray, int depth)
 			if(dDotN < 0)
 			{
 				Vec3 dir;			
-				refract(ray._dir, N, _ambientIOR, geom->_material._eta, dir); //TIR can't happen because air is <= goem ior
+				refract(ray._dir, N, _ambientIOR, material._eta, dir); //TIR can't happen because air is <= goem ior
 				It = calculateColor(Ray(collisionPoint, dir, _rayOffset), depth - 1);
 				Ir = calculateColor(Ray(collisionPoint, reflect(ray._dir, N), _rayOffset), depth - 1);
 				cosTheta = -dDotN;
@@ -418,9 +447,9 @@ Vec3 Scene::calculateColor(Ray ray, int depth)
 			else
 			{
 				Vec3 dir;
-				k = geom->_material.attenuationColor(ray._t);	
+				k = material.attenuationColor(ray._t);	
 			
-				if(refract(ray._dir, -1*N, geom->_material._eta, _ambientIOR, dir)) // check for TIR
+				if(refract(ray._dir, -1*N, material._eta, _ambientIOR, dir)) // check for TIR
 				{
 					It = calculateColor(Ray(collisionPoint, dir, _rayOffset), depth - 1);
 					Ir = calculateColor(Ray(collisionPoint, reflect(ray._dir, -1.f*N), _rayOffset), depth - 1);
@@ -431,7 +460,7 @@ Vec3 Scene::calculateColor(Ray ray, int depth)
 					return k*calculateColor(Ray(collisionPoint, reflect(ray._dir, N), _rayOffset), depth - 1);
 			}
 
-			float r = geom->_material.schlick(geom->_material._eta, _ambientIOR, cosTheta);
+			float r = material.schlick(material._eta, _ambientIOR, cosTheta);
 			color = color + k * (r * Ir + (1.f-r) * It);
 		}
 	}

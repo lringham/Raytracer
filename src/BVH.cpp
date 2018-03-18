@@ -1,11 +1,9 @@
 #include "BVH.h"
 #include "Triangle.h"
 #include <memory>
+#include <iostream>
 
-BVH::BVH()
-{
-
-}
+BVH::BVH() {}
 
 BVH::BVH(const Obj& obj)
 {
@@ -16,31 +14,37 @@ void BVH::build(const Obj& obj)
 {
     // Find all triangles        
     _position = obj._position;
-    std::vector<Triangle> triangles(obj._faces.size());
-    {
+    std::vector<Triangle> triangles;
+    {        
         int i = 0;
         for(auto& f : obj._faces)
         {
-            triangles[i] = Triangle(obj._positions[f._v0] + _position,
+            triangles.emplace_back(obj._positions[f._v0] + _position,
                                     obj._positions[f._v1] + _position,
                                     obj._positions[f._v2] + _position);
 
             if(obj.hasTextureCoordinates())
             {
-                triangles[i]._t0 = obj._textureCoords[f._t0];            
-                triangles[i]._t1 = obj._textureCoords[f._t1];
-                triangles[i]._t2 = obj._textureCoords[f._t2];
+                triangles.back()._t0 = obj._textureCoords[f._t0];            
+                triangles.back()._t1 = obj._textureCoords[f._t1];
+                triangles.back()._t2 = obj._textureCoords[f._t2];
             }
 
             if(obj.hasNormals())
             {
-                triangles[i]._n0 = obj._normals[f._n0];            
-                triangles[i]._n1 = obj._normals[f._n1];
-                triangles[i]._n2 = obj._normals[f._n2];
+                triangles.back()._n0 = obj._normals[f._n0];            
+                triangles.back()._n1 = obj._normals[f._n1];
+                triangles.back()._n2 = obj._normals[f._n2];
             }
 
+            if(obj._faceMaterialMap.size() > 0)
+                triangles.back()._materialID = obj._faceMaterialMap.at(i);
+            else   
+                std::cout << "Mesh has no material\n";
+                
             i++;
         }
+        triangles.shrink_to_fit();
     }
     
     // Create root and childern

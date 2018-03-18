@@ -1,12 +1,12 @@
 name: Test Scene
 outputName: spheres.ppm
 backgroundColor: [.2, .2, .6] # overridden if skySphere is specified
-recursionDepth: 6
+recursionDepth: 3
 shadowSampleCount: 10
 #skySphere: sky.jpg
 materials:
     - name: plane
-      type: blinnPhong
+      type: metallic
       kd: [1, 1, 1]
       ks: [.0, .0, .0]
       Ia: 0.1
@@ -14,22 +14,22 @@ materials:
       eta: 1
       checkered: true
     - name: modelPlane
-      type: transparent
-      kd: [0, .66, .42]
+      type: blinnPhong
+      kd: [1, 1, 1]
       ks: [1, 1, 1]
       attenuation: [1, 1, 1]
       Ia: .1
       gloss: 64
       reflectivity: 0
-      eta: 1.2
+      eta: 1.7
 objects:
     - type: model
-      filename: bunny.obj
-      position: [.5, .5, 43.0]
+      filename: untitled.obj
+      position: [.5, .5, 40.0]
       material: modelPlane
     # - type: sphere
     #   position: [0, 2, 43]
-    #   radius: 2
+    #   radius: 1
     #   material: modelPlane
     - type: plane
       position: [0.0, 0, 0.0]
@@ -38,15 +38,15 @@ objects:
 lights:
   - type: point
     color: [1.0, 1.0, 1.0]
-    position: [0.0, 10, 40.0]
+    position: [3, 7, 40.0]
     radius: .2
-    intensity: 25.0
+    intensity: 200.0
 camera:
-  position: [0, 3.25, 47.5]
-  direction: [0, -.5, -1]
+  position: [7, 3.25, 40.5]
+  direction: [-1, 0, 0]
   fov: 1.5708
   focalLength: 4
-  lensRadius: 0.05
+  lensRadius: 0.0
   pxWidth: 1920
   pxHeight: 1080
-  sampleCount: 40
+  sampleCount: 10

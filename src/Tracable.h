@@ -9,5 +9,5 @@ public:
   virtual ~Tracable();
   virtual bool raycast(Ray& ray) const;
   
-  Material _material;
+  int _materialID;
 };

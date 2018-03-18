@@ -80,7 +80,7 @@ private:
 
 	std::vector<std::unique_ptr<Tracable>> _geometry;
 	std::vector<std::unique_ptr<Light>> _lights;
-	std::map<std::string, Material> _materialMap;
+	std::vector<Material> _materials;
 	std::stack<Block> blocks;
 
 	Texture _skySphere;
@@ -89,6 +89,6 @@ private:
 	std::string _name;
 	std::string _outputName;
 	std::mutex _mutex;
-	unsigned _threadCount, _depth, _shadowSampleCount;
+	unsigned _threadCount, _depth, _shadowSampleCount, _totalBlockCount;
 	float _rayOffset = .01f, _ambientIOR = 1.f;
 };

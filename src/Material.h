@@ -44,13 +44,18 @@ public:
     return _hasTexture;
   }
 
+  inline Vec3 sampleTexture(const Vec2& uv) const
+  {
+    return _texture.sample(uv._u, uv._v);
+  }
+
   std::string _name;
   float _Ia;
   Vec3 _kd, _ks, _attenuation;
   float _gloss, _eta, _reflectivity;
   MaterialType _type;
-  Texture _texture;
 
 private:
+  Texture _texture;
   bool _hasTexture, _checkered;
 };

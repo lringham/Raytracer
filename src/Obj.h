@@ -1,14 +1,16 @@
 #pragma once
-#include "Tracable.h"
 #include "Triangle.h"
+#include "Tracable.h"
 #include "Vec3.h"
 #include "Vec2.h"
 #include "AABB.h"
+#include "Utils.h"
 
 #include <fstream>
 #include <iostream>
 #include <string>
 #include <vector>
+#include <map>
 
 class Obj : public Tracable
 {
@@ -24,24 +26,56 @@ public:
 	{
 	}
 
-	Obj(Vec3 position, const std::string& filename, const std::string& path = "") :
-		_position(position)
+	Obj(Vec3 position, const std::string& filename, const std::string& path, int materialID, std::vector<Material>& materials, std::map<std::string, int>& materialMap) :
+		_position(position), _path("")
 	{
-		load(filename, path);
+		_materialID = materialID;
+		load(filename, path, materials, materialMap);
 	}
 
-	~Obj()
+	bool load(const std::string& filename, const std::string& path, std::vector<Material>& materials, std::map<std::string, int>& materialMap)
 	{
-	}
+		_path = path;
+		OBJ_TYPE objTypeMap[3] = {V, VT, VTN};
+		std::ifstream objReader(path + filename);
+		int currentMaterial = _materialID;		
+		if(objReader.is_open())
+		{
+			OBJ_TYPE objType = NONE;
+			char line[256];			
+			while (objReader.getline(line, 256))
+			{
+				if (objType == NONE && line[0] == 'f') //determine component type
+				{
+						int slashCount = 0;
+						char c = ' ';
+						for (int i = 2; c != '\0' && objType == NONE; ++i)
+						{
+							c = line[i];
+							if (c == '/')
+							{
+								if (line[i + 1] == '/') //Check for double slash denoting v//n
+									objType = VN;
+								slashCount++;
+							}
+						}
+						
+						if(objType != VN && slashCount <= 6)
+						{
+							objType = objTypeMap[slashCount / 3];
+						}
+				}
+				parseLine(line, objType, materials, materialMap, currentMaterial);
+			}
+			objReader.close();
+		}
+		else
+		{
+			std::cout << "Can't load model: " << filename << std::endl;
+			return false;
+		}
 
-	bool hasTextureCoordinates() const
-	{
-		return _textureCoords.size() > 0;
-	}
-
-	bool hasNormals() const
-	{
-		return _normals.size() > 0;
+		return true;
 	}
 
 	bool raycast(Ray& ray) const override
@@ -50,9 +84,7 @@ public:
 		float u1 = 0, v1 = 0;
 		Face f1;
 
-		if(!_boundingBox.raycast(ray))
-			return false;
-
+		int hitObjectIndex = -1;
 		for(auto& f : _faces)
 		{
 			Ray tempRay = ray;
@@ -70,10 +102,11 @@ public:
 					u1 = u0;
 					v1 = v0;
 					f1 = f;
+					//hitObjectIndex = i;
 				}
 			}
 		}
-
+		
 		if(hit)
 		{
 			float w1 = (1.f-(u1+v1));
@@ -102,74 +135,57 @@ public:
 		return hit;
 	}
 
-	void calcAABB()
-	{
-		// Calculate AABB of vertices in models space
-		// and then translate them into world space
-		_boundingBox = AABB(_positions);
-		_boundingBox.move(_position);
-	}
+		const std::string _name;
+		std::vector<Vec3> _positions;
+		std::vector<Vec3> _normals;
+		std::vector<Vec2> _textureCoords;
+		std::vector<Face> _faces;
+		std::vector<unsigned> _indices;
+		std::map<int, int> _faceMaterialMap;
 
-	bool load(const std::string& filename, const std::string& path = "")
-	{
-		std::ifstream objReader(path + filename);
-		if(objReader.is_open())
+		inline bool hasNormals() const
 		{
-			OBJ_TYPE objType = NONE;
-			char line[256];
-			while (objReader.getline(line, 256))
-			{
-				if (objType == NONE && line[0] == 'f') //determine component type
-				{
-						int slashCount = 0;
-						char c = ' ';
-						for (int i = 2; c != '\0' && objType == NONE; ++i)
-						{
-							c = line[i];
-							if (c == '/')
-							{
-								if (line[i + 1] == '/') //Check for double slash denoting v//n
-									objType = VN;
-								slashCount++;
-							}
-						}
-						if(objType != VN)
-							objType = (OBJ_TYPE) slashCount;
-				}
-				parseLine(line, objType);
-			}
-			objReader.close();
-		}
-		else
-		{
-			std::cout << "Can't load model: " << filename << std::endl;
-			return false;
+			return _normals.size() > 0;
 		}
 
-		// Calculate bounding box
-		calcAABB();
+		inline bool hasTextureCoordinates() const
+		{
+			return _textureCoords.size() > 0;
+		}
 
-		// Print stats
-		std::cout << "Model loaded: " << filename << std::endl;
-		std::cout << "\tfaces: " << _faces.size() << std::endl;
-		std::cout << "\tvertices: " << _positions.size() << std::endl;
-		std::cout << "\tnormals: " << _normals.size() << std::endl;
-		std::cout << "\tuvs: " << _textureCoords.size() << std::endl;
+	// struct Object
+	// {
+	// 	const std::string _name;
+	// 	std::vector<Vec3> _positions;
+	// 	std::vector<Vec3> _normals;
+	// 	std::vector<Vec2> _textureCoords;
+	// 	std::vector<Face> _faces;
+	// 	std::vector<unsigned> _indices;
+	// 	std::map<int, int> _faceMaterialMap;
 
-		return true;
-	}
+	// 	inline bool hasNormals() const
+	// 	{
+	// 		return _normals.size() > 0;
+	// 	}
 
-	std::vector<Vec3> _positions;
-	std::vector<Vec3> _normals;
-	std::vector<Vec2> _textureCoords;
-	std::vector<Face> _faces;
-	std::vector<unsigned> _indices;
+	// 	inline bool hasTextureCoordinates() const
+	// 	{
+	// 		return _textureCoords.size() > 0;
+	// 	}
+
+	// 	Object(const std::string& name = "DefaultObject") :
+	// 		_name(name)
+	// 	{
+	// 	}
+	// };
+
+	// std::vector<Object> _objects;
 	Vec3 _position;
 
 private:	
 	enum OBJ_TYPE
 	{
-		V = 0, VT = 3, VTN = 6, VN, F, NONE
+		V, VT, VTN, VN, F, OBJECT, MATERIAL, USE_MATERIAL, NONE
 	};
 
 	inline float parsef(const char* data, char** extra = nullptr)
@@ -182,42 +198,143 @@ private:
 		return strtol(data, extra, base);
 	}
 
-	void parseLine(char* line, OBJ_TYPE objType)
+	void loadMTLFile(const std::string& filename, std::vector<Material>& materials, std::map<std::string, int>& materialMap)
+	{
+		std::vector<std::string> headings = {"newmtl", "Ns", "Ka", "Kd", "Ks", "Ke", "Ni", "d", "illum", "map_Kd"};
+		std::ifstream matReader(_path + filename);
+		
+		if(matReader.is_open())
+		{
+			char line[256];	
+			int offset = 0;					
+			while (matReader.getline(line, 256))
+			{				
+				std::string heading = "";
+				for(auto& str : headings)
+				{
+					if(startsWith(line, str))
+					{
+						offset = str.size()+1;
+						heading = str;
+					}
+				}
+
+				if(heading == "newmtl")
+				{
+					std::string name = std::string(line +  offset);
+					materialMap[name] = materials.size();
+					materials.emplace_back(name);					
+				}
+				else if(heading == "Ns") // specular pow
+					materials.back()._gloss = parsef(line + offset);
+				else if(heading == "Ni") // optical_density
+					materials.back()._eta = parsef(line + offset);
+				else if(heading == "Kd")
+				{
+					char* extra = nullptr;
+					materials.back()._kd._r = parsef(line + offset, &extra);
+					materials.back()._kd._g = parsef(extra, &extra);
+					materials.back()._kd._b = parsef(extra);
+				}
+				else if(heading == "Ks")
+				{
+					char* extra = nullptr;
+					materials.back()._ks._r = parsef(line + offset, &extra);
+					materials.back()._ks._g = parsef(extra, &extra);
+					materials.back()._ks._b = parsef(extra);
+				}
+				else if(heading == "map_Kd")
+				{
+					materials.back().setTexture(_path + std::string(line + offset));
+					
+				}
+				// else if(heading == "d")
+				// 	; // transparancy or (1-tr)
+				// else if(heading == "Ka")
+				// 	; // amb color
+				// else if(heading == "illum")
+				// 	; // illumination model
+				
+			}
+			matReader.close();
+		}
+		else
+			std::cout << "Cannot open mtllib : " << _path + filename << std::endl;
+	}
+
+	// Object& currentObject()
+	// {
+	// 	if(_objects.size() == 0)
+	// 		_objects.emplace_back("defaultObject");
+	// 	return _objects.back();
+	// }
+
+	void parseLine(char* line, OBJ_TYPE objType, std::vector<Material>& materials, std::map<std::string, int>& materialMap, int& materialID)
 	{
 		if(line == nullptr)
 			return;
 
 		//Determine the line type
 		OBJ_TYPE lineType = NONE;
-		int offset;
-		switch(line[0])
+		int offset;		
+		if(startsWith(line, "mtllib")) //material
 		{
-			case 'f': //face
-				offset = 2;
-				lineType = F;
-				break;
-			case 'v': //vertex
-				switch(line[1])
-				{
-				case ' ': // position
-					offset = 2;
-					lineType = V;
-					break;
-				case 'n': // normal
-					offset = 3;
-					lineType = VN;
-					break;
-				case 't': // texture coordinate
-					offset = 3;
-					lineType = VT;
-					break;
-				}
-				break;
+			offset = 7;
+			lineType = MATERIAL;
 		}
+		else if(startsWith(line, "usemtl")) //use materials
+		{
+			offset = 7;
+			lineType = USE_MATERIAL;
+		}
+		else if(line[0] == 'o') // object
+		{
+			offset = 2;
+			lineType = OBJECT;
+		}			
+		else if(line[0] == 'f') //face
+		{
+			offset = 2;
+			lineType = F;
+		}
+		else if(line[0] == 'v') //vertex
+		{
+			if(line[1] == ' ') // position
+			{
+				offset = 2;
+				lineType = V;
+			}
+			else if(line[1] == 'n') // normal
+			{
+				offset = 3;
+				lineType = VN;
+			}
+			else if(line[1] == 't') // texture coordinate
+			{
+				offset = 3;
+				lineType = VT;
+			}
+		}		
 
 		//Convert Line Values
 		switch (lineType)
 		{
+			case MATERIAL: //Parse a material
+			{				
+				loadMTLFile(std::string(line+offset), materials, materialMap);
+				break;
+			}
+			case USE_MATERIAL:
+			{
+				materialID = materialMap[std::string(line+offset)];
+				break;
+			}
+			case OBJECT: //Parse an object
+			{
+				//std::cout << std::string(line+offset) << std::endl;
+				//_objects.emplace_back(std::string(line+offset));
+				break;
+			}
 			case F: //Parse a face
 			{
 				//replace all slashes with spaces to allow for conversion
@@ -277,6 +394,8 @@ private:
 				case NONE:
 					break;
 				}
+
+				_faceMaterialMap[_faces.size()] = materialID; 
 				_faces.push_back(f);
 				break;
 			}
@@ -313,5 +432,5 @@ private:
 		}
 	}
 
-	AABB _boundingBox;
+	std::string _path;
 };

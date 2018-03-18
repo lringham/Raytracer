@@ -36,7 +36,8 @@ bool Plane::raycast(Ray& ray) const
     ray._uv.set(
       (dist._x + _halfWidth) / _width,
       (dist._z + _halfHeight) / _height);
-
+      
+    ray._materialID = _materialID;
     return true;
   }
 	return false;

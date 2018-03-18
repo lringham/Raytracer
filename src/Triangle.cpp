@@ -67,6 +67,7 @@ bool Triangle::raycast(Ray& ray) const
 			  _t1 * u +
 			  _t2 * v;
 			  
+	ray._materialID = _materialID;
 	return true;
 }
 

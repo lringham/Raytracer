@@ -14,4 +14,5 @@ public:
   Vec3 _normal;
   Vec2 _uv;
   float _t, _ior;
+  int _materialID;
 };

@@ -36,6 +36,7 @@ bool Sphere::raycast(Ray& ray) const
 	ray._uv.set(
 		atan2(ray._normal._x, ray._normal._z) / (3.1415926f*2.f),
 		1.f - acos(ray._normal._y) / 3.1415926f);
-
+	
+	ray._materialID = _materialID;
 	return true;
 }

@@ -9,6 +9,5 @@ Tracable::~Tracable()
 
 bool Tracable::raycast(Ray&) const
 {
-  std::cout << "AHHHH" << std::endl;
   return true;
 }
