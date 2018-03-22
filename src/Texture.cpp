@@ -28,18 +28,20 @@ Vec3 Texture::sample(float u, float v) const
 bool Texture::loadTexture(const std::string& filename)
 {
     stbi_set_flip_vertically_on_load(true);
-    unsigned char* data = stbi_load(&filename[0], &_width, &_height, &_numComp, 3);
-
+    int n = 0;
+    unsigned char* data = stbi_load(&filename[0], &_width, &_height, &_numComp, n);
+    std::cout << "Loading " << filename;
     if(data != nullptr)
     {
         for(int i = 0; i < _width*_height*3; ++i)
             _pixels.push_back(data[i]);
         _pixels.shrink_to_fit();
         stbi_image_free(data);
-
         _initalized = true;
+        std::cout << "...Success\n";
         return true;
     }
+    std::cout << "...Fail\n";
     return false;
 }
 

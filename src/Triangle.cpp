@@ -59,13 +59,15 @@ bool Triangle::raycast(Ray& ray) const
 	if (v < 0.f || v > 1.f - u)
 		return false;
 	
-	ray._normal = _n0 * (1.f-u-v) +
-			  	  _n1 * u +
-			  	  _n2 * v;
+	ray._normal  = _n0 * (1.f-u-v) +
+			  	   _n1 * u +
+			   	   _n2 * v;
 
-	ray._uv = _t0 * (1.f-u-v) +
-			  _t1 * u +
-			  _t2 * v;
+	ray._tangent = _t;
+
+	ray._uv      = _uv0 * (1.f-u-v) +
+			       _uv1 * u +
+			       _uv2 * v;
 			  
 	ray._materialID = _materialID;
 	return true;
@@ -120,6 +122,24 @@ Vec3 barycentre(const Triangle& triangle)
 	return (triangle._p0 + triangle._p1 + triangle._p2) * (1.f/3.f);
 }
 
+Vec3 calculateTangent(const Vec3& p0, const Vec3& p1, const Vec3& p2, const Vec2& uv0, const Vec2& uv1, const Vec2& uv2)
+{
+	Vec3 Q1 = p1 - p0;
+	Vec3 Q2 = p2 - p0;
+	
+	float u1 = uv1._u - uv0._u;
+	float u2 = uv2._u - uv0._u;
+	float v1 = uv1._v - uv0._v;
+	float v2 = uv2._v - uv0._v;
+
+	float denom = u1*v2 - u2*v1;
+	if(denom != 0)
+	{
+		float invDet = 1.f / (u1*v2 - u2*v1);	
+		return invDet * (v2*Q1 - u1*Q2);
+	}
+	return Vec3(0, 0, 0);
+}
 
 //
 // Vec3 circumcentre(const Vec3& p0, const Vec3& p1, const Vec3& p2, float* radius)

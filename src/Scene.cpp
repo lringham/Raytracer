@@ -60,7 +60,9 @@ bool Scene::parseArgs(int argc, char** argv) //argv
 		_name 			   	  = parseNode<std::string>(config, "name", "scene");
 		_depth 			   	  = parseNode<unsigned>(config, "recursionDepth", 1);
 		_shadowSampleCount 	  = parseNode<unsigned>(config, "shadowSampleCount", 1);
-		_skySphere.loadTexture(parseNode<std::string>(config, "skySphere", ""));
+
+		if(config["skySphere"])
+			_skySphere.loadTexture(parseNode<std::string>(config, "skySphere", ""));
 
 		const YAML::Node& materialsNode = config["materials"];
 		for (YAML::const_iterator it = materialsNode.begin(); it != materialsNode.end(); ++it)
@@ -82,7 +84,14 @@ bool Scene::parseArgs(int argc, char** argv) //argv
 					parseNode<bool>(materialNode, "checkered", false));
 
 			if(materialNode["texture"])
+			{
 				_materials.back().setTexture(materialNode["texture"].as<std::string>());
+			}
+
+			if(materialNode["normalMap"])
+			{
+				_materials.back().setNormalMap(materialNode["normalMap"].as<std::string>());
+			}
 		}
 
 		const YAML::Node& objectsNode = config["objects"];
@@ -371,11 +380,21 @@ Vec3 Scene::calculateColor(Ray ray, int depth)
 	if(geomIndex != -1)
 	{		
 		Vec3 collisionPoint = ray.intersection();
-		auto& geom = _geometry[geomIndex];
 		auto& material = _materials[ray._materialID];
 
 		// Calculate light contribution
-		Vec3 N = ray._normal;
+		Vec3 N;
+		if(material.hasNormalMap())
+		{
+			Mat3 TBN;
+			TBN.setCol(0, ray._tangent);
+			TBN.setCol(1, cross(ray._normal, ray._tangent));
+			TBN.setCol(2, ray._normal);
+			N = TBN * (2.f*material.sampleNormalMap(ray._uv) - 1.f);
+		}
+		else
+			N = ray._normal;
+
 		Vec3 V = normalize(_camera._position - collisionPoint);
 
 		// Lights

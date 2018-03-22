@@ -68,6 +68,7 @@ public:
 				parseLine(line, objType, materials, materialMap, currentMaterial);
 			}
 			objReader.close();
+			std::cout << "Loaded model: " << filename << std::endl;
 		}
 		else
 		{
@@ -84,7 +85,6 @@ public:
 		float u1 = 0, v1 = 0;
 		Face f1;
 
-		int hitObjectIndex = -1;
 		for(auto& f : _faces)
 		{
 			Ray tempRay = ray;
@@ -102,7 +102,6 @@ public:
 					u1 = u0;
 					v1 = v0;
 					f1 = f;
-					//hitObjectIndex = i;
 				}
 			}
 		}
@@ -130,6 +129,14 @@ public:
 				ray._uv = _textureCoords[f1._t0] * w1 +
 						  _textureCoords[f1._t1] * u1 +
 						  _textureCoords[f1._t2] * v1;
+
+				ray._tangent = calculateTangent(
+						_positions[f1._v0],
+						_positions[f1._v1],
+						_positions[f1._v2],
+						_textureCoords[f1._t0],
+						_textureCoords[f1._t1],
+						_textureCoords[f1._t2]);
 			}
 		}
 		return hit;
@@ -200,7 +207,7 @@ private:
 
 	void loadMTLFile(const std::string& filename, std::vector<Material>& materials, std::map<std::string, int>& materialMap)
 	{
-		std::vector<std::string> headings = {"newmtl", "Ns", "Ka", "Kd", "Ks", "Ke", "Ni", "d", "illum", "map_Kd"};
+		std::vector<std::string> headings = {"newmtl", "Ns", "Ka", "Kd", "Ks", "Ke", "Ni", "d", "illum", "map_Kd", "map_Bump"};
 		std::ifstream matReader(_path + filename);
 		
 		if(matReader.is_open())
@@ -246,7 +253,10 @@ private:
 				else if(heading == "map_Kd")
 				{
 					materials.back().setTexture(_path + std::string(line + offset));
-					
+				}
+				else if(heading == "map_Bump")
+				{
+					materials.back().setNormalMap(_path + std::string(line + offset));
 				}
 				// else if(heading == "d")
 				// 	; // transparancy or (1-tr)

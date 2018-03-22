@@ -12,6 +12,7 @@ public:
   Vec3 _origin;
   Vec3 _dir;
   Vec3 _normal;
+  Vec3 _tangent;
   Vec2 _uv;
   float _t, _ior;
   int _materialID;

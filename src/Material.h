@@ -15,8 +15,9 @@ public:
 
   Material(const std::string& name = "", float Ia = .1f, const Vec3& kd = Vec3(1,1,1), const Vec3& ks = Vec3(1,1,1), const Vec3& attenuation = Vec3(1,1,1), float gloss = 64.f, float eta = 1.f, float reflectivity = 0.f, const std::string& type = "blinnPhong", bool checkered = false);
   void setTexture(const std::string& filename);
+  void setNormalMap(const std::string& filename);
   Vec3 color(const Vec3& N,const Vec3& V, const Vec3& L, const Vec3& lightColor) const;
-  Vec3 sampleTexture(const Vec2& uv);
+  Vec3 sampleTexture(const Vec2& uv);  
   Vec3 attenuationColor(float distance);
   bool isCheckered(const Vec3& point, int width = 10, int height = 10) const;
   float schlick(float eta1, float eta2, float cosTheta) const;
@@ -41,12 +42,22 @@ public:
 
   inline bool hasTexture()
   {
-    return _hasTexture;
+    return _texture.isInitialized();
   }
 
   inline Vec3 sampleTexture(const Vec2& uv) const
   {
     return _texture.sample(uv._u, uv._v);
+  }
+
+  inline Vec3 sampleNormalMap(const Vec2& uv) const
+  {
+    return _normalMap.sample(uv._u, uv._v);
+  }
+
+  inline bool hasNormalMap()
+  {
+    return _hasNormalMap;
   }
 
   std::string _name;
@@ -57,5 +68,6 @@ public:
 
 private:
   Texture _texture;
-  bool _hasTexture, _checkered;
+  Texture _normalMap;
+  bool _hasTexture, _hasNormalMap, _checkered;
 };

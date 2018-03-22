@@ -19,15 +19,24 @@ void BVH::build(const Obj& obj)
         int i = 0;
         for(auto& f : obj._faces)
         {
-            triangles.emplace_back(obj._positions[f._v0] + _position,
+            triangles.emplace_back( obj._positions[f._v0] + _position,
                                     obj._positions[f._v1] + _position,
                                     obj._positions[f._v2] + _position);
 
             if(obj.hasTextureCoordinates())
             {
-                triangles.back()._t0 = obj._textureCoords[f._t0];            
-                triangles.back()._t1 = obj._textureCoords[f._t1];
-                triangles.back()._t2 = obj._textureCoords[f._t2];
+                triangles.back()._uv0 = obj._textureCoords[f._t0];            
+                triangles.back()._uv1 = obj._textureCoords[f._t1];
+                triangles.back()._uv2 = obj._textureCoords[f._t2];
+
+                triangles.back()._t = calculateTangent(
+                    triangles.back()._p0,
+                    triangles.back()._p1,
+                    triangles.back()._p2,
+                    triangles.back()._uv0,
+                    triangles.back()._uv1,
+                    triangles.back()._uv2
+                );
             }
 
             if(obj.hasNormals())

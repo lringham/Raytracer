@@ -9,9 +9,9 @@ Plane::Plane(Vec3 normal, Vec3 position, float width, float height) :
   float nDotUp = dot(normal, Vec3(0, 1, 0));
   if (nDotUp*nDotUp != 1.f)
   {
-    Vec3 w = normalize(cross(Vec3(0, 1, 0), normal));
-    Vec3 h = normalize(cross(normal, w));
-    m.setCol(0, w);
+    _tangent = normalize(cross(Vec3(0, 1, 0), normal));
+    Vec3 h = normalize(cross(normal, _tangent));
+    m.setCol(0, _tangent);
     m.setCol(1, _normal);
     m.setCol(2, h);
     m.transpose();
@@ -28,11 +28,13 @@ bool Plane::raycast(Ray& ray) const
 
 
   ray._t = (_position - ray._origin).dot(_normal) / rayDirDotNormal;
-  ray._normal = _normal;
 
   Vec3 dist = m * (ray.intersection() - _position);
   if(std::abs(dist._x) < _halfWidth && std::abs(dist._z) < _halfHeight)
   {
+    ray._normal = _normal;
+    ray._tangent = _tangent;
+
     ray._uv.set(
       (dist._x + _halfWidth) / _width,
       (dist._z + _halfHeight) / _height);
