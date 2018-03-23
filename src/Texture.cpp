@@ -18,30 +18,32 @@ Vec3 Texture::sample(float u, float v) const
     unsigned y = static_cast<unsigned>(v * (_height - 1));
     int i = (x + y*_width) * _numComp;
 
-    return Vec3(
-       static_cast<float>(_pixels[i]  ) / 255.f,
-       static_cast<float>(_pixels[i+1]) / 255.f,
-       static_cast<float>(_pixels[i+2]) / 255.f);
-
+    if(_numComp == 1)
+        return Vec3(static_cast<float>(_pixels[i]  ) / 255.f, 0, 0);
+    else if(_numComp == 2)
+        return Vec3(
+            static_cast<float>(_pixels[i]  ) / 255.f, 
+            static_cast<float>(_pixels[i+1]) / 255.f, 0);
+    else
+        return Vec3(
+            static_cast<float>(_pixels[i]  ) / 255.f, 
+            static_cast<float>(_pixels[i+1]) / 255.f, 
+            static_cast<float>(_pixels[i+2]) / 255.f);    
 }
 
 bool Texture::loadTexture(const std::string& filename)
 {
     stbi_set_flip_vertically_on_load(true);
-    int n = 0;
-    unsigned char* data = stbi_load(&filename[0], &_width, &_height, &_numComp, n);
-    std::cout << "Loading " << filename;
+    unsigned char* data = stbi_load(&filename[0], &_width, &_height, &_numComp, 0);
     if(data != nullptr)
     {
-        for(int i = 0; i < _width*_height*3; ++i)
+        for(int i = 0; i < _width*_height*_numComp; ++i)
             _pixels.push_back(data[i]);
-        _pixels.shrink_to_fit();
+        _pixels.shrink_to_fit();        
         stbi_image_free(data);
         _initalized = true;
-        std::cout << "...Success\n";
         return true;
     }
-    std::cout << "...Fail\n";
     return false;
 }
 

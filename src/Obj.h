@@ -215,7 +215,11 @@ private:
 			char line[256];	
 			int offset = 0;					
 			while (matReader.getline(line, 256))
-			{				
+			{		
+				std::string lineStr = std::string(line + offset);
+				if(line[0] == '\0' || line[0] == '\n' || line[0] == '#' || lineStr.size() == 0)
+					continue;
+						
 				std::string heading = "";
 				for(auto& str : headings)
 				{
@@ -251,13 +255,9 @@ private:
 					materials.back()._ks._b = parsef(extra);
 				}
 				else if(heading == "map_Kd")
-				{
 					materials.back().setTexture(_path + std::string(line + offset));
-				}
 				else if(heading == "map_Bump")
-				{
 					materials.back().setNormalMap(_path + std::string(line + offset));
-				}
 				// else if(heading == "d")
 				// 	; // transparancy or (1-tr)
 				// else if(heading == "Ka")

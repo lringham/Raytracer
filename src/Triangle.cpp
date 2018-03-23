@@ -62,9 +62,7 @@ bool Triangle::raycast(Ray& ray) const
 	ray._normal  = _n0 * (1.f-u-v) +
 			  	   _n1 * u +
 			   	   _n2 * v;
-
 	ray._tangent = _t;
-
 	ray._uv      = _uv0 * (1.f-u-v) +
 			       _uv1 * u +
 			       _uv2 * v;

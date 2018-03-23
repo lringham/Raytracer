@@ -216,11 +216,11 @@ bool Scene::parseArgs(int argc, char** argv) //argv
 	// 	std::cout << "\t kd: " << m._kd << "\n";
 	// 	std::cout << "\t ks: " << m._ks << "\n";
 	// 	std::cout << "\t Ia: " << m._Ia << "\n";
-	// 	std::cout << "\t Type: " << m._type << "\n";	
-	// 	std::cout << "\t Tex: " << (m.hasTexture() ? "yes\n" : "no\n");	
+	// 	std::cout << "\t type: " << m._type << "\n";	
+	// 	std::cout << "\t tex: " << (m.hasTexture() ? "yes\n" : "no\n");	
+	// 	std::cout << "\t normMap: " << (m.hasNormalMap() ? "yes\n" : "no\n");	
 	// 	std::cout << "\t gloss: " << m._gloss << "\n";	
 	// }
-
 	return true;
 }
 
@@ -330,6 +330,7 @@ bool Scene::getBlock(unsigned& startX, unsigned& endX, unsigned& startY, unsigne
 		startY = b._startY;
 		endY = b._endY;
 
+		// Print progress
 		int progressRes = 10;
 		float progress = 1.f - static_cast<float>(blocks.size()) / static_cast<float>(_totalBlockCount);
 		std::cout.flush();
@@ -338,7 +339,7 @@ bool Scene::getBlock(unsigned& startX, unsigned& endX, unsigned& startY, unsigne
 		for(int i = 0; i < progressRes; ++i)
 		{
 			if(progress*progressRes > i)
-				std::cout << "\033[1;32m#\033[0m";		
+				std::cout << "\033[1;32m=\033[0m";		
 			else
 				std::cout << "\033[1;32m \033[0m";		
 		}
@@ -350,8 +351,11 @@ bool Scene::getBlock(unsigned& startX, unsigned& endX, unsigned& startY, unsigne
 			std::cout << " ";
 		std::cout << "\033[1;32m" << progress << "%\033[0m" << "\r";
 
+		// return true
 		return true;
 	}
+
+
 	return false;
 }
 
@@ -426,9 +430,7 @@ Vec3 Scene::calculateColor(Ray ray, int depth)
 		}
 
 		if(material.hasTexture())
-		{
 			color = color * material.sampleTexture(ray._uv);
-		}
 		if(material.isCheckered(collisionPoint))
 			color = color * 0.25f;
 

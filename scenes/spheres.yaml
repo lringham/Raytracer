@@ -3,7 +3,7 @@ outputName: spheres.ppm
 backgroundColor: [.2, .2, .6] # overridden if skySphere is specified
 recursionDepth: 3
 shadowSampleCount: 10
-skySphere: sky.jpg
+skySphere: horse.png
 materials:
     - name: plane
       type: blinnPhong
@@ -14,7 +14,7 @@ materials:
       eta: 1
       checkered: true
     - name: modelPlane
-      type: transparent
+      type: blinnPhong
       kd: [1, 1, 1]
       ks: [0, 0, 0]
       attenuation: [1, 1, 1]
@@ -24,29 +24,31 @@ materials:
       eta: 1.7
 objects:
     - type: model
-      filename: untitled.obj
+      filename: chief.obj
       position: [.5, 0, 40.0]
       material: modelPlane
     # - type: sphere
     #   position: [0, 2, 43]
     #   radius: 1
     #   material: modelPlane
-    - type: plane
-      position: [0.0, 0, 0.0]
-      normal: [0.0, 1, 0.0]
-      material: plane
+    # - type: plane
+    #   position: [.5, 0, 40.0]
+    #   normal: [0.0, 1, 0.0]
+    #   material: plane
+    #   width: 50
+    #   height: 50
 lights:
   - type: point
     color: [1.0, 1.0, 1.0]
-    position: [5, 5, 40.0]
-    radius: 0
-    intensity: 100.0
+    position: [5, 5, 30.0]
+    radius: 0.03
+    intensity: 50.0
 camera:
-  position: [6, 2, 35]
-  direction: [-1, -.1, 1]
+  position: [0, 3, 32.5]
+  direction: [0, 0, 1]
   fov: 1.5708
   focalLength: 4
   lensRadius: 0.0
   pxWidth: 1920
   pxHeight: 1080
-  sampleCount: 20
+  sampleCount: 10
