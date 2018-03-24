@@ -2,13 +2,13 @@ name: Test Scene
 outputName: spheres.ppm
 backgroundColor: [.2, .2, .6] # overridden if skySphere is specified
 recursionDepth: 3
-shadowSampleCount: 10
-skySphere: horse.png
+shadowSampleCount: 1
+skySphere: sky.png
 materials:
     - name: plane
-      type: blinnPhong
+      type: metallic
       kd: [1, 1, 1]
-      ks: [.0, .0, .0]
+      ks: [1, 1, 1]
       Ia: 0.1
       gloss: 64
       eta: 1
@@ -22,33 +22,39 @@ materials:
       gloss: 64
       reflectivity: 0
       eta: 1.7
+    # - name: horseSphere
+    #   type: blinnPhong
+    #   kd: [1, 1, 1]
+    #   ks: [0, 0, 0]
+    #   Ia: 1
+    #   texture: horse.png
 objects:
     - type: model
       filename: chief.obj
-      position: [.5, 0, 40.0]
+      position: [.5, 0, 0]
       material: modelPlane
     # - type: sphere
     #   position: [0, 2, 43]
     #   radius: 1
     #   material: modelPlane
-    # - type: plane
-    #   position: [.5, 0, 40.0]
-    #   normal: [0.0, 1, 0.0]
-    #   material: plane
-    #   width: 50
-    #   height: 50
+    - type: plane
+      position: [.5, 0.01, 0.0]
+      normal: [0.0, 1, 0.0]
+      material: plane
+      width: 25
+      height: 25
 lights:
   - type: point
     color: [1.0, 1.0, 1.0]
-    position: [5, 5, 30.0]
+    position: [.5, 10, 0.0]
     radius: 0.03
     intensity: 50.0
 camera:
-  position: [0, 3, 32.5]
-  direction: [0, 0, 1]
+  position: [0, 10, 10]
+  direction: [0, -1, -1]
   fov: 1.5708
-  focalLength: 4
-  lensRadius: 0.0
+  focalLength: 8
+  lensRadius: 0.03
   pxWidth: 1920
   pxHeight: 1080
-  sampleCount: 10
+  sampleCount: 1

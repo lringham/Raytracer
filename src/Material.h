@@ -19,7 +19,7 @@ public:
   Vec3 color(const Vec3& N,const Vec3& V, const Vec3& L, const Vec3& lightColor) const;
   Vec3 sampleTexture(const Vec2& uv);  
   Vec3 attenuationColor(float distance);
-  bool isCheckered(const Vec3& point, int width = 10, int height = 10) const;
+  bool isCheckered(const Vec3& point, int width = 5, int height = 5) const;
   float schlick(float eta1, float eta2, float cosTheta) const;
 
   inline Vec3 ambientColor() const

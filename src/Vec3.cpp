@@ -280,7 +280,7 @@ Vec3 rotate(const Vec3& v, float angle, const Vec3& axis)
 
 Vec3 lerp(float s, const Vec3& v1, const Vec3& v2)
 {
-	return s*(v2)+(1.f - s)*v1;
+	return (1.f-s)*v1 + s*(v2);
 }
 
 Vec3 nlerp(float s, const Vec3& v1, const Vec3& v2)

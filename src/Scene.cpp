@@ -441,10 +441,10 @@ Vec3 Scene::calculateColor(Ray ray, int depth)
 		// Calculate reflection and refraction rays
 		if(material.isMetallic())
 		{
-			float r = material.schlick(material._eta, _ambientIOR, ray._dir.dot(N));
+			float r = .15f; //material.schlick(material._eta, _ambientIOR, ray._dir.dot(N));
 			Ray reflectedRay(collisionPoint, reflect(ray._dir, N), _rayOffset);
 			Vec3 Ir = calculateColor(reflectedRay, depth - 1);
-			color = color + r*Ir;
+			color = (1.f-r)*color + r*Ir;
 		}
 		else if(material.isTransparent())
 		{
@@ -513,7 +513,7 @@ Vec3 Scene::sampleBackground(const Vec3& dir) const
 	}
 	else
 	{
-		float s = cos(((dir._y + 1.f) / 2.f) * 3.141592); 
-		return (1.f-s)*normalize(Vec3(135, 206, 235)) + s*normalize(Vec3(250, 214, 165));
+		float s = cos(((dir._y + 1.f) * .5f) * 3.141592); 
+		return lerp(s, normalize(Vec3(135, 206, 235)), normalize(Vec3(250, 214, 165)));
 	}
 }
