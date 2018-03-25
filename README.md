@@ -1,5 +1,5 @@
 # Raytracer
-A simple raytracer made for fun.
+A simple raytracer made for fun. Very much a work in progress.
 
 ## How to Build
 ```
@@ -14,11 +14,14 @@ make
 ```
 ## Bugs and Limitations
 - Uses non PBR
-- BVH slow at certain angles
 
 ## TODO
 - review usage info
-- linear texture sampling
-- FOG
-- make a few interesting scenes showing off features
 - clean todos and fixmes
+- Add tangent calculation to all geometry
+- Render a scene with all types of geometry
+- finish implementing boxes
+- Add sky box
+- make a few interesting scenes showing off features
+- list all features
+- add control of metal reflectivity
