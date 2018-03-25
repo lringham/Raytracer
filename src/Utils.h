@@ -43,3 +43,20 @@ inline bool startsWith(const std::string& string, const std::string& start)
             return false;
     return true;
 }
+
+inline std::string greenText(const std::string& text)
+{
+	return "\033[1;32m" + text + "\033[0m";
+}
+
+template<typename T>
+inline bool inbetweenInc(T val, T lower, T upper)
+{
+	return val >= lower && val <= upper;
+}
+
+template<typename T>
+inline bool inbetweenExc(T val, T lower, T upper)
+{
+	return val > lower && val < upper;
+}

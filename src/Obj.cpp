@@ -52,11 +52,9 @@ bool Obj::load(const std::string& filename, const std::string& path, std::vector
             parseLine(line, objType, materials, materialMap, currentMaterial);
         }
         objReader.close();
-        std::cout << "Loaded model: " << filename << std::endl;
     }
     else
     {
-        std::cout << "Can't load model: " << filename << std::endl;
         return false;
     }
 

@@ -16,12 +16,22 @@ make
 - Uses non PBR
 
 ## TODO
-- review usage info
 - clean todos and fixmes
-- Add tangent calculation to all geometry
 - Render a scene with all types of geometry
-- finish implementing boxes
 - Add sky box
 - make a few interesting scenes showing off features
-- list all features
-- add control of metal reflectivity
+
+## Features
+- Multi-threaded
+- Plane, Sphere, Triangles, OBJ/MTL files
+- BlinnPhong, Relfectivity, and Transparancy 
+- Point and directional lights
+- Sky spheres
+- Textures
+- Normal Mapping
+- BVH acceleration for OBJ models
+- YAML scene specification
+- PNG, JPG, BMP input
+- PPM output
+- Anti-aliasing via multiple samples
+- Soft shadows

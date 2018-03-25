@@ -12,7 +12,7 @@ materials:
       Ia: 0.1
       gloss: 64
       eta: 1
-      checkered: true
+      reflectivity: .5
     - name: modelPlane
       type: blinnPhong
       kd: [1, 1, 1]
@@ -41,8 +41,8 @@ objects:
       position: [.5, 0.01, 0.0]
       normal: [0.0, 1, 0.0]
       material: plane
-      width: 25
-      height: 25
+      width: 10
+      height: 10
 lights:
   - type: point
     color: [1.0, 1.0, 1.0]

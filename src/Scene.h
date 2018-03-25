@@ -15,6 +15,7 @@ class Scene
 {
 public:
 	Scene(int argc, char** argv);
+	bool loadScene(int argc, char** argv);
 	void trace();
 	void save();
 
@@ -68,7 +69,7 @@ private:
 		return t;
 	}
 
-	bool parseArgs(int argc, char** argv);
+	bool parseArgs(int argc, char** argv, std::string& sceneFilename);	
 	void traceSection(Camera& camera);
 	int castRay(Ray& ray);
 	Vec3 calculateColor(const Ray origRay, int depth);

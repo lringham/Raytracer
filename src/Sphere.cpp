@@ -33,6 +33,11 @@ bool Sphere::raycast(Ray& ray) const
 
 	ray._t = t1 >= 0 && t1 < t2 ? t1 : t2;
 	ray._normal = normalize(ray.intersection() - _center);
+	if(dot(Vec3(0, 1, 0), ray._normal) != 0.f)	
+		ray._tangent = normalize(cross(Vec3(0, 1, 0), ray._normal));
+	else
+		ray._tangent.set(1, 0, 0);
+
 	ray._uv.set(
 		atan2(ray._normal._x, ray._normal._z) / (3.1415926f*2.f),
 		1.f - acos(ray._normal._y) / 3.1415926f);

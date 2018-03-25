@@ -1,5 +1,8 @@
 #include <thread>
 #include <iostream>
+#include <functional>
+#include <map>
+
 
 #include "Utils.h"
 #include "Scene.h"
@@ -8,53 +11,68 @@
 #include "Plane.h"
 #include "Triangle.h"
 #include "Obj.h"
-#include "AABB.h"
 #include "BVH.h"
 
 Scene::Scene(int argc, char** argv) :
 	 _name("scene"), _outputName(""), _threadCount(0)
 {
 
-	std::cout << "Loading scene...\n";
-	if(parseArgs(argc, argv))
+	std::cout << "Loading scene...";
+	if(loadScene(argc, argv))
 	{
-		std::cout << "Finished loading\n";
+		std::cout << "finished\n";
 	}
 	else
 	{
-		std::cout << "Failed loading\n";
+		std::cout << "failed\n";
 		usage();
 		throw -1;
 	}
 }
 
-bool Scene::parseArgs(int argc, char** argv) //argv
-{
-	std::string sceneFile = "";
-	if(argc <= 1 || argc > 5)
+bool Scene::parseArgs(int argc, char** argv, std::string& sceneFilename)
+{	
+	std::map<std::string, std::function<void(std::string)>> argMap;
+	argMap["-threads="] = [&] (std::string value) {
+		_threadCount = std::stoi(value);		
+	};
+
+	if(inbetweenExc(argc, 1, 4))
 	{
-		return false;
-	}
-	else
-	{
-		sceneFile = argv[1];
-		const std::string threadCountStr = "-threads=";
+		sceneFilename = argv[1];
 		for(int i = 1; i < argc; ++i)
 		{
 			std::string arg = argv[i];
-			if(arg.compare(0, threadCountStr.length(), threadCountStr) == 0)
-				_threadCount = std::stoi(arg.substr(arg.find(threadCountStr)+threadCountStr.size()));
-				//FIXME account for other params
+			size_t pos = arg.find('=');
+			if(pos != std::string::npos)
+			{
+				std::string header = arg.substr(0, pos+1);				
+				std::string value = arg.substr(pos+1);				
+				if(argMap.count(header) == 1)
+					argMap.at(header)(value);
+			}
+			// else // is a flag
+			// {}
 		}
 	}
-	
+	else
+		return false;
+	return true;
+}
+
+bool Scene::loadScene(int argc, char** argv)
+{
+	std::string sceneFilename = "";
+	if(!parseArgs(argc, argv, sceneFilename))
+		return false;
+
 	std::map<std::string, int> materialMap;
 	YAML::Node config;
 	try
 	{
 		//TODO convert all optional args to use parseNode function
 		//TODO extract default values / magic numbers
-		YAML::Node config  	  = YAML::LoadFile(sceneFile);
+		YAML::Node config  	  = YAML::LoadFile(sceneFilename);
 		std::string modelsDir = parseNode<std::string>(config, "modelsDir", "");
 		_outputName 	   	  = parseNode<std::string>(config, "outputName", "scene.ppm");
 		_name 			   	  = parseNode<std::string>(config, "name", "scene");
@@ -136,14 +154,6 @@ bool Scene::parseArgs(int argc, char** argv) //argv
 						_materials,
 						materialMap)));	
 			}
-			else if(type == "box")
-			{
-				_geometry.emplace_back(
-					new AABB(
-						parseNode(object, "maxCorner", Vec3(0, 0, 0)),
-						parseNode(object, "minCorner", Vec3(1, 1, 1))
-					));
-			}
 			else
 				std::cout << "Invalid geometry type: " << type << std::endl;
 
@@ -206,27 +216,14 @@ bool Scene::parseArgs(int argc, char** argv) //argv
 	}
 	catch(YAML::BadFile e)
 	{
-		usage();
 		return false;
 	}
-
-	// for(auto& m : _materials)
-	// {
-	// 	std::cout << "Material: " << m._name << "\n";
-	// 	std::cout << "\t kd: " << m._kd << "\n";
-	// 	std::cout << "\t ks: " << m._ks << "\n";
-	// 	std::cout << "\t Ia: " << m._Ia << "\n";
-	// 	std::cout << "\t type: " << m._type << "\n";	
-	// 	std::cout << "\t tex: " << (m.hasTexture() ? "yes\n" : "no\n");	
-	// 	std::cout << "\t normMap: " << (m.hasNormalMap() ? "yes\n" : "no\n");	
-	// 	std::cout << "\t gloss: " << m._gloss << "\n";	
-	// }
 	return true;
 }
 
 void Scene::usage()
 {
-	std::cout << "Invalid command line parameters.\nUsage: ./Raytracer scene.yaml [-threads=8] [-w=800] [-h=600] [recurDepth=6]" << std::endl;
+	std::cout << "Invalid command line parameters.\nUsage: ./Raytracer scene.yaml [-threads=8]" << std::endl;
 }
 
 void Scene::trace()
@@ -335,27 +332,26 @@ bool Scene::getBlock(unsigned& startX, unsigned& endX, unsigned& startY, unsigne
 		float progress = 1.f - static_cast<float>(blocks.size()) / static_cast<float>(_totalBlockCount);
 		std::cout.flush();
 		std::cout << "Tracing " << _name << " ";
-		std::cout << "\033[1;32m[\033[0m";
+
+		// Create progress string
+		std::string progressText = "[";
 		for(int i = 0; i < progressRes; ++i)
 		{
 			if(progress*progressRes > i)
-				std::cout << "\033[1;32m=\033[0m";		
+				progressText = progressText + '=';
 			else
-				std::cout << "\033[1;32m \033[0m";		
+				progressText = progressText + ' ';
 		}
-		std::cout << "\033[1;32m]\033[0m";		
-		progress = static_cast<int>(progress * 100);
+		progressText = progressText + ']';
 		if(progress < 10)
-			std::cout << "  ";	
+			progressText = progressText + "  ";
 		else if(progress < 100)
-			std::cout << " ";
-		std::cout << "\033[1;32m" << progress << "%\033[0m" << "\r";
+			progressText = progressText + ' ';		
 
-		// return true
+		std::cout << greenText(progressText + std::to_string(static_cast<int>(progress * 100)) + "%\r");
+		
 		return true;
 	}
-
-
 	return false;
 }
 
@@ -441,7 +437,7 @@ Vec3 Scene::calculateColor(Ray ray, int depth)
 		// Calculate reflection and refraction rays
 		if(material.isMetallic())
 		{
-			float r = .15f; //material.schlick(material._eta, _ambientIOR, ray._dir.dot(N));
+			float r = material._reflectivity;
 			Ray reflectedRay(collisionPoint, reflect(ray._dir, N), _rayOffset);
 			Vec3 Ir = calculateColor(reflectedRay, depth - 1);
 			color = (1.f-r)*color + r*Ir;
