@@ -2,8 +2,8 @@
 #include "Utils.h"
 #include <math.h>
 
-Material::Material(const std::string& name, float Ia, const Vec3& kd, const Vec3& ks, const Vec3& attenuation, float gloss, float eta, float reflectivity, const std::string& materialType, bool checkered) :
-  _name(name), _Ia(Ia), _kd(kd), _ks(ks), _attenuation(attenuation), _gloss(gloss), _eta(eta), _reflectivity(reflectivity), _hasTexture(false), _hasNormalMap(false), _checkered(checkered)
+Material::Material(const std::string& name, float Ia, const Vec3& kd, const Vec3& ks, const Vec3& attenuation, float gloss, float ior, float reflectivity, const std::string& materialType, bool checkered) :
+  _name(name), _Ia(Ia), _kd(kd), _ks(ks), _attenuation(attenuation), _gloss(gloss), _ior(ior), _reflectivity(reflectivity), _hasTexture(false), _hasNormalMap(false), _checkered(checkered)
 {
     if(materialType == "metallic")
     {

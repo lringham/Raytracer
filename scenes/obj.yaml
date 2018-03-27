@@ -1,63 +1,60 @@
-name: Test Scene
+name: Obj Scene
 outputName: obj.ppm
-modelsDir: "../models/"
-backgroundColor: [.2, .2, .6]
-recursionDepth: 0
-shadowSampleCount: 1
+backgroundColor: [.2, .2, .6] # overridden if skySphere is specified
+recursionDepth: 3
+shadowSampleCount: 30
+skySphere: sky.png
 materials:
     - name: plane
-      type: blinnPhong
-      kd: [0.6, .6, .6]
-      ks: [1.0, 1.0, 1.0]
-      Ia: 0.1
-      gloss: 64
-      eta: 1.0
-    - name: sphere
       type: metallic
       kd: [1, 1, 1]
       ks: [1, 1, 1]
-      Ia: .1
-      gloss: 128
+      Ia: 0.1
+      gloss: 64
       eta: 1
-    - name: sphere_red
+      reflectivity: .5
+    - name: modelPlane
       type: blinnPhong
-      kd: [1, 0, 0]
-      ks: [1, 1, 1]
-      Ia: .1
-      gloss: 256
-      eta: 1
-    - name: glass
-      type: transparent
       kd: [1, 1, 1]
-      ks: [1, 1, 1]
+      ks: [0, 0, 0]
+      attenuation: [1, 1, 1]
       Ia: .1
-      gloss: 256
-      eta: 1.5
+      gloss: 64
+      reflectivity: 0
+      eta: 1.7
+    # - name: horseSphere
+    #   type: blinnPhong
+    #   kd: [1, 1, 1]
+    #   ks: [0, 0, 0]
+    #   Ia: 1
+    #   texture: horse.png
 objects:
-    - type: plane
-      normal: [0, 1, 0]
-      position: [0, 0, 0]
-      material: plane
-    #- type: model
-    #  position: [-10, 14.5, 48]
-    #  filename: f16b
-    #  texture: f16.png
-    #  material: sphere_red
     - type: model
-      position: [0, .5, 46]
-      filename: bunny
-      texture: f16.png
-      material: sphere_red
+      filename: chief.obj
+      position: [.5, 0, 0]
+      material: modelPlane
+    # - type: sphere
+    #   position: [0, 2, 43]
+    #   radius: 1
+    #   material: modelPlane
+    - type: plane
+      position: [.5, 0.01, 0.0]
+      normal: [0.0, 1, 0.0]
+      material: plane
+      width: 10
+      height: 10
 lights:
-  - color: [1.0, 1.0, 1.0]
-    position: [0.0, 10.0, 50.0]
-    radius: 1
-    intensity: 100.0
+  - type: point
+    color: [1.0, 1.0, 1.0]
+    position: [.5, 10, 0.0]
+    radius: 0.03
+    intensity: 50.0
 camera:
-  position: [0.0, 1.0, 50.0]
+  position: [0, 10, 10]
+  direction: [0, -1, -1]
   fov: 1.5708
-  focalLength: 50.0
-  lensRadius: 0
-  pxWidth: 800
-  pxHeight: 600
-  sampleCount: 6
+  focalLength: 8
+  lensRadius: 0.03
+  pxWidth: 1920
+  pxHeight: 1080
+  sampleCount: 30

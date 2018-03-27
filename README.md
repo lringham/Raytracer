@@ -10,16 +10,16 @@ make
 
 ## How to Run
 ```
-./Raytracer ../scenes/scene.yaml [-threads=8] [-w=800] [-h=600] [-recurDepth=6]
+./raytracer scene.yaml [-threads=8]
 ```
 ## Bugs and Limitations
-- Uses non PBR
+- Non PBR
 
 ## TODO
 - clean todos and fixmes
 - Render a scene with all types of geometry
-- Add sky box
 - make a few interesting scenes showing off features
+- fix white space
 
 ## Features
 - Multi-threaded
@@ -35,3 +35,5 @@ make
 - PPM output
 - Anti-aliasing via multiple samples
 - Soft shadows
+
+## Sample Renders

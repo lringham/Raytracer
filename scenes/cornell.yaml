@@ -1,0 +1,158 @@
+name: Cornell Box
+outputName: cornell.ppm
+backgroundColor: [0, 0, 0]
+recursionDepth: 3
+shadowSampleCount: 20
+skySphere: sky.png
+materials:
+    - name: plane
+      type: metallic
+      kd: [1, 1, 1]
+      ks: [1, 1, 1]
+      Ia: 0.1
+      gloss: 64
+      eta: 1
+      reflectivity: .5
+    - name: graySphere
+      type: transparent
+      kd: [1, 1, 1]
+      ks: [1, 1, 1]
+      attenuation: [200, 200, 200]
+      Ia: .1
+      ior: 1.5
+      gloss: 256
+      reflectivity: 0
+    - name: bluePyramid
+      type: blinnPhong
+      kd: [0, 0, 1]
+      ks: [1, 1, 1]
+      Ia: .1
+      gloss: 64
+      reflectivity: 0 
+    - name: greenWall
+      type: blinnPhong
+      kd: [0, 1, 0]
+      ks: [0, 0, 0]
+      Ia: .1
+      gloss: 64
+      reflectivity: 0 
+    - name: redWall
+      type: blinnPhong
+      kd: [1, 0, 0]
+      ks: [0, 0, 0]
+      Ia: .1
+      gloss: 64
+      reflectivity: 0 
+    - name: floor
+      type: blinnPhong
+      kd: [1, 1, 1]
+      ks: [1, 1, 1]
+      Ia: .1
+      gloss: 64
+      reflectivity: 0 
+objects:
+    # Reflective grey sphere
+    - type: sphere
+      position: [0.9, -1.925, -6.69]
+      radius: 0.825
+      material: graySphere
+    
+    # Blue pyramid
+    - type: triangle
+      x0: [-0.4, -2.75, -9.55]
+      x1: [-0.93, 0.55, -8.51]
+      x2: [0.11, -2.75, -7.98]
+      material: bluePyramid
+
+    - type: triangle
+      x0: [0.11, -2.75, -7.98]
+      x1: [-0.93, 0.55, -8.51]
+      x2: [-1.46, -2.75, -7.47]
+      material: bluePyramid
+
+    - type: triangle
+      x0: [-1.46, -2.75, -7.47]
+      x1: [-0.93, 0.55, -8.51]
+      x2: [-1.97, -2.75, -9.04]
+      material: bluePyramid
+
+    - type: triangle
+      x0: [-1.97, -2.75, -9.04]
+      x1: [-0.93, 0.55, -8.51]
+      x2: [-0.4, -2.75, -9.55]
+      material: bluePyramid
+      
+    # Ceiling
+    - type: triangle
+      x0: [2.75, 2.75, -10.5]
+      x1: [2.75, 2.75, -5]
+      x2: [-2.75, 2.75, -5]
+      material: floor
+
+    - type: triangle
+      x0: [-2.75, 2.75, -10.5]
+      x1: [2.75, 2.75, -10.5]
+      x2: [-2.75, 2.75, -5]
+      material: floor
+
+    # Green wall on right 
+    - type: triangle
+      x0: [2.75, 2.75, -5]
+      x1: [2.75, 2.75, -10.5]
+      x2: [2.75, -2.75, -10.5]
+      material: greenWall
+
+    - type: triangle
+      x0: [2.75, -2.75, -5]
+      x1: [2.75, 2.75, -5]
+      x2: [2.75, -2.75, -10.5]
+      material: greenWall
+
+    # Red wall on left
+    - type: triangle
+      x0: [-2.75, -2.75, -5]
+      x1: [-2.75, -2.75, -10.5]
+      x2: [-2.75, 2.75, -10.5]
+      material: redWall
+
+    - type: triangle
+      x0: [-2.75, 2.75, -5]
+      x1: [-2.75, -2.75, -5]
+      x2: [-2.75, 2.75, -10.5]
+      material: redWall
+
+    # Floor
+    - type: triangle
+      x0: [2.75, -2.75, -5]
+      x1: [2.75, -2.75, -10.5]
+      x2: [-2.75, -2.75, -10.5]
+      material: floor
+
+    - type: triangle
+      x0: [-2.75, -2.75, -5]
+      x1: [2.75, -2.75, -5]
+      x2: [-2.75, -2.75, -10.5]
+      material: floor
+
+    # Back wall
+    - type: plane
+      position: [0, 0, -10.5]
+      normal: [0, 0, 1]
+      material: plane
+
+lights:
+  - type: point
+    color: [1.0, 1.0, 1.0]
+    position: [0, 2.5, -7.75]
+    radius: 0.1
+    intensity: 1.0
+
+camera:
+  position: [0, 0, 0]
+  direction: [0, 0, -1]
+  fov: 1
+  focalLength: 8
+  lensRadius: 0
+  pxWidth: 600
+  pxHeight: 600
+  sampleCount: 40

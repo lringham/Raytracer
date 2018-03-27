@@ -13,7 +13,7 @@ public:
     metallic
   };
 
-  Material(const std::string& name = "", float Ia = .1f, const Vec3& kd = Vec3(1,1,1), const Vec3& ks = Vec3(1,1,1), const Vec3& attenuation = Vec3(1,1,1), float gloss = 64.f, float eta = 1.f, float reflectivity = 0.f, const std::string& type = "blinnPhong", bool checkered = false);
+  Material(const std::string& name = "", float Ia = .1f, const Vec3& kd = Vec3(1,1,1), const Vec3& ks = Vec3(1,1,1), const Vec3& attenuation = Vec3(1,1,1), float gloss = 64.f, float ior = 1.f, float reflectivity = 0.f, const std::string& type = "blinnPhong", bool checkered = false);
   void setTexture(const std::string& filename);
   void setNormalMap(const std::string& filename);
   Vec3 color(const Vec3& N,const Vec3& V, const Vec3& L, const Vec3& lightColor) const;
@@ -63,7 +63,7 @@ public:
   std::string _name;
   float _Ia;
   Vec3 _kd, _ks, _attenuation;
-  float _gloss, _eta, _reflectivity;
+  float _gloss, _ior, _reflectivity;
   MaterialType _type;
 
 private:

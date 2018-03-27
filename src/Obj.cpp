@@ -158,7 +158,7 @@ void Obj::loadMTLFile(const std::string& filename, std::vector<Material>& materi
             else if(heading == "Ns") // specular pow
                 materials.back()._gloss = parsef(line + offset);
             else if(heading == "Ni") // optical_density
-                materials.back()._eta = parsef(line + offset);
+                materials.back()._ior = parsef(line + offset);
             else if(heading == "Kd")
             {
                 char* extra = nullptr;

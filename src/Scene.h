@@ -92,4 +92,5 @@ private:
 	std::mutex _mutex;
 	unsigned _threadCount, _depth, _shadowSampleCount, _totalBlockCount;
 	float _rayOffset = .01f, _ambientIOR = 1.f;
+	bool _backgroundSet;
 };

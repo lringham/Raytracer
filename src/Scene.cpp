@@ -14,9 +14,8 @@
 #include "BVH.h"
 
 Scene::Scene(int argc, char** argv) :
-	 _name("scene"), _outputName(""), _threadCount(0)
-{
-
+	 _name("scene"), _outputName(""), _threadCount(0), _backgroundSet(false)
+{	
 	std::cout << "Loading scene...";
 	if(loadScene(argc, argv))
 	{
@@ -96,7 +95,7 @@ bool Scene::loadScene(int argc, char** argv)
 					parseNode(materialNode, "ks", Vec3(1, 1, 1)),
 					parseNode(materialNode, "attenuation", Vec3(1, 1, 1)),
 					parseNode<float>(materialNode, "gloss", 1.f),
-					parseNode<float>(materialNode, "eta", 1.f),
+					parseNode<float>(materialNode, "ior", 1.f),
 					parseNode<float>(materialNode, "reflectivity", 0.f),
 					materialNode["type"].as<std::string>(),
 					parseNode<bool>(materialNode, "checkered", false));
@@ -212,7 +211,11 @@ bool Scene::loadScene(int argc, char** argv)
 				parseNode<int>(config["camera"], "sampleCount", 1),
 				parseNode<float>(config["camera"], "lensRadius", 0.f));
 
-		_backgroundColor.set(parseNode(config, "backgroundColor", Vec3(0, 0, 0)));
+		if(config["backgroundColor"])
+		{
+			_backgroundColor.set(parseNode(config, "backgroundColor", Vec3(0, 0, 0)));
+			_backgroundSet = true;
+		}
 	}
 	catch(YAML::BadFile e)
 	{
@@ -223,7 +226,7 @@ bool Scene::loadScene(int argc, char** argv)
 
 void Scene::usage()
 {
-	std::cout << "Invalid command line parameters.\nUsage: ./Raytracer scene.yaml [-threads=8]" << std::endl;
+	std::cout << "Invalid command line parameters.\nUsage: ./raytracer scene.yaml [-threads=8]" << std::endl;
 }
 
 void Scene::trace()
@@ -455,7 +458,7 @@ Vec3 Scene::calculateColor(Ray ray, int depth)
 			if(dDotN < 0)
 			{
 				Vec3 dir;			
-				refract(ray._dir, N, _ambientIOR, material._eta, dir); //TIR can't happen because air is <= goem ior
+				refract(ray._dir, N, _ambientIOR, material._ior, dir); //TIR can't happen because air is <= goem ior
 				It = calculateColor(Ray(collisionPoint, dir, _rayOffset), depth - 1);
 				Ir = calculateColor(Ray(collisionPoint, reflect(ray._dir, N), _rayOffset), depth - 1);
 				cosTheta = -dDotN;
@@ -466,7 +469,7 @@ Vec3 Scene::calculateColor(Ray ray, int depth)
 				Vec3 dir;
 				k = material.attenuationColor(ray._t);	
 			
-				if(refract(ray._dir, -1*N, material._eta, _ambientIOR, dir)) // check for TIR
+				if(refract(ray._dir, -1*N, material._ior, _ambientIOR, dir)) // check for TIR
 				{
 					It = calculateColor(Ray(collisionPoint, dir, _rayOffset), depth - 1);
 					Ir = calculateColor(Ray(collisionPoint, reflect(ray._dir, -1.f*N), _rayOffset), depth - 1);
@@ -477,7 +480,7 @@ Vec3 Scene::calculateColor(Ray ray, int depth)
 					return k*calculateColor(Ray(collisionPoint, reflect(ray._dir, N), _rayOffset), depth - 1);
 			}
 
-			float r = material.schlick(material._eta, _ambientIOR, cosTheta);
+			float r = material.schlick(material._ior, _ambientIOR, cosTheta);
 			color = color + k * (r * Ir + (1.f-r) * It);
 		}
 	}
@@ -507,6 +510,8 @@ Vec3 Scene::sampleBackground(const Vec3& dir) const
 		Vec2 uv = calculateUV(dir);
 		return _skySphere.sample(uv._u, uv._v);
 	}
+	else if(_backgroundSet)
+		return _backgroundColor;
 	else
 	{
 		float s = cos(((dir._y + 1.f) * .5f) * 3.141592); 

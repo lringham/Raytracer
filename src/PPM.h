@@ -1,13 +1,3 @@
-/*
-char data[48] = {
-0,0,0,   0,0,0,  0,0,0,  15,0,15,
-0,0,0,   0,15,7, 0,0,0,  0,0,0,
-0,0,0,   0,0,0,  0,15,7, 0,0,0,
-15,0,15, 0,0,0,  0,0,0,  0,0,0 };
-
-savePPM("test.ppm", 4, 4, data);
-*/
-
 #include <fstream>
 #include <string>
 bool savePPM(std::string filename, unsigned width, unsigned height, char* data, bool normalize = false)
@@ -17,7 +7,7 @@ bool savePPM(std::string filename, unsigned width, unsigned height, char* data, 
 	{
 		// Set header info
 		file << "P6\n";
-		file << "# Generated with Lee Ringham's Raytracer\n";
+		file << "# Generated with Lee Ringham's raytracer\n";
 		file << width << " " << height << "\n";
 
 		// Set max char val
