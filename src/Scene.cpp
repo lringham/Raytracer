@@ -14,7 +14,7 @@
 #include "BVH.h"
 
 Scene::Scene(int argc, char** argv) :
-	 _name("scene"), _outputName(""), _threadCount(0), _backgroundSet(false)
+	 _name("scene"), _outputName(""), _threadCount(0),  _rayOffset(.01f), _ambientIOR(1.f), _backgroundSet(false)
 {	
 	std::cout << "Loading scene...";
 	if(loadScene(argc, argv))

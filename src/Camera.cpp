@@ -36,7 +36,8 @@ void Camera::init(const Vec3& position, const Vec3& direction, float fov, float 
 std::vector<Ray> Camera::createRays(unsigned x, unsigned y) const
 {
     std::vector<Ray> rays;
-    std::mt19937 gen(1); 
+    std::random_device rd;
+    std::mt19937 gen(rd()); 
     std::uniform_real_distribution<> dis(0.f, 1.f);
 
     for(int rayID = 0; rayID < _sampleCount; ++rayID)

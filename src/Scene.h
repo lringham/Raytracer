@@ -91,6 +91,6 @@ private:
 	std::string _outputName;
 	std::mutex _mutex;
 	unsigned _threadCount, _depth, _shadowSampleCount, _totalBlockCount;
-	float _rayOffset = .01f, _ambientIOR = 1.f;
+	float _rayOffset, _ambientIOR;
 	bool _backgroundSet;
 };
