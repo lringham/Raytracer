@@ -25,7 +25,7 @@ make
 ## Features
 - Multi-threaded
 - Plane, Sphere, Triangles, OBJ/MTL files
-- BlinnPhong, Relfectivity, and Transparancy 
+- BlinnPhong, Reflectivity, and Transparancy 
 - Point and directional lights
 - Sky spheres
 - Textures
