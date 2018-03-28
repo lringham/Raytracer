@@ -37,3 +37,5 @@ make
 - Soft shadows
 
 ## Sample Renders
+![Cornell Box](./images/cornell.png)
+![Depth of Field](./images/spheres.png)
