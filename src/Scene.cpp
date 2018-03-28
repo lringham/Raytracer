@@ -24,11 +24,13 @@ bool Scene::init(int argc, char** argv)
 	if(!loadScene(argc, argv))
 	{
 		std::cout << "finished\n";
+		return false;
 	}
 	else
 	{		
 		std::cout << "failed\n";
-		usage();		
+		usage();	
+		return true;	
 	}
 }
 
