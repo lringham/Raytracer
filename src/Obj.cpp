@@ -54,11 +54,8 @@ bool Obj::load(const std::string& filename, const std::string& path, std::vector
         objReader.close();
     }
     else
-    {
-        return false;
-    }
-
-    return true;
+        return true;
+    return false;
 }
 
 bool Obj::raycast(Ray& ray) const

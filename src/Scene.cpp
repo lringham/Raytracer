@@ -13,19 +13,22 @@
 #include "Obj.h"
 #include "BVH.h"
 
-Scene::Scene(int argc, char** argv) :
+Scene::Scene() :
 	 _name("scene"), _outputName(""), _threadCount(0),  _rayOffset(.01f), _ambientIOR(1.f), _backgroundSet(false)
 {	
+}
+
+bool Scene::init(int argc, char** argv)
+{
 	std::cout << "Loading scene...";
-	if(loadScene(argc, argv))
+	if(!loadScene(argc, argv))
 	{
 		std::cout << "finished\n";
 	}
 	else
-	{
+	{		
 		std::cout << "failed\n";
-		usage();
-		throw -1;
+		usage();		
 	}
 }
 
@@ -55,15 +58,15 @@ bool Scene::parseArgs(int argc, char** argv, std::string& sceneFilename)
 		}
 	}
 	else
-		return false;
-	return true;
+		return true;
+	return false;
 }
 
 bool Scene::loadScene(int argc, char** argv)
 {
 	std::string sceneFilename = "";
-	if(!parseArgs(argc, argv, sceneFilename))
-		return false;
+	if(parseArgs(argc, argv, sceneFilename))
+		return true;
 
 	std::map<std::string, int> materialMap;
 	YAML::Node config;
@@ -203,7 +206,7 @@ bool Scene::loadScene(int argc, char** argv)
 		_camera.init(
 				parseNode(config["camera"], "position", Vec3(0, 0, 1)),
 				parseNode(config["camera"], "direction", Vec3(0, 0, -1)),
-				parseNode<float>(config["camera"], "fov", 1.f),
+				parseNode<float>(config["camera"], "fov", 0),
 				parseNode<float>(config["camera"], "focalLength", 1.f),
 				Pixels(
 					 parseNode<unsigned>(config["camera"], "pxWidth", 100),
@@ -219,9 +222,9 @@ bool Scene::loadScene(int argc, char** argv)
 	}
 	catch(YAML::BadFile e)
 	{
-		return false;
+		return true;
 	}
-	return true;
+	return false;
 }
 
 void Scene::usage()

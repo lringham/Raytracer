@@ -14,7 +14,8 @@
 class Scene
 {
 public:
-	Scene(int argc, char** argv);
+	Scene();
+	bool init(int argc, char** argv);
 	bool loadScene(int argc, char** argv);
 	void trace();
 	void save();

@@ -16,7 +16,12 @@ void Camera::init(const Vec3& position, const Vec3& direction, float fov, float 
     _pixels = pixels;
     _position = position;
     _direction = normalize(direction);
-    _fov = fov;
+
+    if(fov == 0)
+        _fov = pixels.width() / pixels.height();
+    else
+        _fov = fov;
+
     _focalLength = focalLength;
     _lensRadius = lensRadius;
     _sampleCount = sampleCount;
@@ -35,9 +40,9 @@ void Camera::init(const Vec3& position, const Vec3& direction, float fov, float 
 
 std::vector<Ray> Camera::createRays(unsigned x, unsigned y) const
 {
-    std::vector<Ray> rays;
+    std::vector<Ray> rays;    
     std::random_device rd;
-    std::mt19937 gen(rd()); 
+    std::mt19937 gen(rd());
     std::uniform_real_distribution<> dis(0.f, 1.f);
 
     for(int rayID = 0; rayID < _sampleCount; ++rayID)

@@ -1,15 +1,16 @@
 name: Test Scene
 outputName: spheres.ppm
-recursionDepth: 1
+recursionDepth: 6
 shadowSampleCount: 10
 materials:
     - name: plane
-      type: blinnPhong
-      kd: [0.0, 1.0, 1.0]
+      type: metallic
+      kd: [.3, .3, .3]
       ks: [1.0, 1.0, 1.0]
       Ia: 0.1
       gloss: 64
       ior: 1.0
+      reflectivity: .05
     - name: sphere
       type: metallic
       kd: [1, 1, 1]
@@ -17,6 +18,7 @@ materials:
       Ia: .1
       gloss: 128
       ior: 1
+      reflectivity: .05
     - name: sphere_red
       type: metallic
       kd: [1, 0, 0]
@@ -24,6 +26,7 @@ materials:
       Ia: .1
       gloss: 256
       ior: 1
+      reflectivity: .05
     - name: glass
       type: transparent
       kd: [1, 1, 1]
@@ -63,10 +66,10 @@ lights:
     radius: 25.0
     intensity: 100000.0
 camera:
-  position: [-10.0, 15.0, 50.0]
+  position: [-10.0, 12.5, 50.0]
   fov: 1.5708
   focalLength: 50.0
-  lensRadius: 2.5
-  pxWidth: 1024
-  pxHeight: 800
-  sampleCount: 500
+  lensRadius: 2
+  pxWidth: 1000
+  pxHeight: 640
+  sampleCount: 1000

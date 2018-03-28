@@ -21,7 +21,7 @@ materials:
       Ia: .1
       ior: 1.5
       gloss: 256
-      reflectivity: 0
+      reflectivity: 0.05
     - name: bluePyramid
       type: blinnPhong
       kd: [0, 0, 1]
