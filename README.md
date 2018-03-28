@@ -1,5 +1,5 @@
 # Raytracer
-A simple raytracer made for fun. Very much a work in progress.
+A simple raytracer made for fun. It is a work in progress.
 
 ## How to Build
 ```
@@ -20,6 +20,7 @@ make
 - Render a scene with all types of geometry
 - make a few interesting scenes showing off features
 - fix white space
+- energy conserving phong
 
 ## Features
 - Multi-threaded
