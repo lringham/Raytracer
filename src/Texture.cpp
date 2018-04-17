@@ -75,9 +75,8 @@ bool Texture::loadTexture(const std::string& filename)
         _pixels.shrink_to_fit();        
         stbi_image_free(data);
         _initalized = true;
-        return true;
     }
-    return false;
+    return _initalized;
 }
 
 bool Texture::isInitialized() const

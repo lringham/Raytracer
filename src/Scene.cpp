@@ -21,16 +21,16 @@ Scene::Scene() :
 bool Scene::init(int argc, char** argv)
 {
 	std::cout << "Loading scene...";
-	if(!loadScene(argc, argv))
+	if(loadScene(argc, argv))
 	{
 		std::cout << "finished\n";
-		return false;
+		return true;
 	}
 	else
 	{		
 		std::cout << "failed\n";
 		usage();	
-		return true;	
+		return false;	
 	}
 }
 
@@ -58,17 +58,17 @@ bool Scene::parseArgs(int argc, char** argv, std::string& sceneFilename)
 			// else // is a flag
 			// {}
 		}
+		return true;
 	}
 	else
-		return true;
-	return false;
+		return false;	
 }
 
 bool Scene::loadScene(int argc, char** argv)
 {
 	std::string sceneFilename = "";
-	if(parseArgs(argc, argv, sceneFilename))
-		return true;
+	if(!parseArgs(argc, argv, sceneFilename))
+		return false;
 
 	std::map<std::string, int> materialMap;
 	YAML::Node config;
@@ -224,9 +224,9 @@ bool Scene::loadScene(int argc, char** argv)
 	}
 	catch(YAML::BadFile e)
 	{
-		return true;
+		return false;
 	}
-	return false;
+	return true;
 }
 
 void Scene::usage()
