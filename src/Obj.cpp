@@ -185,7 +185,7 @@ void Obj::loadMTLFile(const std::string& filename, std::vector<Material>& materi
         matReader.close();
     }
     else
-        std::cout << "Cannot open mtllib : " << _path + filename << std::endl;
+        std::cout << "Cannot open mtllib: " << _path + filename << std::endl;
 }
 
 void Obj::parseLine(char* line, OBJ_TYPE objType, std::vector<Material>& materials, std::map<std::string, int>& materialMap, int& materialID)
@@ -245,7 +245,9 @@ void Obj::parseLine(char* line, OBJ_TYPE objType, std::vector<Material>& materia
         }
         case USE_MATERIAL:
         {
-            materialID = materialMap[std::string(line+offset)];
+            std::string filename = std::string(line+offset);
+            if(materialMap.find(filename) != materialMap.end())
+                materialID = materialMap[filename];
             break;
         }
         case OBJECT: //Parse an object

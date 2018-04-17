@@ -11,7 +11,6 @@ materials:
       ks: [1, 1, 1]
       Ia: 0.1
       gloss: 64
-      eta: 1
       reflectivity: .5
     - name: graySphere
       type: transparent

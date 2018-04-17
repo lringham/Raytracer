@@ -10,28 +10,28 @@ materials:
       ks: [0.0, 0.0, 0.0]
       Ia: 0.1
       gloss: 64
-      eta: 1.0
+      ior: 1.0
     - name: sphere
       type: transparent
       kd: [1, 1, 1]
       ks: [1.0, 1.0, 1.0]
       Ia: .1
       gloss: 64
-      eta: 1.00
+      ior: 1.00
     - name: triangle
       type: blinnPhong
       kd: [1.0, 1.0, 0.0]
       ks: [0.0, 0.0, 0.0]
       Ia: .1
       gloss: 64
-      eta: 1.0
+      ior: 1.0
     - name: sphere2
       type: metallic
       kd: [.3, .3, .7]
       ks: [1, 1, 1]
       Ia: .1
       gloss: 8
-      eta: 1.0
+      ior: 1.0
 objects:
     - type: sphere
       radius: 100.0

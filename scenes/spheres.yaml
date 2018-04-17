@@ -1,4 +1,4 @@
-name: Test Scene
+name: Spheres
 outputName: spheres.ppm
 recursionDepth: 6
 shadowSampleCount: 1
