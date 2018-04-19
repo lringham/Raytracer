@@ -46,4 +46,4 @@ camera:
   lensRadius: 0.05
   pxWidth: 1920
   pxHeight: 1080
-  sampleCount: 40
+  sampleCount: 200

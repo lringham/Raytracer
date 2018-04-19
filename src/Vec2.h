@@ -4,40 +4,40 @@
 class Vec2
 {
 public:
-	Vec2(float val = 0);
-	Vec2(float x, float y);
+    Vec2(float val = 0);
+    Vec2(float x, float y);
 
-	float length() const;
-	void set(float x, float y);
-	void set(Vec2 v);
-	void zero();
-	void normalize();
-	float dot(Vec2 v);
-	void rotate(float angle);
+    float length() const;
+    void set(float x, float y);
+    void set(Vec2 v);
+    void zero();
+    void normalize();
+    float dot(Vec2 v);
+    void rotate(float angle);
 
-	//FIXME: need to be friends?
-	friend std::ostream& operator<<(std::ostream& os, const Vec2& v);
-	friend Vec2 operator+(const Vec2& v1, const Vec2& v2);
-	friend Vec2 operator+(const float& val, const Vec2& v);
-	friend Vec2 operator+(const Vec2& v, const float& val);
+    //FIXME: need to be friends?
+    friend std::ostream& operator<<(std::ostream& os, const Vec2& v);
+    friend Vec2 operator+(const Vec2& v1, const Vec2& v2);
+    friend Vec2 operator+(const float& val, const Vec2& v);
+    friend Vec2 operator+(const Vec2& v, const float& val);
 
-	friend Vec2 operator-(const Vec2& v1, const Vec2& v2);
-	friend Vec2 operator-(const float& val, const Vec2& v);
-	friend Vec2 operator-(const Vec2& v, const float& val);
+    friend Vec2 operator-(const Vec2& v1, const Vec2& v2);
+    friend Vec2 operator-(const float& val, const Vec2& v);
+    friend Vec2 operator-(const Vec2& v, const float& val);
 
-	friend Vec2 operator*(const Vec2& v1, const Vec2& v2);
-	friend Vec2 operator*(const float& val, const Vec2& v);
-	friend Vec2 operator*(const Vec2& v, const float& val);
+    friend Vec2 operator*(const Vec2& v1, const Vec2& v2);
+    friend Vec2 operator*(const float& val, const Vec2& v);
+    friend Vec2 operator*(const Vec2& v, const float& val);
 
-	union
-	{
-		float _x, _u;
-	};
+    union
+    {
+        float _x, _u;
+    };
 
-	union
-	{
-		float _y, _v;
-	};
+    union
+    {
+        float _y, _v;
+    };
 };
 
 Vec2 normalize(const Vec2& v);

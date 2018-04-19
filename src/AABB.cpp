@@ -1,12 +1,12 @@
 #include "AABB.h"
 
 AABB::AABB() :
-  	_min(std::numeric_limits<float>::max()), _max(std::numeric_limits<float>::min())
+    _min(std::numeric_limits<float>::max()), _max(std::numeric_limits<float>::min())
 {}
 
 AABB::AABB(const AABB& b0,const AABB& b1)
 {
-    _min._x = std::min(b0._min._x, b1._min._x);  
+    _min._x = std::min(b0._min._x, b1._min._x);
     _min._y = std::min(b0._min._y, b1._min._y);
     _min._z = std::min(b0._min._z, b1._min._z);
 
@@ -62,12 +62,12 @@ AABB::AABB(const std::vector<Triangle>& triangles)
     if(triangles.size() > 0)
     {
         const Triangle& t = triangles[0];
-     	_min._x = std::min(t._p0._x, std::min(t._p1._x, t._p2._x));
+        _min._x = std::min(t._p0._x, std::min(t._p1._x, t._p2._x));
         _min._y = std::min(t._p0._y, std::min(t._p1._y, t._p2._y));
         _min._z = std::min(t._p0._z, std::min(t._p1._z, t._p2._z));
         _max._x = std::max(t._p0._x, std::max(t._p1._x, t._p2._x));
         _max._y = std::max(t._p0._y, std::max(t._p1._y, t._p2._y));
-        _max._z = std::max(t._p0._z, std::max(t._p1._z, t._p2._z)); 
+        _max._z = std::max(t._p0._z, std::max(t._p1._z, t._p2._z));
     }
 
     for(const auto& t : triangles)

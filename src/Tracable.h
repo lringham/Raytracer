@@ -5,9 +5,9 @@
 class Tracable
 {
 public:
-  Tracable();
-  virtual ~Tracable();
-  virtual bool raycast(Ray& ray) const;
-  
-  int _materialID;
+    Tracable();
+    virtual ~Tracable();
+    virtual bool raycast(Ray& ray) const;
+
+    int _materialID;
 };

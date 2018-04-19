@@ -5,54 +5,54 @@
 class Vec4
 {
 public:
-	Vec4(float val = 0);
-	Vec4(float x, float y, float z, float w = 0.f);
-	Vec4(Vec3 v, float w = 0.f);
-	void zero();
-	void set(float x, float y, float z, float w = 0.f);
-	void set(const Vec4& v);
+    Vec4(float val = 0);
+    Vec4(float x, float y, float z, float w = 0.f);
+    Vec4(Vec3 v, float w = 0.f);
+    void zero();
+    void set(float x, float y, float z, float w = 0.f);
+    void set(const Vec4& v);
 
-	float dot(const Vec4& v) const;
-	void normalize();
-	float length() const;
-	Vec3 xyz();
+    float dot(const Vec4& v) const;
+    void normalize();
+    float length() const;
+    Vec3 xyz();
 
-	void sub(float x, float y, float z, float w);
-	void sub(const Vec4& translation);
-	void add(float x, float y, float z, float w);
-	void add(const Vec4& translation);
+    void sub(float x, float y, float z, float w);
+    void sub(const Vec4& translation);
+    void add(float x, float y, float z, float w);
+    void add(const Vec4& translation);
 
-	//FIXME: need to be friends?
-	friend std::ostream& operator<<(std::ostream& os, const Vec4& v);
-	friend Vec4 operator+(const Vec4& v1, const Vec4& v2);
-	friend Vec4 operator+(const float& val, const Vec4& v);
-	friend Vec4 operator+(const Vec4& v, const float& val);
+    //FIXME: need to be friends?
+    friend std::ostream& operator<<(std::ostream& os, const Vec4& v);
+    friend Vec4 operator+(const Vec4& v1, const Vec4& v2);
+    friend Vec4 operator+(const float& val, const Vec4& v);
+    friend Vec4 operator+(const Vec4& v, const float& val);
 
-	friend Vec4 operator-(const Vec4& v1, const Vec4& v2);
-	friend Vec4 operator-(const float& val, const Vec4& v);
-	friend Vec4 operator-(const Vec4& v, const float& val);
+    friend Vec4 operator-(const Vec4& v1, const Vec4& v2);
+    friend Vec4 operator-(const float& val, const Vec4& v);
+    friend Vec4 operator-(const Vec4& v, const float& val);
 
-	friend Vec4 operator*(const Vec4& v1, const Vec4& v2);
-	friend Vec4 operator*(const float& val, const Vec4& v);
-	friend Vec4 operator*(const Vec4& v, const float& val);
+    friend Vec4 operator*(const Vec4& v1, const Vec4& v2);
+    friend Vec4 operator*(const float& val, const Vec4& v);
+    friend Vec4 operator*(const Vec4& v, const float& val);
 
-	union
-	{
-		float _x, _r;
-	};
+    union
+    {
+        float _x, _r;
+    };
 
-	union
-	{
-		float _y, _g;
-	};
+    union
+    {
+        float _y, _g;
+    };
 
-	union
-	{
-		float _z, _b;
-	};
+    union
+    {
+        float _z, _b;
+    };
 
-	union
-	{
-		float _w, _a;
-	};
+    union
+    {
+        float _w, _a;
+    };
 };

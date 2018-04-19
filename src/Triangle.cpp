@@ -1,11 +1,11 @@
 #include "Triangle.h"
 
 Triangle::Triangle(Vec3 p0, Vec3 p1, Vec3 p2) :
-	_p0(p0), _p1(p1), _p2(p2)
+    _p0(p0), _p1(p1), _p2(p2)
 {
-	_n0 = normalize(cross(_p1 - _p0, _p2 - _p0));
-	_n1 = _n0;
-	_n2 = _n0;
+    _n0 = normalize(cross(_p1 - _p0, _p2 - _p0));
+    _n1 = _n0;
+    _n2 = _n0;
 }
 
 /* From pg 78 in Fundamentals of Computer Graphics 3rd Edition
@@ -28,115 +28,115 @@ det(A3)/M = v
 */
 bool Triangle::raycast(Ray& ray) const
 {
-	Vec3 e0 = _p1 - _p0;
-	Vec3 e1 = _p2 - _p0;
-	Vec3 rsubv0 = ray._origin - _p0;
+    Vec3 e0 = _p1 - _p0;
+    Vec3 e1 = _p2 - _p0;
+    Vec3 rsubv0 = ray._origin - _p0;
 
-	float a = -ray._dir._x, b = -ray._dir._y, c = -ray._dir._z;
-	float d = e0._x, e = e0._y, f = e0._z;
-	float g = e1._x, h = e1._y, i = e1._z;
-	float j = rsubv0._x, k = rsubv0._y, l = rsubv0._z;
+    float a = -ray._dir._x, b = -ray._dir._y, c = -ray._dir._z;
+    float d = e0._x, e = e0._y, f = e0._z;
+    float g = e1._x, h = e1._y, i = e1._z;
+    float j = rsubv0._x, k = rsubv0._y, l = rsubv0._z;
 
-	float eisubhf = e*i - h*f;
-	float gfsubdi = g*f - d*i;
-	float dhsubeg = d*h - e*g;
+    float eisubhf = e*i - h*f;
+    float gfsubdi = g*f - d*i;
+    float dhsubeg = d*h - e*g;
 
-	float Minv = 1.f / (a*eisubhf + b*gfsubdi + c*dhsubeg);
+    float Minv = 1.f / (a*eisubhf + b*gfsubdi + c*dhsubeg);
 
-	ray._t = (j*eisubhf + k*gfsubdi + l*dhsubeg) * Minv;
-	if (ray._t < 0)
-		return false;
+    ray._t = (j*eisubhf + k*gfsubdi + l*dhsubeg) * Minv;
+    if (ray._t < 0)
+        return false;
 
-	float aksubjb = a*k - j*b;
-	float jcsubal = j*c - a*l;
-	float blsubkc = b*l - k*c;
+    float aksubjb = a*k - j*b;
+    float jcsubal = j*c - a*l;
+    float blsubkc = b*l - k*c;
 
-	float u = (i*aksubjb + h*jcsubal + g*blsubkc) * Minv;
-	if (u < 0.f || u > 1.f)
-		return false;
+    float u = (i*aksubjb + h*jcsubal + g*blsubkc) * Minv;
+    if (u < 0.f || u > 1.f)
+        return false;
 
-	float v = -(f*aksubjb + e*(jcsubal)+d*blsubkc) * Minv;
-	if (v < 0.f || v > 1.f - u)
-		return false;
-	
-	ray._normal  = _n0 * (1.f-u-v) +
-			  	   _n1 * u +
-			   	   _n2 * v;
-	ray._tangent = _t;
-	ray._uv      = _uv0 * (1.f-u-v) +
-			       _uv1 * u +
-			       _uv2 * v;
-			  
-	ray._materialID = _materialID;
-	return true;
+    float v = -(f*aksubjb + e*(jcsubal)+d*blsubkc) * Minv;
+    if (v < 0.f || v > 1.f - u)
+        return false;
+
+    ray._normal  = _n0 * (1.f-u-v) +
+            _n1 * u +
+            _n2 * v;
+    ray._tangent = _t;
+    ray._uv      = _uv0 * (1.f-u-v) +
+            _uv1 * u +
+            _uv2 * v;
+
+    ray._materialID = _materialID;
+    return true;
 }
 
 bool raycastTri(const Vec3& p0, const Vec3& p1, const Vec3& p2, Ray& ray, float* uRet, float* vRet)
 {
-	Vec3 e0 = p1 - p0;
-	Vec3 e1 = p2 - p0;
-	Vec3 rsubv0 = ray._origin - p0;
+    Vec3 e0 = p1 - p0;
+    Vec3 e1 = p2 - p0;
+    Vec3 rsubv0 = ray._origin - p0;
 
-	float a = -ray._dir._x, b = -ray._dir._y, c = -ray._dir._z;
-	float d = e0._x, e = e0._y, f = e0._z;
-	float g = e1._x, h = e1._y, i = e1._z;
-	float j = rsubv0._x, k = rsubv0._y, l = rsubv0._z;
+    float a = -ray._dir._x, b = -ray._dir._y, c = -ray._dir._z;
+    float d = e0._x, e = e0._y, f = e0._z;
+    float g = e1._x, h = e1._y, i = e1._z;
+    float j = rsubv0._x, k = rsubv0._y, l = rsubv0._z;
 
-	float eisubhf = e*i - h*f;
-	float gfsubdi = g*f - d*i;
-	float dhsubeg = d*h - e*g;
+    float eisubhf = e*i - h*f;
+    float gfsubdi = g*f - d*i;
+    float dhsubeg = d*h - e*g;
 
-	float Minv = 1.f / (a*eisubhf + b*gfsubdi + c*dhsubeg);
+    float Minv = 1.f / (a*eisubhf + b*gfsubdi + c*dhsubeg);
 
-	ray._t = (j*eisubhf + k*gfsubdi + l*dhsubeg) * Minv;
-	if (ray._t < 0)
-		return false;
+    ray._t = (j*eisubhf + k*gfsubdi + l*dhsubeg) * Minv;
+    if (ray._t < 0)
+        return false;
 
-	float aksubjb = a*k - j*b;
-	float jcsubal = j*c - a*l;
-	float blsubkc = b*l - k*c;
+    float aksubjb = a*k - j*b;
+    float jcsubal = j*c - a*l;
+    float blsubkc = b*l - k*c;
 
-	float u = (i*aksubjb + h*jcsubal + g*blsubkc) * Minv;
-	if (u < 0.f || u > 1.f)
-		return false;
+    float u = (i*aksubjb + h*jcsubal + g*blsubkc) * Minv;
+    if (u < 0.f || u > 1.f)
+        return false;
 
-	float v = -(f*aksubjb + e*(jcsubal)+d*blsubkc) * Minv;
-	if (v < 0.f || v > 1.f - u)
-		return false;
+    float v = -(f*aksubjb + e*(jcsubal)+d*blsubkc) * Minv;
+    if (v < 0.f || v > 1.f - u)
+        return false;
 
-	ray._normal = normalize(cross(e0, e1));
+    ray._normal = normalize(cross(e0, e1));
 
-	if(uRet != nullptr)
-		*uRet = u;
+    if(uRet != nullptr)
+        *uRet = u;
 
-	if(vRet != nullptr)
-		*vRet = v;
+    if(vRet != nullptr)
+        *vRet = v;
 
-	return true;
+    return true;
 }
 
 Vec3 barycentre(const Triangle& triangle)
 {
-	return (triangle._p0 + triangle._p1 + triangle._p2) * (1.f/3.f);
+    return (triangle._p0 + triangle._p1 + triangle._p2) * (1.f/3.f);
 }
 
 Vec3 calculateTangent(const Vec3& p0, const Vec3& p1, const Vec3& p2, const Vec2& uv0, const Vec2& uv1, const Vec2& uv2)
 {
-	Vec3 Q1 = p1 - p0;
-	Vec3 Q2 = p2 - p0;
-	
-	float u1 = uv1._u - uv0._u;
-	float u2 = uv2._u - uv0._u;
-	float v1 = uv1._v - uv0._v;
-	float v2 = uv2._v - uv0._v;
+    Vec3 Q1 = p1 - p0;
+    Vec3 Q2 = p2 - p0;
 
-	float denom = u1*v2 - u2*v1;
-	if(denom != 0)
-	{
-		float invDet = 1.f / (u1*v2 - u2*v1);	
-		return invDet * (v2*Q1 - u1*Q2);
-	}
-	return Vec3(0, 0, 0);
+    float u1 = uv1._u - uv0._u;
+    float u2 = uv2._u - uv0._u;
+    float v1 = uv1._v - uv0._v;
+    float v2 = uv2._v - uv0._v;
+
+    float denom = u1*v2 - u2*v1;
+    if(denom != 0)
+    {
+        float invDet = 1.f / (u1*v2 - u2*v1);
+        return invDet * (v2*Q1 - u1*Q2);
+    }
+    return Vec3(0, 0, 0);
 }
 
 //

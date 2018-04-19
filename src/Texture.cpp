@@ -3,19 +3,19 @@
 #include "stb_image.h"
 
 Texture::Texture() : 
-  _initalized(false)
+    _initalized(false)
 {}
 
 Texture::Texture(const std::string& filename)
 {
-  if(!loadTexture(filename))
-    std::cout << "Cannot load texture:" << filename << "\n";
+    if(!loadTexture(filename))
+        std::cout << "Cannot load texture:" << filename << "\n";
 }
 
 Vec3 Texture::getPixelColor(int x, int y) const
 {
     if(x >= _width)
-       x = x % _width;
+        x = x % _width;
 
     if(y >= _height)
         y = y % _height;
@@ -25,13 +25,13 @@ Vec3 Texture::getPixelColor(int x, int y) const
         return Vec3(static_cast<float>(_pixels[i]  ) / 255.f, 0, 0);
     else if(_numComp == 2)
         return Vec3(
-            static_cast<float>(_pixels[i]  ) / 255.f, 
-            static_cast<float>(_pixels[i+1]) / 255.f, 0);
+                    static_cast<float>(_pixels[i]  ) / 255.f,
+                    static_cast<float>(_pixels[i+1]) / 255.f, 0);
     else
         return Vec3(
-            static_cast<float>(_pixels[i]  ) / 255.f, 
-            static_cast<float>(_pixels[i+1]) / 255.f, 
-            static_cast<float>(_pixels[i+2]) / 255.f); 
+                    static_cast<float>(_pixels[i]  ) / 255.f,
+                    static_cast<float>(_pixels[i+1]) / 255.f,
+                static_cast<float>(_pixels[i+2]) / 255.f);
 }
 
 Vec3 Texture::sample(float u, float v) const
@@ -39,8 +39,8 @@ Vec3 Texture::sample(float u, float v) const
     if(filter == NEAREST)
     {
         return getPixelColor(
-            static_cast<unsigned>(u*_width), 
-            static_cast<unsigned>(v*_height));
+                    static_cast<unsigned>(u*_width),
+                    static_cast<unsigned>(v*_height));
     }
     else
     {
@@ -56,7 +56,7 @@ Vec3 Texture::sample(float u, float v) const
         float dv = 1.f / _height;
         float u0 = static_cast<float>(x) / _width;
         float v0 = static_cast<float>(y) / _height;
-  
+
         float s = (u - u0) / du;
         float t = (v - v0) / dv;
         
@@ -72,7 +72,7 @@ bool Texture::loadTexture(const std::string& filename)
     {
         for(int i = 0; i < _width*_height*_numComp; ++i)
             _pixels.push_back(data[i]);
-        _pixels.shrink_to_fit();        
+        _pixels.shrink_to_fit();
         stbi_image_free(data);
         _initalized = true;
     }

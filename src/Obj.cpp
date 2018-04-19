@@ -22,32 +22,32 @@ bool Obj::load(const std::string& filename, const std::string& path, std::vector
     _path = path;
     OBJ_TYPE objTypeMap[3] = {V, VT, VTN};
     std::ifstream objReader(path + filename);
-    int currentMaterial = _materialID;		
+    int currentMaterial = _materialID;
     if(objReader.is_open())
     {
         OBJ_TYPE objType = NONE;
-        char line[256];			
+        char line[256];
         while (objReader.getline(line, 256))
         {
             if (objType == NONE && line[0] == 'f') //determine component type
             {
-                    int slashCount = 0;
-                    char c = ' ';
-                    for (int i = 2; c != '\0' && objType == NONE; ++i)
+                int slashCount = 0;
+                char c = ' ';
+                for (int i = 2; c != '\0' && objType == NONE; ++i)
+                {
+                    c = line[i];
+                    if (c == '/')
                     {
-                        c = line[i];
-                        if (c == '/')
-                        {
-                            if (line[i + 1] == '/') //Check for double slash denoting v//n
-                                objType = VN;
-                            slashCount++;
-                        }
+                        if (line[i + 1] == '/') //Check for double slash denoting v//n
+                            objType = VN;
+                        slashCount++;
                     }
-                    
-                    if(objType != VN && slashCount <= 6)
-                    {
-                        objType = objTypeMap[slashCount / 3];
-                    }
+                }
+
+                if(objType != VN && slashCount <= 6)
+                {
+                    objType = objTypeMap[slashCount / 3];
+                }
             }
             parseLine(line, objType, materials, materialMap, currentMaterial);
         }
@@ -69,10 +69,10 @@ bool Obj::raycast(Ray& ray) const
         Ray tempRay = ray;
         float u0, v0;
         if(raycastTri(
-            _position + _positions[f._v0],
-            _position + _positions[f._v1],
-            _position + _positions[f._v2],
-            tempRay, &u0, &v0))
+                    _position + _positions[f._v0],
+                    _position + _positions[f._v1],
+                    _position + _positions[f._v2],
+                    tempRay, &u0, &v0))
         {
             hit = true;
             if(tempRay._t < ray._t)
@@ -91,26 +91,26 @@ bool Obj::raycast(Ray& ray) const
         if(_normals.size() > 0)
         {
             ray._normal = normalize(_normals[f1._n0] * w1 +
-                                    _normals[f1._n1] * u1 +
-                                    _normals[f1._n2] * v1);
+                    _normals[f1._n1] * u1 +
+                    _normals[f1._n2] * v1);
         }
         else
         {
             ray._normal = normalize(
-                    cross(
-                        _positions[f1._v1] - _positions[f1._v0], 
-                        _positions[f1._v2] - _positions[f1._v0])
+                        cross(
+                            _positions[f1._v1] - _positions[f1._v0],
+                    _positions[f1._v2] - _positions[f1._v0])
                     );
         }
 
         if(hasTextureCoordinates())
         {
             ray._uv = _textureCoords[f1._t0] * w1 +
-                        _textureCoords[f1._t1] * u1 +
-                        _textureCoords[f1._t2] * v1;
+                    _textureCoords[f1._t1] * u1 +
+                    _textureCoords[f1._t2] * v1;
 
             ray._tangent = calculateTangent(
-                    _positions[f1._v0],
+                        _positions[f1._v0],
                     _positions[f1._v1],
                     _positions[f1._v2],
                     _textureCoords[f1._t0],
@@ -128,14 +128,14 @@ void Obj::loadMTLFile(const std::string& filename, std::vector<Material>& materi
     
     if(matReader.is_open())
     {
-        char line[256];	
-        int offset = 0;					
+        char line[256];
+        int offset = 0;
         while (matReader.getline(line, 256))
-        {		
+        {
             std::string lineStr = std::string(line + offset);
             if(line[0] == '\0' || line[0] == '\n' || line[0] == '#' || lineStr.size() == 0)
                 continue;
-                    
+
             std::string heading = "";
             for(auto& str : headings)
             {
@@ -150,7 +150,7 @@ void Obj::loadMTLFile(const std::string& filename, std::vector<Material>& materi
             {
                 std::string name = std::string(line +  offset);
                 materialMap[name] = materials.size();
-                materials.emplace_back(name);					
+                materials.emplace_back(name);
             }
             else if(heading == "Ns") // specular pow
                 materials.back()._gloss = parsef(line + offset);
@@ -210,7 +210,7 @@ void Obj::parseLine(char* line, OBJ_TYPE objType, std::vector<Material>& materia
     {
         offset = 2;
         lineType = OBJECT;
-    }			
+    }
     else if(line[0] == 'f') //face
     {
         offset = 2;
@@ -233,123 +233,123 @@ void Obj::parseLine(char* line, OBJ_TYPE objType, std::vector<Material>& materia
             offset = 3;
             lineType = VT;
         }
-    }		
+    }
 
     //Convert Line Values
     switch (lineType)
     {
-        case MATERIAL: //Parse a material
-        {				
-            loadMTLFile(std::string(line+offset), materials, materialMap);
-            break;
-        }
-        case USE_MATERIAL:
+    case MATERIAL: //Parse a material
+    {
+        loadMTLFile(std::string(line+offset), materials, materialMap);
+        break;
+    }
+    case USE_MATERIAL:
+    {
+        std::string filename = std::string(line+offset);
+        if(materialMap.find(filename) != materialMap.end())
+            materialID = materialMap[filename];
+        break;
+    }
+    case OBJECT: //Parse an object
+    {
+        //std::cout << std::string(line+offset) << std::endl;
+        //_objects.emplace_back(std::string(line+offset));
+        break;
+    }
+    case F: //Parse a face
+    {
+        //replace all slashes with spaces to allow for conversion
+        char c = ' ';
+        for (int i = offset; c != '\0'; ++i)
         {
-            std::string filename = std::string(line+offset);
-            if(materialMap.find(filename) != materialMap.end())
-                materialID = materialMap[filename];
-            break;
+            c = line[i];
+            if (c == '/')
+                line[i] = ' ';
         }
-        case OBJECT: //Parse an object
+
+        // parse face indices
+        Face f;
+        char* extra = nullptr;
+        switch (objType)
         {
-            //std::cout << std::string(line+offset) << std::endl;
-            //_objects.emplace_back(std::string(line+offset));
+        case V:
+            f._v0 = parsel(line + offset, &extra) - 1;
+            f._v1 = parsel(extra, &extra) - 1;
+            f._v2 = parsel(extra) - 1;
             break;
-        }
-        case F: //Parse a face
-        {
-            //replace all slashes with spaces to allow for conversion
-            char c = ' ';
-            for (int i = offset; c != '\0'; ++i)
-            {
-                c = line[i];
-                if (c == '/')
-                    line[i] = ' ';
-            }
+        case VT:
+            f._v0 = parsel(line + offset, &extra) - 1;
+            f._t0 = parsel(extra, &extra) - 1;
 
-            // parse face indices
-            Face f;
-            char* extra = nullptr;
-            switch (objType)
-            {
-            case V:
-                f._v0 = parsel(line + offset, &extra) - 1;
-                f._v1 = parsel(extra, &extra) - 1;
-                f._v2 = parsel(extra) - 1;
-                break;
-            case VT:
-                f._v0 = parsel(line + offset, &extra) - 1;
-                f._t0 = parsel(extra, &extra) - 1;
+            f._v1 = parsel(extra, &extra) - 1;
+            f._t1 = parsel(extra, &extra) - 1;
 
-                f._v1 = parsel(extra, &extra) - 1;
-                f._t1 = parsel(extra, &extra) - 1;
-
-                f._v2 = parsel(extra, &extra) - 1;
-                f._t2 = parsel(extra) - 1;
-                break;
-            case VN:
-                f._v0 = parsel(line + offset, &extra) - 1;
-                f._n0 = parsel(extra, &extra) - 1;
-
-                f._v1 = parsel(extra, &extra) - 1;
-                f._n1 = parsel(extra, &extra) - 1;
-
-                f._v2 = parsel(extra, &extra) - 1;
-                f._n2 = parsel(extra) - 1;
-                break;
-            case VTN:
-                f._v0 = parsel(line + offset, &extra) - 1;
-                f._t0 = parsel(extra, &extra) - 1;
-                f._n0 = parsel(extra, &extra) - 1;
-
-                f._v1 = parsel(extra, &extra) - 1;
-                f._t1 = parsel(extra, &extra) - 1;
-                f._n1 = parsel(extra, &extra) - 1;
-
-                f._v2 = parsel(extra, &extra) - 1;
-                f._t2 = parsel(extra, &extra) - 1;
-                f._n2 = parsel(extra) - 1;
-                break;
-            case F:
-            case OBJECT:
-            case MATERIAL:
-            case USE_MATERIAL:
-            case NONE:
-                break;
-            }
-
-            _faceMaterialMap[_faces.size()] = materialID; 
-            _faces.push_back(f);
+            f._v2 = parsel(extra, &extra) - 1;
+            f._t2 = parsel(extra) - 1;
             break;
-        }
-        case V: //Parse a position
-        {
-            char* extra = nullptr;
-            float x = parsef(line + offset, &extra);
-            float y = parsef(extra, &extra);
-            float z = parsef(extra);
-            _positions.emplace_back(x, y, z);
+        case VN:
+            f._v0 = parsel(line + offset, &extra) - 1;
+            f._n0 = parsel(extra, &extra) - 1;
+
+            f._v1 = parsel(extra, &extra) - 1;
+            f._n1 = parsel(extra, &extra) - 1;
+
+            f._v2 = parsel(extra, &extra) - 1;
+            f._n2 = parsel(extra) - 1;
             break;
-        }
-        case VN: //Parse a normal
-        {
-            char* extra = nullptr;
-            float x = parsef(line + offset, &extra);
-            float y = parsef(extra, &extra);
-            float z = parsef(extra);
-            _normals.emplace_back(x, y, z);
-            break;
-        }
-        case VT:  //Parse a texture coordinate
-        {
-            char* extra = nullptr;
-            float x = parsef(line + offset, &extra);
-            float y = parsef(extra);
-            _textureCoords.emplace_back(x, y);
-            break;
-        }
         case VTN:
+            f._v0 = parsel(line + offset, &extra) - 1;
+            f._t0 = parsel(extra, &extra) - 1;
+            f._n0 = parsel(extra, &extra) - 1;
+
+            f._v1 = parsel(extra, &extra) - 1;
+            f._t1 = parsel(extra, &extra) - 1;
+            f._n1 = parsel(extra, &extra) - 1;
+
+            f._v2 = parsel(extra, &extra) - 1;
+            f._t2 = parsel(extra, &extra) - 1;
+            f._n2 = parsel(extra) - 1;
+            break;
+        case F:
+        case OBJECT:
+        case MATERIAL:
+        case USE_MATERIAL:
         case NONE:
             break;
+        }
+
+        _faceMaterialMap[_faces.size()] = materialID;
+        _faces.push_back(f);
+        break;
+    }
+    case V: //Parse a position
+    {
+        char* extra = nullptr;
+        float x = parsef(line + offset, &extra);
+        float y = parsef(extra, &extra);
+        float z = parsef(extra);
+        _positions.emplace_back(x, y, z);
+        break;
+    }
+    case VN: //Parse a normal
+    {
+        char* extra = nullptr;
+        float x = parsef(line + offset, &extra);
+        float y = parsef(extra, &extra);
+        float z = parsef(extra);
+        _normals.emplace_back(x, y, z);
+        break;
+    }
+    case VT:  //Parse a texture coordinate
+    {
+        char* extra = nullptr;
+        float x = parsef(line + offset, &extra);
+        float y = parsef(extra);
+        _textureCoords.emplace_back(x, y);
+        break;
+    }
+    case VTN:
+    case NONE:
+        break;
     }
 }

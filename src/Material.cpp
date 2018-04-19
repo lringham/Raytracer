@@ -3,7 +3,7 @@
 #include <math.h>
 
 Material::Material(const std::string& name, float Ia, const Vec3& kd, const Vec3& ks, const Vec3& attenuation, float gloss, float ior, float reflectivity, const std::string& materialType, bool checkered) :
-  _name(name), _Ia(Ia), _kd(kd), _ks(ks), _attenuation(attenuation), _gloss(gloss), _ior(ior), _reflectivity(reflectivity), _hasTexture(false), _hasNormalMap(false), _checkered(checkered)
+    _name(name), _Ia(Ia), _kd(kd), _ks(ks), _attenuation(attenuation), _gloss(gloss), _ior(ior), _reflectivity(reflectivity), _hasTexture(false), _hasNormalMap(false), _checkered(checkered)
 {
     if(materialType == "metallic")
     {
@@ -44,15 +44,15 @@ Vec3 Material::color(const Vec3& N, const Vec3& V, const Vec3& L, const Vec3& li
 
 Vec3 Material::sampleTexture(const Vec2& uv)
 {
-  return _texture.sample(uv._u, uv._v);
+    return _texture.sample(uv._u, uv._v);
 }
 
 Vec3 Material::attenuationColor(float distance)
 {  
     return Vec3(
-        std::exp(-_attenuation._r * distance), 
-        std::exp(-_attenuation._g * distance), 
-        std::exp(-_attenuation._b * distance));
+                std::exp(-_attenuation._r * distance),
+                std::exp(-_attenuation._g * distance),
+                std::exp(-_attenuation._b * distance));
 }
 
 void Material::setTexture(const std::string& filename)
@@ -68,7 +68,7 @@ void Material::setNormalMap(const std::string& filename)
 float Material::schlick(float eta1, float eta2, float cosTheta) const
 {
     float R = ((eta1-eta2)*(eta1-eta2)) / ((eta1+eta2)*(eta1+eta2));
-    R = R + (1.f - R) * pow((1.f-cosTheta), 5);	
+    R = R + (1.f - R) * pow((1.f-cosTheta), 5);
     return (_reflectivity + (1.0 - _reflectivity) * R);
 }
 
@@ -80,8 +80,8 @@ bool Material::isCheckered(const Vec3& point, int width, int height) const
         float x = point._x, y = point._z;
         int x1 = ((int)x / width) % 2;
         int y1 = ((int)y / height) % 2;
-        return (y > 0) ^ y1 ? ((x <= 0 && x1) || (x > 0 && !x1)) : ((x <= 0 && !x1) || (x > 0 && x1)); 
+        return (y > 0) ^ y1 ? ((x <= 0 && x1) || (x > 0 && !x1)) : ((x <= 0 && !x1) || (x > 0 && x1));
     }
-    else 
+    else
         return false;
 }

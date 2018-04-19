@@ -40,7 +40,7 @@ void Camera::init(const Vec3& position, const Vec3& direction, float fov, float 
 
 std::vector<Ray> Camera::createRays(unsigned x, unsigned y) const
 {
-    std::vector<Ray> rays;    
+    std::vector<Ray> rays;
     std::random_device rd;
     std::mt19937 gen(rd());
     std::uniform_real_distribution<> dis(0.f, 1.f);
@@ -51,7 +51,7 @@ std::vector<Ray> Camera::createRays(unsigned x, unsigned y) const
         if(_lensRadius == 0.f)
             pos = _position;
         else
-        {           
+        {
             Vec3 p = pointInCircle(gen) * _lensRadius;
             pos = _position + _right*p._x + _up*p._y;
         }
@@ -59,15 +59,15 @@ std::vector<Ray> Camera::createRays(unsigned x, unsigned y) const
         Vec3 dir;
         if(_sampleCount == 1)
         {
-            dir = normalize(_topLeft + 
-                (x*_pxWidth  + .5f*_pxWidth) * _right -
-                (y*_pxHeight - .5f*_pxHeight)* _up    - pos);
+            dir = normalize(_topLeft +
+                            (x*_pxWidth  + .5f*_pxWidth) * _right -
+                            (y*_pxHeight - .5f*_pxHeight)* _up    - pos);
         }
         else
         {
-            dir = normalize(_topLeft + 
-                (x*_pxWidth  + dis(gen)*_pxWidth) * _right -
-                (y*_pxHeight - dis(gen)*_pxHeight)* _up    - pos);
+            dir = normalize(_topLeft +
+                            (x*_pxWidth  + dis(gen)*_pxWidth) * _right -
+                            (y*_pxHeight - dis(gen)*_pxHeight)* _up    - pos);
         }
         rays.emplace_back(pos, dir);
     }

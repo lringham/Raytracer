@@ -4,35 +4,35 @@
 
 inline float clamp(float v, float v1, float v2)
 {
-  return v < v1 ? v1 : v > v2 ? v2 : v;
+    return v < v1 ? v1 : v > v2 ? v2 : v;
 }
 
 inline Vec3 pointInCircle()
 {
-	std::random_device rd;
-  std::mt19937 gen(rd());
-  std::uniform_real_distribution<> dis(-1.f, 1.f);
-	Vec3 result(0, 0, 0);
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_real_distribution<> dis(-1.f, 1.f);
+    Vec3 result(0, 0, 0);
 
-	do
-	{
-		result.set(dis(gen), dis(gen), dis(gen)); // Find point in box around the sphere
-	} while(dot(result, result) >= 1.f); // Reject point if outside the sphere
+    do
+    {
+        result.set(dis(gen), dis(gen), dis(gen)); // Find point in box around the sphere
+    } while(dot(result, result) >= 1.f); // Reject point if outside the sphere
 
-	return result;
+    return result;
 }
 
 inline Vec3 pointInCircle(std::mt19937& gen)
 {
-  std::uniform_real_distribution<> dis(-1.f, 1.f);
-	Vec3 result(0, 0, 0);
+    std::uniform_real_distribution<> dis(-1.f, 1.f);
+    Vec3 result(0, 0, 0);
 
-	do
-	{
-		result.set(dis(gen), dis(gen), dis(gen)); // Find point in box around the sphere
-	} while(dot(result, result) >= 1.f); // Reject point if outside the sphere
+    do
+    {
+        result.set(dis(gen), dis(gen), dis(gen)); // Find point in box around the sphere
+    } while(dot(result, result) >= 1.f); // Reject point if outside the sphere
 
-	return result;
+    return result;
 }
 
 inline bool startsWith(const std::string& string, const std::string& start)
@@ -46,17 +46,17 @@ inline bool startsWith(const std::string& string, const std::string& start)
 
 inline std::string greenText(const std::string& text)
 {
-	return "\033[1;32m" + text + "\033[0m";
+    return "\033[1;32m" + text + "\033[0m";
 }
 
 template<typename T>
 inline bool inbetweenInc(T val, T lower, T upper)
 {
-	return val >= lower && val <= upper;
+    return val >= lower && val <= upper;
 }
 
 template<typename T>
 inline bool inbetweenExc(T val, T lower, T upper)
 {
-	return val > lower && val < upper;
+    return val > lower && val < upper;
 }

@@ -12,45 +12,45 @@ BVH::BVH(const Obj& obj)
 
 void BVH::build(const Obj& obj)
 {
-    // Find all triangles        
+    // Find all triangles
     _position = obj._position;
     std::vector<Triangle> triangles;
-    {        
+    {
         int i = 0;
         for(auto& f : obj._faces)
         {
             triangles.emplace_back( obj._positions[f._v0] + _position,
-                                    obj._positions[f._v1] + _position,
-                                    obj._positions[f._v2] + _position);
+                    obj._positions[f._v1] + _position,
+                    obj._positions[f._v2] + _position);
 
             if(obj.hasTextureCoordinates())
             {
-                triangles.back()._uv0 = obj._textureCoords[f._t0];            
+                triangles.back()._uv0 = obj._textureCoords[f._t0];
                 triangles.back()._uv1 = obj._textureCoords[f._t1];
                 triangles.back()._uv2 = obj._textureCoords[f._t2];
 
                 triangles.back()._t = calculateTangent(
-                    triangles.back()._p0,
-                    triangles.back()._p1,
-                    triangles.back()._p2,
-                    triangles.back()._uv0,
-                    triangles.back()._uv1,
-                    triangles.back()._uv2
-                );
+                            triangles.back()._p0,
+                            triangles.back()._p1,
+                            triangles.back()._p2,
+                            triangles.back()._uv0,
+                            triangles.back()._uv1,
+                            triangles.back()._uv2
+                            );
             }
 
             if(obj.hasNormals())
             {
-                triangles.back()._n0 = obj._normals[f._n0];            
+                triangles.back()._n0 = obj._normals[f._n0];
                 triangles.back()._n1 = obj._normals[f._n1];
                 triangles.back()._n2 = obj._normals[f._n2];
             }
 
             if(obj._faceMaterialMap.size() > 0)
                 triangles.back()._materialID = obj._faceMaterialMap.at(i);
-            else   
+            else
                 std::cout << "Mesh has no material\n";
-                
+
             i++;
         }
         triangles.shrink_to_fit();
@@ -58,7 +58,7 @@ void BVH::build(const Obj& obj)
     
     // Create root and childern
     _tree.emplace_back(AABB(triangles));
-    buildChildern(triangles);      
+    buildChildern(triangles);
     _tree.shrink_to_fit();
     _triangles.shrink_to_fit();
 }
@@ -98,11 +98,11 @@ BVH::Pair BVH::split(const std::vector<Triangle>& triangles, int axis) const
     // calculate centre of triangles
     float divider = 0.f;
     // split on x
-    if(axis == 0) 
+    if(axis == 0)
         for(auto& t : triangles)
             divider += barycentre(t)._x;
     // split on y
-    else if(axis == 1) 
+    else if(axis == 1)
         for(auto& t : triangles)
             divider += barycentre(t)._y;
     // split on z
@@ -111,8 +111,8 @@ BVH::Pair BVH::split(const std::vector<Triangle>& triangles, int axis) const
             divider += barycentre(t)._z;
     divider /= static_cast<float>(triangles.size());
 
-    // sort triangles    
-    if(axis == 0) 
+    // sort triangles
+    if(axis == 0)
     {
         for(auto& t : triangles)
         {
@@ -122,7 +122,7 @@ BVH::Pair BVH::split(const std::vector<Triangle>& triangles, int axis) const
                 pair._second.push_back(t);
         }
     }
-    else if(axis == 1) 
+    else if(axis == 1)
     {
         for(auto& t : triangles)
         {
@@ -177,16 +177,16 @@ bool BVH::search(Ray& ray, int parentIndex) const
         return false;
     }
     else if(node._boundingBox.raycast(parentRay))
-    {        
+    {
         Ray leftRay = ray, rightRay = ray;
         bool hitLeft = false, hitRight = false;
 
-        bool hasLeft = !node.isLeaf() && node._rightChildOffset != parentIndex + 1; 
+        bool hasLeft = !node.isLeaf() && node._rightChildOffset != parentIndex + 1;
         if(hasLeft) // has left child
             hitLeft = search(leftRay, parentIndex + 1); // search left
         if(node._rightChildOffset != -1) // has right child
             hitRight = search(rightRay, node._rightChildOffset); // search right
-            
+
         if(hitLeft && hitRight)
         {
             if(leftRay._t < rightRay._t)

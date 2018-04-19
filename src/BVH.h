@@ -15,7 +15,7 @@ public:
     bool raycast(Ray& ray) const override;
 
 private:
-    struct Pair 
+    struct Pair
     {
         std::vector<Triangle> _first;
         std::vector<Triangle> _second;

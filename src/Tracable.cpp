@@ -9,5 +9,5 @@ Tracable::~Tracable()
 
 bool Tracable::raycast(Ray&) const
 {
-  return true;
+    return true;
 }
