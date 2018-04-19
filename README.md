@@ -19,7 +19,6 @@ make
 - clean todos and fixmes
 - Render a scene with all types of geometry
 - make a few interesting scenes showing off features
-- fix white space
 - energy conserving phong
 
 ## Features
