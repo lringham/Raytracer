@@ -10,7 +10,7 @@ materials:
       Ia: 0.1
       gloss: 64
       checkered: true
-    - name: modelPlane
+    - name: bunny
       type: transparent
       kd: [0, .66, .42]
       ks: [1, 1, 1]
@@ -23,11 +23,7 @@ objects:
     - type: model
       filename: bunny.obj
       position: [.5, 0.01, 43.0]
-      material: modelPlane
-    # - type: sphere
-    #   position: [0, 2, 43]
-    #   radius: 2
-    #   material: modelPlane
+      material: bunny
     - type: plane
       position: [0.0, 0, 0.0]
       normal: [0.0, 1, 0.0]

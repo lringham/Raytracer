@@ -1,7 +1,7 @@
 name: Spheres
 outputName: spheres.ppm
 recursionDepth: 6
-shadowSampleCount: 1
+shadowSampleCount: 10
 materials:
     - name: plane
       type: metallic
@@ -72,4 +72,4 @@ camera:
   lensRadius: 2
   pxWidth: 1000
   pxHeight: 640
-  sampleCount: 1
+  sampleCount: 100
