@@ -38,13 +38,18 @@ make
 - Soft shadows
 
 ## Sample Renders
+Cornell box  
 ![Cornell Box](./images/cornell.png)
-Cornell box
+
+Depth of field example  
 ![Depth of Field](./images/spheres.png)
-Depth of field example
+
+Glass bunny example  
 ![Bunny](./images/bunny.png)
-Glass bunny example
+
+Masterchief with specular and normal maps  
 ![Chief](./images/chief.png)
-Masterchief with specular and normal maps
+
+Interesting bug  
 ![Bug](./images/bug.png)
-Interesting bug 
+
