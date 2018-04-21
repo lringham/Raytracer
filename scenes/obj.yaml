@@ -1,9 +1,9 @@
 name: Obj Scene
 outputName: obj.ppm
-recursionDepth: 3
-shadowSampleCount: 10
+recursionDepth: 1
+shadowSampleCount: 1
 backgroundColor: [0, 0, 0]
-skySphere: sky.jpg
+skySphere: space.png
 materials:
     - name: plane
       type: blinnPhong
@@ -77,4 +77,4 @@ camera:
   lensRadius: 0.03
   pxWidth: 1920
   pxHeight: 1080
-  sampleCount: 40
+  sampleCount: 10

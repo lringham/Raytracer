@@ -39,6 +39,12 @@ make
 
 ## Sample Renders
 ![Cornell Box](./images/cornell.png)
+Cornell box
 ![Depth of Field](./images/spheres.png)
+Depth of field example
 ![Bunny](./images/bunny.png)
+Glass bunny example
+![Chief](./images/chief.png)
+Masterchief with specular and normal maps
 ![Bug](./images/bug.png)
+Interesting bug 
