@@ -1,8 +1,8 @@
 #include "Sphere.h"
 #include <cmath>
 
-Sphere::Sphere(float radius, Vec3 center)
-    : _radius(radius), _center(center)
+Sphere::Sphere(float radius, Vec3 center, bool invertNormals)
+    : _radius(radius), _center(center), _invertNormals(invertNormals)
 {
 
 }
@@ -32,7 +32,13 @@ bool Sphere::raycast(Ray& ray) const
     float t2 = tc + t1c;
 
     ray._t = t1 >= 0 && t1 < t2 ? t1 : t2;
-    ray._normal = normalize(ray.intersection() - _center);
+
+    if(_invertNormals)
+        ray._normal = normalize(_center - ray.intersection());
+    else
+        ray._normal = normalize(ray.intersection() - _center);
+
+
     if(dot(Vec3(0, 1, 0), ray._normal) != 0.f)
         ray._tangent = normalize(cross(Vec3(0, 1, 0), ray._normal));
     else

@@ -29,6 +29,7 @@ make
 - Sky spheres
 - Textures
 - Normal Mapping
+- Specular Mapping without gloss
 - BVH acceleration for OBJ models
 - YAML scene specification
 - PNG, JPG, BMP input
@@ -40,3 +41,4 @@ make
 ![Cornell Box](./images/cornell.png)
 ![Depth of Field](./images/spheres.png)
 ![Bunny](./images/bunny.png)
+![Bug](./images/bug.png)

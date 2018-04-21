@@ -21,6 +21,7 @@ Vec3 Texture::getPixelColor(int x, int y) const
         y = y % _height;
 
     int i = (x + y*_width) * _numComp;
+
     if(_numComp == 1)
         return Vec3(static_cast<float>(_pixels[i]  ) / 255.f, 0, 0);
     else if(_numComp == 2)
@@ -31,7 +32,7 @@ Vec3 Texture::getPixelColor(int x, int y) const
         return Vec3(
                     static_cast<float>(_pixels[i]  ) / 255.f,
                     static_cast<float>(_pixels[i+1]) / 255.f,
-                static_cast<float>(_pixels[i+2]) / 255.f);
+                    static_cast<float>(_pixels[i+2]) / 255.f);
 }
 
 Vec3 Texture::sample(float u, float v) const
@@ -74,7 +75,7 @@ bool Texture::loadTexture(const std::string& filename)
             _pixels.push_back(data[i]);
         _pixels.shrink_to_fit();
         stbi_image_free(data);
-        _initalized = true;
+        _initalized = true;        
     }
     return _initalized;
 }

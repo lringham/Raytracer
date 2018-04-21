@@ -16,7 +16,8 @@ public:
     Material(const std::string& name = "", float Ia = .1f, const Vec3& kd = Vec3(1,1,1), const Vec3& ks = Vec3(1,1,1), const Vec3& attenuation = Vec3(1,1,1), float gloss = 64.f, float ior = 1.f, float reflectivity = 0.f, const std::string& type = "blinnPhong", bool checkered = false);
     void setTexture(const std::string& filename);
     void setNormalMap(const std::string& filename);
-    Vec3 color(const Vec3& N,const Vec3& V, const Vec3& L, const Vec3& lightColor) const;
+    void setSpecularMap(const std::string& filename);
+    Vec3 color(const Vec3& N,const Vec3& V, const Vec3& L, const Vec3& lightColor, const Vec2& uv) const;
     Vec3 sampleTexture(const Vec2& uv);
     Vec3 attenuationColor(float distance);
     bool isCheckered(const Vec3& point, int width = 5, int height = 5) const;
@@ -60,6 +61,11 @@ public:
         return _hasNormalMap;
     }
 
+    inline bool hasSpecularMap()
+    {
+        return _hasSpecularMap;
+    }
+
     std::string _name;
     float _Ia;
     Vec3 _kd, _ks, _attenuation;
@@ -69,5 +75,6 @@ public:
 private:
     Texture _texture;
     Texture _normalMap;
-    bool _hasTexture, _hasNormalMap, _checkered;
+    Texture _specularMap;
+    bool _hasTexture, _hasNormalMap, _hasSpecularMap, _checkered;
 };

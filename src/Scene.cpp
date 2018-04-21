@@ -114,6 +114,11 @@ bool Scene::loadScene(int argc, char** argv)
             {
                 _materials.back().setNormalMap(materialNode["normalMap"].as<std::string>());
             }
+
+            if(materialNode["specularMap"])
+            {
+                _materials.back().setSpecularMap(materialNode["specularMap"].as<std::string>());
+            }            
         }
 
         const YAML::Node& objectsNode = config["objects"];
@@ -127,7 +132,8 @@ bool Scene::loadScene(int argc, char** argv)
                 _geometry.emplace_back(
                             new Sphere(
                                 parseNode<float>(object, "radius", 1.f),
-                                parseNode(object, "position", Vec3(0, 0, 0))));
+                                parseNode(object, "position", Vec3(0, 0, 0)),
+                                parseNode<bool>(object, "invertNormals", false)));
             }
             else if(type == "triangle")
             {
@@ -206,15 +212,15 @@ bool Scene::loadScene(int argc, char** argv)
         }
 
         _camera.init(
-                    parseNode(config["camera"], "position", Vec3(0, 0, 1)),
+                parseNode(config["camera"], "position", Vec3(0, 0, 1)),
                 parseNode(config["camera"], "direction", Vec3(0, 0, -1)),
                 parseNode<float>(config["camera"], "fov", 0),
                 parseNode<float>(config["camera"], "focalLength", 1.f),
                 Pixels(
                     parseNode<unsigned>(config["camera"], "pxWidth", 100),
-                parseNode<unsigned>(config["camera"], "pxHeight", 100)),
-                parseNode<int>(config["camera"], "sampleCount", 1),
-                parseNode<float>(config["camera"], "lensRadius", 0.f));
+                    parseNode<unsigned>(config["camera"], "pxHeight", 100)),
+                    parseNode<int>(config["camera"], "sampleCount", 1),
+                    parseNode<float>(config["camera"], "lensRadius", 0.f));
 
         if(config["backgroundColor"])
         {
@@ -399,6 +405,7 @@ Vec3 Scene::calculateColor(Ray ray, int depth)
             TBN.setCol(1, cross(ray._normal, ray._tangent));
             TBN.setCol(2, ray._normal);
             N = TBN * (2.f*material.sampleNormalMap(ray._uv) - 1.f);
+            ray._normal = N;
         }
         else
             N = ray._normal;
@@ -413,7 +420,7 @@ Vec3 Scene::calculateColor(Ray ray, int depth)
             L.normalize();
 
             if(_shadowSampleCount == 0)
-                color = material.color(N, V, L, l->getColor(collisionPoint));
+                color = material.color(N, V, L, l->getColor(collisionPoint), ray._uv);
 
             // Shadows
             for(unsigned i = 0; i < _shadowSampleCount; ++i)
@@ -422,7 +429,7 @@ Vec3 Scene::calculateColor(Ray ray, int depth)
                 if(castShadowRay(shadowRay, distToLight))
                     color = color + material.ambientColor();
                 else
-                    color = color + material.color(N, V, L, l->getColor(collisionPoint));
+                    color = color + material.color(N, V, L, l->getColor(collisionPoint), ray._uv);
             }
         }
 

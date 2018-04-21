@@ -3,7 +3,7 @@
 #include <math.h>
 
 Material::Material(const std::string& name, float Ia, const Vec3& kd, const Vec3& ks, const Vec3& attenuation, float gloss, float ior, float reflectivity, const std::string& materialType, bool checkered) :
-    _name(name), _Ia(Ia), _kd(kd), _ks(ks), _attenuation(attenuation), _gloss(gloss), _ior(ior), _reflectivity(reflectivity), _hasTexture(false), _hasNormalMap(false), _checkered(checkered)
+    _name(name), _Ia(Ia), _kd(kd), _ks(ks), _attenuation(attenuation), _gloss(gloss), _ior(ior), _reflectivity(reflectivity), _hasTexture(false), _hasNormalMap(false), _hasSpecularMap(false), _checkered(checkered)
 {
     if(materialType == "metallic")
     {
@@ -19,11 +19,15 @@ Material::Material(const std::string& name, float Ia, const Vec3& kd, const Vec3
     }
 }
 
-Vec3 Material::color(const Vec3& N, const Vec3& V, const Vec3& L, const Vec3& lightColor) const
+Vec3 Material::color(const Vec3& N, const Vec3& V, const Vec3& L, const Vec3& lightColor, const Vec2& uv) const
 {
     Vec3 color = ambientColor();
     Vec3 H = normalize(L + V);
     Vec3 ks = _ks * pow(clamp(dot(N, H), 0, 1), _gloss);
+
+    if(_hasSpecularMap)
+        ks = ks * _specularMap.sample(uv._u, uv._v).length();
+        
     Vec3 kd = _kd * clamp(dot(N, L), 0, 1);
 
     if(isMetallic())
@@ -36,7 +40,7 @@ Vec3 Material::color(const Vec3& N, const Vec3& V, const Vec3& L, const Vec3& li
     }
     else
     {
-        color = color + (1.f-_Ia) * (kd + lightColor * ks);
+        color = color + (1.f-_Ia) * lightColor * (kd +  ks);
     }
 
     return color;
@@ -63,6 +67,11 @@ void Material::setTexture(const std::string& filename)
 void Material::setNormalMap(const std::string& filename)
 {
     _hasNormalMap = _normalMap.loadTexture(filename);
+}
+
+void Material::setSpecularMap(const std::string& filename)
+{
+    _hasSpecularMap = _specularMap.loadTexture(filename);
 }
 
 float Material::schlick(float eta1, float eta2, float cosTheta) const

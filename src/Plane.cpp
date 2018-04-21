@@ -17,7 +17,10 @@ Plane::Plane(Vec3 normal, Vec3 position, float width, float height) :
         m.transpose();
     }
     else
+    {
+        _tangent.set(1,0,0);
         m.identity();
+    }
 }
 
 bool Plane::raycast(Ray& ray) const

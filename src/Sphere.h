@@ -5,7 +5,7 @@
 class Sphere : public Tracable
 {
 public:
-    Sphere(float radius = 1.f, Vec3 center = Vec3(0, 0, 0));
+    Sphere(float radius = 1.f, Vec3 center = Vec3(0, 0, 0), bool invertNormals = false);
 
     /* Create a triangle using the ray origin, sphere origin, and the vector from the ray origin to the centre
        of the sphere projected onto the ray direction.
@@ -30,6 +30,7 @@ public:
 private:
     float _radius;
     Vec3 _center;
+    bool _invertNormals;
 };
 
 inline Vec2 calculateUV(const Vec3& vec) 

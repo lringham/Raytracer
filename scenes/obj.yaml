@@ -1,17 +1,19 @@
 name: Obj Scene
 outputName: obj.ppm
-backgroundColor: [.2, .2, .6] # overridden if skySphere is specified
 recursionDepth: 3
-shadowSampleCount: 30
-skySphere: sky.png
+shadowSampleCount: 10
+backgroundColor: [0, 0, 0]
+skySphere: sky.jpg
 materials:
     - name: plane
-      type: metallic
-      kd: [1, 1, 1]
+      type: blinnPhong
+      kd: [.5, .5, .5]
       ks: [1, 1, 1]
-      Ia: 0.1
+      Ia: 0
       gloss: 64
-      reflectivity: .5
+      texture: Concrete_002_COLOR.png
+      normalMap: Concrete_002_NRM.png
+      specularMap: Concrete_002_SPEC.png
     - name: modelPlane
       type: blinnPhong
       kd: [1, 1, 1]
@@ -20,39 +22,59 @@ materials:
       Ia: .1
       gloss: 64
       reflectivity: 0
-    # - name: horseSphere
-    #   type: blinnPhong
-    #   kd: [1, 1, 1]
-    #   ks: [0, 0, 0]
-    #   Ia: 1
-    #   texture: horse.png
+    - name: sphere
+      type: transparent
+      kd: [0, .5, 1]
+      ks: [0, .5, 1]
+      attenuation: [1, 1, 1]
+      Ia: .1
+      gloss: 64
+      reflectivity: 0.5
+      ior: 1.7
 objects:
     - type: model
       filename: chief.obj
       position: [.5, 0, 0]
       material: modelPlane
-    # - type: sphere
-    #   position: [0, 2, 43]
-    #   radius: 1
-    #   material: modelPlane
     - type: plane
-      position: [.5, 0.01, 0.0]
+      position: [0, 0.01, 3.0]
       normal: [0.0, 1, 0.0]
       material: plane
-      width: 10
-      height: 10
+      width: 15
+      height: 15
+    - type: plane
+      position: [15, 0.01, 3.0]
+      normal: [0.0, 1, 0.0]
+      material: plane
+      width: 15
+      height: 15
+    - type: plane
+      position: [-15, 0.01, 3.0]
+      normal: [0.0, 1, 0.0]
+      material: plane
+      width: 15
+      height: 15
+    - type: sphere
+      position: [5, .1, 2]
+      radius: .1
+      material: sphere
 lights:
   - type: point
-    color: [1.0, 1.0, 1.0]
-    position: [.5, 10, 0.0]
+    color: [0, .5, 1]
+    position: [5, 2, 2]
     radius: 0.03
-    intensity: 50.0
+    intensity: 20
+  - type: point
+    color: [1, 1, 1]
+    position: [0, 10, 0]
+    radius: 0.03
+    intensity: 50
 camera:
-  position: [0, 10, 10]
-  direction: [0, -1, -1]
-  fov: 1.5708
-  focalLength: 8
+  position: [3, 3, 6]
+  direction: [0, -.25, -1]
+  fov: 1.777777778
+  focalLength: 6
   lensRadius: 0.03
   pxWidth: 1920
   pxHeight: 1080
-  sampleCount: 30
+  sampleCount: 40
