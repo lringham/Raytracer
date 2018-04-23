@@ -3,7 +3,6 @@
 #include <functional>
 #include <map>
 
-
 #include "Utils.h"
 #include "Scene.h"
 #include "Ray.h"
@@ -526,7 +525,7 @@ Vec3 Scene::sampleBackground(const Vec3& dir) const
         return _backgroundColor;
     else
     {
-        float s = cos(((dir._y + 1.f) * .5f) * 3.141592);
-        return lerp(s, normalize(Vec3(135, 206, 235)), normalize(Vec3(250, 214, 165)));
+        float s = cosf(((dir._y + 1.f) * .5f) * _PI);
+        return lerp(s, normalize({135, 206, 235}), normalize({250, 214, 165}));
     }
 }

@@ -46,7 +46,12 @@ inline bool startsWith(const std::string& string, const std::string& start)
 
 inline std::string greenText(const std::string& text)
 {
+    #ifdef __linux__
     return "\033[1;32m" + text + "\033[0m";
+    #else
+    return text;
+    #endif
+
 }
 
 template<typename T>
@@ -60,3 +65,5 @@ inline bool inbetweenExc(T val, T lower, T upper)
 {
     return val > lower && val < upper;
 }
+
+const float _PI = 3.14159265f;

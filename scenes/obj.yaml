@@ -1,19 +1,26 @@
 name: Obj Scene
 outputName: obj.ppm
-recursionDepth: 1
-shadowSampleCount: 1
-backgroundColor: [0, 0, 0]
-skySphere: space.png
+recursionDepth: 3
+shadowSampleCount: 10
 materials:
     - name: plane
       type: blinnPhong
       kd: [.5, .5, .5]
       ks: [1, 1, 1]
       Ia: 0
-      gloss: 64
+      gloss: 256
       texture: Concrete_002_COLOR.png
       normalMap: Concrete_002_NRM.png
       specularMap: Concrete_002_SPEC.png
+    - name: backwall
+      type: blinnPhong
+      kd: [.3, .3, .3]
+      ks: [1, 1, 1]
+      Ia: 0
+      gloss: 256
+      texture: Stone_Wall_001_COLOR.jpg
+      normalMap: Stone_Wall_001_NRM.jpg
+      specularMap: Stone_Wall_001_SPEC.jpg    
     - name: modelPlane
       type: blinnPhong
       kd: [1, 1, 1]
@@ -54,18 +61,41 @@ objects:
       material: plane
       width: 15
       height: 15
+    - type: plane
+      position: [10, 0, -10.0]
+      normal: [0, 0, 1]
+      material: backwall
+      width: 20
+      height: 20
+    - type: plane
+      position: [30, 0, -10.0]
+      normal: [0, 0, 1]
+      material: backwall
+      width: 20
+      height: 20
+    - type: plane
+      position: [-10, 0, -10.0]
+      normal: [0, 0, 1]
+      material: backwall
+      width: 20
+      height: 20
     - type: sphere
       position: [5, .1, 2]
       radius: .1
       material: sphere
 lights:
   - type: point
+    color: [1, 1, 1]
+    position: [20, 10, 0]
+    radius: 0.02
+    intensity: 50
+  - type: point
     color: [0, .5, 1]
     position: [5, 2, 2]
     radius: 0.03
     intensity: 20
   - type: point
-    color: [1, 1, 1]
+    color: [.8, .3, 0]
     position: [0, 10, 0]
     radius: 0.03
     intensity: 50
@@ -77,4 +107,4 @@ camera:
   lensRadius: 0.03
   pxWidth: 1920
   pxHeight: 1080
-  sampleCount: 10
+  sampleCount: 1

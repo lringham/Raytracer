@@ -13,6 +13,8 @@ make
 ./raytracer scene.yaml [-threads=8]
 ```
 ## Bugs and Limitations
+- Specular map should be float texture
+- skymaps look like garbage
 - Non PBR
 
 ## TODO
