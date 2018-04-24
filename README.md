@@ -49,7 +49,7 @@ Depth of field example
 Glass bunny example  
 ![Bunny](./images/bunny.png)
 
-Masterchief with specular and normal maps  
+Masterchief with texture, specular and normal maps  
 ![Chief](./images/chief.png)
 
 Interesting bug  
