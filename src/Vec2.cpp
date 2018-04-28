@@ -2,41 +2,41 @@
 #include <cmath>
 
 Vec2::Vec2(float val)
-    : _x(val), _y(val)
+    : x_(val), y_(val)
 {
 }
 
 Vec2::Vec2(float x, float y)
-    : _x(x), _y(y)
+    : x_(x), y_(y)
 {
 }
 
 float Vec2::length() const
 {
-    return std::sqrt(_x*_x + _y*_y);
+    return std::sqrt(x_*x_ + y_*y_);
 }
 
 void Vec2::set(float x, float y)
 {
-    this->_x = x;
-    this->_y = y;
+    this->x_ = x;
+    this->y_ = y;
 }
 
 void Vec2::set(Vec2 v)
 {
-    this->_x = v._x;
-    this->_y = v._y;
+    this->x_ = v.x_;
+    this->y_ = v.y_;
 }
 
 float Vec2::dot(Vec2 v)
 {
-    return _x*v._x + _y*v._y;
+    return x_*v.x_ + y_*v.y_;
 }
 
 void Vec2::zero()
 {
-    _x = 0;
-    _y = 0;
+    x_ = 0;
+    y_ = 0;
 }
 
 void Vec2::normalize()
@@ -46,101 +46,101 @@ void Vec2::normalize()
     if (len == 0)
         return;
 
-    _x = _x / len;
-    _y = _y / len;
+    x_ = x_ / len;
+    y_ = y_ / len;
 }
 
 void Vec2::rotate(float angle)
 {
-    float newX = cos(angle)*_x - sin(angle)*_y;
-    float newY = sin(angle)*_x + cos(angle)*_y;
-    _x = newX;
-    _y = newY;
+    float newX = cos(angle)*x_ - sin(angle)*y_;
+    float newY = sin(angle)*x_ + cos(angle)*y_;
+    x_ = newX;
+    y_ = newY;
 }
 
 std::ostream& operator<<(std::ostream& os, const Vec2& v)
 {
-    os << "(" << v._x << ", " << v._y << ")";
+    os << "(" << v.x_ << ", " << v.y_ << ")";
     return os;
 }
 
 Vec2 operator+(const Vec2& v1, const Vec2& v2)
 {
-    return Vec2(v1._x + v2._x, v1._y + v2._y);
+    return Vec2(v1.x_ + v2.x_, v1.y_ + v2.y_);
 }
 
 Vec2 operator+(const float& val, const Vec2& v)
 {
-    return Vec2(v._x + val, v._y + val);
+    return Vec2(v.x_ + val, v.y_ + val);
 }
 
 Vec2 operator+(const Vec2& v, const float& val)
 {
-    return Vec2(v._x + val, v._y + val);
+    return Vec2(v.x_ + val, v.y_ + val);
 }
 
 Vec2 operator-(const Vec2& v1, const Vec2& v2)
 {
-    return Vec2(v1._x - v2._x, v1._y - v2._y);
+    return Vec2(v1.x_ - v2.x_, v1.y_ - v2.y_);
 }
 
 Vec2 operator-(const float& val, const Vec2& v)
 {
-    return Vec2(v._x - val, v._y - val);
+    return Vec2(v.x_ - val, v.y_ - val);
 }
 
 Vec2 operator-(const Vec2& v, const float& val)
 {
-    return Vec2(v._x - val, v._y - val);
+    return Vec2(v.x_ - val, v.y_ - val);
 }
 
 Vec2 operator*(const Vec2& v1, const Vec2& v2)
 {
-    return Vec2(v1._x * v2._x, v1._y * v2._y);
+    return Vec2(v1.x_ * v2.x_, v1.y_ * v2.y_);
 }
 
 Vec2 operator*(const float& val, const Vec2& v)
 {
-    return Vec2(v._x * val, v._y * val);
+    return Vec2(v.x_ * val, v.y_ * val);
 }
 
 Vec2 operator*(const Vec2& v, const float& val)
 {
-    return Vec2(v._x * val, v._y * val);
+    return Vec2(v.x_ * val, v.y_ * val);
 }
 
 //TODO: Add non member funcs
 Vec2 add(const Vec2& v1, const Vec2& v2)
 {
     return Vec2(
-                v1._x + v2._x,
-                v1._y + v2._y);
+                v1.x_ + v2.x_,
+                v1.y_ + v2.y_);
 }
 
 Vec2 sub(const Vec2& v1, const Vec2& v2)
 {
     return Vec2(
-                v1._x - v2._x,
-                v1._y - v2._y);
+                v1.x_ - v2.x_,
+                v1.y_ - v2.y_);
 }
 
 Vec2 mul(const Vec2& v, float val)
 {
     return Vec2(
-                v._x * val,
-                v._y * val);
+                v.x_ * val,
+                v.y_ * val);
 }
 
 Vec2 div(const Vec2& v, float val)
 {
     return Vec2(
-                v._x / val,
-                v._y / val);
+                v.x_ / val,
+                v.y_ / val);
 }
 
 float length(const Vec2& v)
 {
-    return sqrt(v._x*v._x + v._y*v._y);
+    return sqrt(v.x_*v.x_ + v.y_*v.y_);
 }
 
 Vec2 normalize(const Vec2& v)

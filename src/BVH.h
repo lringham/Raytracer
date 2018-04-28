@@ -17,25 +17,25 @@ public:
 private:
     struct Pair
     {
-        std::vector<Triangle> _first;
-        std::vector<Triangle> _second;
+        std::vector<Triangle> first_;
+        std::vector<Triangle> second_;
     };
 
     struct Node
     {
-        AABB _boundingBox;
-        int _triangleIndex;
-        int _rightChildOffset;
+        AABB boundingBox_;
+        int triangleIndex_;
+        int rightChildOffset_;
 
         Node(){}
 
         Node(AABB boundingBox, int triangleIndex = -1, int rightChildOffset = -1) :
-            _boundingBox(boundingBox), _triangleIndex(triangleIndex), _rightChildOffset(rightChildOffset)
+            boundingBox_(boundingBox), triangleIndex_(triangleIndex), rightChildOffset_(rightChildOffset)
         {}
 
         inline bool isLeaf() const
         {
-            return _triangleIndex != -1;
+            return triangleIndex_ != -1;
         }
     };
 
@@ -44,7 +44,7 @@ private:
     bool insert(unsigned destIndex, std::vector<Node>& destTree, unsigned fromIndex, std::vector<Node>& fromTree);
     bool search(Ray& ray, int parentIndex = 0) const;
 
-    std::vector<Node> _tree;
-    std::vector<Triangle> _triangles;
-    Vec3 _position;
+    std::vector<Node> tree_;
+    std::vector<Triangle> triangles_;
+    Vec3 position_;
 };

@@ -45,17 +45,17 @@ public:
 
     union
     {
-        float _x, _r, _u;
+        float x_, r_, u_;
     };
 
     union
     {
-        float _y, _g, _v;
+        float y_, g_, v_;
     };
 
     union
     {
-        float _z, _b, _w;
+        float z_, b_, w_;
     };
 };
 

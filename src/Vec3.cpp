@@ -3,47 +3,47 @@
 #include <cmath>
 
 Vec3::Vec3(float val) :
-    _x(val), _y(val), _z(val)
+    x_(val), y_(val), z_(val)
 {
 }
 
 Vec3::Vec3(float x, float y, float z) :
-    _x(x), _y(y), _z(z)
+    x_(x), y_(y), z_(z)
 {
 }
 
 void Vec3::set(float x, float y, float z)
 {
-    this->_x =x;
-    this->_y =y;
-    this->_z =z;
+    this->x_ =x;
+    this->y_ =y;
+    this->z_ =z;
 }
 
 void Vec3::set(const Vec3& v)
 {
-    _x = v._x;
-    _y = v._y;
-    _z = v._z;
+    x_ = v.x_;
+    y_ = v.y_;
+    z_ = v.z_;
 }
 
 void Vec3::zero()
 {
-    _x = 0;
-    _y = 0;
-    _z = 0;
+    x_ = 0;
+    y_ = 0;
+    z_ = 0;
 }
 
 Vec3 Vec3::cross(const Vec3&  v) const
 {
     return Vec3(
-                _y*v._z - _z*v._y,
-                _z*v._x - _x*v._z,
-                _x*v._y - _y*v._x);
+                y_*v.z_ - z_*v.y_,
+                z_*v.x_ - x_*v.z_,
+                x_*v.y_ - y_*v.x_);
 }
 
 float Vec3::dot(const Vec3&  v) const
 {
-    return _x*v._x + _y*v._y + _z*v._z;
+    return x_*v.x_ + y_*v.y_ + z_*v.z_;
 }
 
 Vec3 Vec3::projOnto(const Vec3& v)
@@ -70,30 +70,30 @@ float Vec3::acuteAngleBetween(const Vec3& v)
 
 void Vec3::add(float x, float y, float z)
 {
-    this->_x += x;
-    this->_y += y;
-    this->_z += z;
+    this->x_ += x;
+    this->y_ += y;
+    this->z_ += z;
 }
 
 void Vec3::add(const Vec3& translation)
 {
-    this->_x += translation._x;
-    this->_y += translation._y;
-    this->_z += translation._z;
+    this->x_ += translation.x_;
+    this->y_ += translation.y_;
+    this->z_ += translation.z_;
 }
 
 void Vec3::sub(float x, float y, float z)
 {
-    this->_x -= x;
-    this->_y -= y;
-    this->_z -= z;
+    this->x_ -= x;
+    this->y_ -= y;
+    this->z_ -= z;
 }
 
 void Vec3::sub(const Vec3& translation)
 {
-    this->_x -= translation._x;
-    this->_y -= translation._y;
-    this->_z -= translation._z;
+    this->x_ -= translation.x_;
+    this->y_ -= translation.y_;
+    this->z_ -= translation.z_;
 }
 
 void Vec3::normalize()
@@ -103,133 +103,133 @@ void Vec3::normalize()
     if (len == 0)
         return;
 
-    _x = _x / len;
-    _y = _y / len;
-    _z = _z / len;
+    x_ = x_ / len;
+    y_ = y_ / len;
+    z_ = z_ / len;
 }
 
 float Vec3::length() const
 {
-    return sqrt(_x*_x + _y*_y + _z*_z);
+    return sqrt(x_*x_ + y_*y_ + z_*z_);
 }
 
 std::ostream& operator<<(std::ostream& os, const Vec3& v)
 {
-    os << "(" << v._x << ", " << v._y << ", " << v._z << ")";
+    os << "(" << v.x_ << ", " << v.y_ << ", " << v.z_ << ")";
     return os;
 }
 
 Vec3 operator+(const Vec3& v1, const Vec3& v2)
 {
-    return Vec3(v1._x + v2._x, v1._y + v2._y, v1._z + v2._z);
+    return Vec3(v1.x_ + v2.x_, v1.y_ + v2.y_, v1.z_ + v2.z_);
 }
 
 Vec3 operator+(const float& val, const Vec3& v)
 {
-    return Vec3(v._x + val, v._y + val, v._z + val);
+    return Vec3(v.x_ + val, v.y_ + val, v.z_ + val);
 }
 
 Vec3 operator+(const Vec3& v, const float& val)
 {
-    return Vec3(v._x + val, v._y + val, v._z + val);
+    return Vec3(v.x_ + val, v.y_ + val, v.z_ + val);
 }
 
 Vec3 operator-(const Vec3& v1, const Vec3& v2)
 {
-    return Vec3(v1._x - v2._x, v1._y - v2._y, v1._z - v2._z);
+    return Vec3(v1.x_ - v2.x_, v1.y_ - v2.y_, v1.z_ - v2.z_);
 }
 
 Vec3 operator-(const float& val, const Vec3& v)
 {
-    return Vec3(v._x - val, v._y - val, v._z - val);
+    return Vec3(v.x_ - val, v.y_ - val, v.z_ - val);
 }
 
 Vec3 operator-(const Vec3& v, const float& val)
 {
-    return Vec3(v._x - val, v._y - val, v._z - val);
+    return Vec3(v.x_ - val, v.y_ - val, v.z_ - val);
 }
 
 Vec3 operator*(const Vec3& v1, const Vec3& v2)
 {
-    return Vec3(v1._x * v2._x, v1._y * v2._y, v1._z * v2._z);
+    return Vec3(v1.x_ * v2.x_, v1.y_ * v2.y_, v1.z_ * v2.z_);
 }
 
 Vec3 operator*(const float& val, const Vec3& v)
 {
-    return Vec3(v._x * val, v._y * val, v._z * val);
+    return Vec3(v.x_ * val, v.y_ * val, v.z_ * val);
 }
 
 Vec3 operator*(const Vec3& v, const float& val)
 {
-    return Vec3(v._x * val, v._y * val, v._z * val);
+    return Vec3(v.x_ * val, v.y_ * val, v.z_ * val);
 }
 
 Vec3 operator/(const Vec3& v1, const Vec3& v2)
 {
-    return Vec3(v1._x / v2._x, v1._y / v2._y, v1._z / v2._z);
+    return Vec3(v1.x_ / v2.x_, v1.y_ / v2.y_, v1.z_ / v2.z_);
 }
 
 Vec3 operator/(const float& val, const Vec3& v)
 {
-    return Vec3(v._x / val, v._y / val, v._z / val);
+    return Vec3(v.x_ / val, v.y_ / val, v.z_ / val);
 }
 
 Vec3 operator/(const Vec3& v, const float& val)
 {
-    return Vec3(v._x / val, v._y / val, v._z / val);
+    return Vec3(v.x_ / val, v.y_ / val, v.z_ / val);
 }
 
 // Non member functions
 Vec3 add(const Vec3& v1, const Vec3& v2)
 {
     return Vec3(
-                v1._x + v2._x,
-                v1._y + v2._y,
-                v1._z + v2._z);
+                v1.x_ + v2.x_,
+                v1.y_ + v2.y_,
+                v1.z_ + v2.z_);
 }
 
 Vec3 sub(const Vec3& v1, const Vec3& v2)
 {
     return Vec3(
-                v1._x - v2._x,
-                v1._y - v2._y,
-                v1._z - v2._z);
+                v1.x_ - v2.x_,
+                v1.y_ - v2.y_,
+                v1.z_ - v2.z_);
 }
 
 Vec3 mul(const Vec3& v, float val)
 {
     return Vec3(
-                v._x * val,
-                v._y * val,
-                v._z * val);
+                v.x_ * val,
+                v.y_ * val,
+                v.z_ * val);
 }
 
 Vec3 div(const Vec3& v, float val)
 {
     return Vec3(
-                v._x / val,
-                v._y / val,
-                v._z / val);
+                v.x_ / val,
+                v.y_ / val,
+                v.z_ / val);
 }
 
 float length(const Vec3& v)
 {
-    return sqrt(v._x*v._x + v._y*v._y + v._z*v._z);
+    return sqrt(v.x_*v.x_ + v.y_*v.y_ + v.z_*v.z_);
 }
 
 float dot(const Vec3& v1, const Vec3& v2)
 {
-    return v1._x * v2._x +
-            v1._y * v2._y +
-            v1._z * v2._z;
+    return v1.x_ * v2.x_ +
+            v1.y_ * v2.y_ +
+            v1.z_ * v2.z_;
 }
 
 Vec3 cross(const Vec3& v1, const Vec3& v2)
 {
     return Vec3(
-                v1._y*v2._z - v1._z*v2._y,
-                v1._z*v2._x - v1._x*v2._z,
-                v1._x*v2._y - v1._y*v2._x);
+                v1.y_*v2.z_ - v1.z_*v2.y_,
+                v1.z_*v2.x_ - v1.x_*v2.z_,
+                v1.x_*v2.y_ - v1.y_*v2.x_);
 }
 
 Vec3 normalize(const Vec3& v)

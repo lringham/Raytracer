@@ -66,4 +66,4 @@ inline bool inbetweenExc(T val, T lower, T upper)
     return val > lower && val < upper;
 }
 
-const float _PI = 3.14159265f;
+const float PI_ = 3.14159265f;

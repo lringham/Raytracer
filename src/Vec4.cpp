@@ -2,84 +2,84 @@
 #include <cmath>
 
 Vec4::Vec4(float val) :
-    _x(val), _y(val), _z(val), _w(val)
+    x_(val), y_(val), z_(val), w_(val)
 {
 }
 
 Vec4::Vec4(float x, float y, float z, float w) :
-    _x(x), _y(y), _z(z), _w(w)
+    x_(x), y_(y), z_(z), w_(w)
 {
 }
 
 Vec4::Vec4(Vec3 v, float w) :
-    _x(v._x), _y(v._y), _z(v._z), _w(w)
+    x_(v.x_), y_(v.y_), z_(v.z_), w_(w)
 {
 }
 
 void Vec4::set(float x, float y, float z, float w)
 {
-    this->_x = x;
-    this->_y = y;
-    this->_z = z;
-    this->_w = w;
+    this->x_ = x;
+    this->y_ = y;
+    this->z_ = z;
+    this->w_ = w;
 }
 
 void Vec4::set(const Vec4& v)
 {
-    _x = v._x;
-    _y = v._y;
-    _z = v._z;
-    _w = v._w;
+    x_ = v.x_;
+    y_ = v.y_;
+    z_ = v.z_;
+    w_ = v.w_;
 }
 
 void Vec4::zero()
 {
-    _x = 0;
-    _y = 0;
-    _z = 0;
-    _w = 0;
+    x_ = 0;
+    y_ = 0;
+    z_ = 0;
+    w_ = 0;
 }
 
 Vec3 Vec4::xyz()
 {
-    return Vec3(_x, _y, _z);
+    return Vec3(x_, y_, z_);
 }
 
 float Vec4::dot(const Vec4&  v) const
 {
-    return _x*v._x + _y*v._y + _z*v._z + _w*v._w;
+    return x_*v.x_ + y_*v.y_ + z_*v.z_ + w_*v.w_;
 }
 
 void Vec4::add(float x, float y, float z, float w)
 {
-    this->_x += x;
-    this->_y += y;
-    this->_z += z;
-    this->_w += w;
+    this->x_ += x;
+    this->y_ += y;
+    this->z_ += z;
+    this->w_ += w;
 }
 
 void Vec4::add(const Vec4& translation)
 {
-    this->_x += translation._x;
-    this->_y += translation._y;
-    this->_z += translation._z;
-    this->_w += translation._w;
+    this->x_ += translation.x_;
+    this->y_ += translation.y_;
+    this->z_ += translation.z_;
+    this->w_ += translation.w_;
 }
 
 void Vec4::sub(float x, float y, float z, float w)
 {
-    this->_x -= x;
-    this->_y -= y;
-    this->_z -= z;
-    this->_w -= w;
+    this->x_ -= x;
+    this->y_ -= y;
+    this->z_ -= z;
+    this->w_ -= w;
 }
 
 void Vec4::sub(const Vec4& translation)
 {
-    this->_x -= translation._x;
-    this->_y -= translation._y;
-    this->_z -= translation._z;
-    this->_w -= translation._w;
+    this->x_ -= translation.x_;
+    this->y_ -= translation.y_;
+    this->z_ -= translation.z_;
+    this->w_ -= translation.w_;
 }
 
 void Vec4::normalize()
@@ -89,66 +89,66 @@ void Vec4::normalize()
     if (len == 0)
         return;
 
-    _x = _x / len;
-    _y = _y / len;
-    _z = _z / len;
-    _w = _w / len;
+    x_ = x_ / len;
+    y_ = y_ / len;
+    z_ = z_ / len;
+    w_ = w_ / len;
 }
 
 float Vec4::length() const
 {
-    return std::sqrt(_x*_x + _y*_y + _z*_z + _w*_w);
+    return std::sqrt(x_*x_ + y_*y_ + z_*z_ + w_*w_);
 }
 
 std::ostream& operator<<(std::ostream& os, const Vec4& v)
 {
-    os << "(" << v._x << ", " << v._y << ", " << v._z << ", " << v._w << ")";
+    os << "(" << v.x_ << ", " << v.y_ << ", " << v.z_ << ", " << v.w_ << ")";
     return os;
 }
 
 Vec4 operator+(const Vec4& v1, const Vec4& v2)
 {
-    return Vec4(v1._x + v2._x, v1._y + v2._y,v1._z + v2._z, v1._w + v2._w);
+    return Vec4(v1.x_ + v2.x_, v1.y_ + v2.y_,v1.z_ + v2.z_, v1.w_ + v2.w_);
 }
 
 Vec4 operator+(const float& val, const Vec4& v)
 {
-    return Vec4(v._x + val, v._y + val, v._z + val, v._z + val);
+    return Vec4(v.x_ + val, v.y_ + val, v.z_ + val, v.z_ + val);
 }
 
 Vec4 operator+(const Vec4& v, const float& val)
 {
-    return Vec4(v._x + val, v._y + val, v._z + val, v._z + val);
+    return Vec4(v.x_ + val, v.y_ + val, v.z_ + val, v.z_ + val);
 }
 
 Vec4 operator-(const Vec4& v1, const Vec4& v2)
 {
-    return Vec4(v1._x - v2._x, v1._y - v2._y, v1._z - v2._z, v1._w - v2._w);
+    return Vec4(v1.x_ - v2.x_, v1.y_ - v2.y_, v1.z_ - v2.z_, v1.w_ - v2.w_);
 }
 
 Vec4 operator-(const float& val, const Vec4& v)
 {
-    return Vec4(v._x - val, v._y - val, v._z - val, v._w - val);
+    return Vec4(v.x_ - val, v.y_ - val, v.z_ - val, v.w_ - val);
 }
 
 Vec4 operator-(const Vec4& v, const float& val)
 {
-    return Vec4(v._x - val, v._y - val, v._z - val, v._w - val);
+    return Vec4(v.x_ - val, v.y_ - val, v.z_ - val, v.w_ - val);
 }
 
 Vec4 operator*(const Vec4& v1, const Vec4& v2)
 {
-    return Vec4(v1._x * v2._x, v1._y * v2._y, v1._z * v2._z, v1._w * v2._w);
+    return Vec4(v1.x_ * v2.x_, v1.y_ * v2.y_, v1.z_ * v2.z_, v1.w_ * v2.w_);
 }
 
 Vec4 operator*(const float& val, const Vec4& v)
 {
-    return Vec4(v._x * val, v._y * val, v._z * val, v._w * val);
+    return Vec4(v.x_ * val, v.y_ * val, v.z_ * val, v.w_ * val);
 }
 
 Vec4 operator*(const Vec4& v, const float& val)
 {
-    return Vec4(v._x * val, v._y * val, v._z * val, v._w * val);
+    return Vec4(v.x_ * val, v.y_ * val, v.z_ * val, v.w_ * val);
 }
 
 //TODO: Add non member funcs

@@ -2,15 +2,15 @@
 #include <cmath>
 
 Sphere::Sphere(float radius, Vec3 center, bool invertNormals)
-    : _radius(radius), _center(center), _invertNormals(invertNormals)
+    : radius_(radius), center_(center), invertNormals_(invertNormals)
 {
 
 }
 
 bool Sphere::raycast(Ray& ray) const
 {
-    Vec3 L = _center - ray._origin; // Get vector from ray origin to sphere centre
-    float tc = L.dot(ray._dir);	// Project vector onto ray dir
+    Vec3 L = center_ - ray.origin_; // Get vector from ray origin to sphere centre
+    float tc = L.dot(ray.dir_);	// Project vector onto ray dir
 
     // Check if ray is pointing at sphere
     if (tc < 0)
@@ -20,7 +20,7 @@ bool Sphere::raycast(Ray& ray) const
     float d2 = L.dot(L) -  tc*tc;
 
     // Check if ray missed the sphere
-    float radius2 = _radius*_radius;
+    float radius2 = radius_*radius_;
     if (d2 > radius2)
         return false;
 
@@ -31,23 +31,23 @@ bool Sphere::raycast(Ray& ray) const
     float t1 = tc - t1c;
     float t2 = tc + t1c;
 
-    ray._t = t1 >= 0 && t1 < t2 ? t1 : t2;
+    ray.t_ = t1 >= 0 && t1 < t2 ? t1 : t2;
 
-    if(_invertNormals)
-        ray._normal = normalize(_center - ray.intersection());
+    if(invertNormals_)
+        ray.normal_ = normalize(center_ - ray.intersection());
     else
-        ray._normal = normalize(ray.intersection() - _center);
+        ray.normal_ = normalize(ray.intersection() - center_);
 
 
-    if(dot(Vec3(0, 1, 0), ray._normal) != 0.f)
-        ray._tangent = normalize(cross(Vec3(0, 1, 0), ray._normal));
+    if(dot(Vec3(0, 1, 0), ray.normal_) != 0.f)
+        ray.tangent_ = normalize(cross(Vec3(0, 1, 0), ray.normal_));
     else
-        ray._tangent.set(1, 0, 0);
+        ray.tangent_.set(1, 0, 0);
 
-    ray._uv.set(
-                atan2(ray._normal._x, ray._normal._z) / (3.1415926f*2.f),
-                1.f - acos(ray._normal._y) / 3.1415926f);
+    ray.uv_.set(
+                atan2(ray.normal_.x_, ray.normal_.z_) / (3.1415926f*2.f),
+                1.f - acos(ray.normal_.y_) / 3.1415926f);
 
-    ray._materialID = _materialID;
+    ray.materialID_ = materialID_;
     return true;
 }

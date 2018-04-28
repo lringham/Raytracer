@@ -13,6 +13,6 @@ public:
     unsigned height() const;
 
 private:
-    unsigned _width = 0, _height = 0;
-    std::vector<Vec3> _data;
+    unsigned width_ = 0, height_ = 0;
+    std::vector<Vec3> data_;
 };

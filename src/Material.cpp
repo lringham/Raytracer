@@ -3,19 +3,19 @@
 #include <math.h>
 
 Material::Material(const std::string& name, float Ia, const Vec3& kd, const Vec3& ks, const Vec3& attenuation, float gloss, float ior, float reflectivity, const std::string& materialType, bool checkered) :
-    _name(name), _Ia(Ia), _kd(kd), _ks(ks), _attenuation(attenuation), _gloss(gloss), _ior(ior), _reflectivity(reflectivity), _hasTexture(false), _hasNormalMap(false), _hasSpecularMap(false), _checkered(checkered)
+    name_(name), Ia_(Ia), kd_(kd), ks_(ks), attenuation_(attenuation), gloss_(gloss), ior_(ior), reflectivity_(reflectivity), hasTexture_(false), hasNormalMap_(false), hasSpecularMap_(false), checkered_(checkered)
 {
     if(materialType == "metallic")
     {
-        _type = MaterialType::metallic;
+        type_ = MaterialType::metallic;
     }
     else if(materialType == "transparent")
     {
-        _type = MaterialType::transparent;
+        type_ = MaterialType::transparent;
     }
     else
     {
-        _type = MaterialType::blinnPhong;
+        type_ = MaterialType::blinnPhong;
     }
 }
 
@@ -23,24 +23,24 @@ Vec3 Material::color(const Vec3& N, const Vec3& V, const Vec3& L, const Vec3& li
 {
     Vec3 color = ambientColor();
     Vec3 H = normalize(L + V);
-    Vec3 ks = _ks * pow(clamp(dot(N, H), 0, 1), _gloss);
+    Vec3 ks = ks_ * pow(clamp(dot(N, H), 0, 1), gloss_);
 
-    if(_hasSpecularMap)
-        ks = ks * _specularMap.sample(uv._u, uv._v).length();
+    if(hasSpecularMap_)
+        ks = ks * specularMap_.sample(uv.u_, uv.v_).length();
         
-    Vec3 kd = _kd * clamp(dot(N, L), 0, 1);
+    Vec3 kd = kd_ * clamp(dot(N, L), 0, 1);
 
     if(isMetallic())
     {
-        color = color + (1.f-_Ia) * lightColor * (kd + ks);
+        color = color + (1.f-Ia_) * lightColor * (kd + ks);
     }
     else if(isTransparent())
     {
-        color = color + (1.f-_Ia) * lightColor * ks;
+        color = color + (1.f-Ia_) * lightColor * ks;
     }
     else
     {
-        color = color + (1.f-_Ia) * lightColor * (kd +  ks);
+        color = color + (1.f-Ia_) * lightColor * (kd +  ks);
     }
 
     return color;
@@ -48,45 +48,45 @@ Vec3 Material::color(const Vec3& N, const Vec3& V, const Vec3& L, const Vec3& li
 
 Vec3 Material::sampleTexture(const Vec2& uv)
 {
-    return _texture.sample(uv._u, uv._v);
+    return texture_.sample(uv.u_, uv.v_);
 }
 
 Vec3 Material::attenuationColor(float distance)
 {  
     return Vec3(
-                std::exp(-_attenuation._r * distance),
-                std::exp(-_attenuation._g * distance),
-                std::exp(-_attenuation._b * distance));
+                std::exp(-attenuation_.r_ * distance),
+                std::exp(-attenuation_.g_ * distance),
+                std::exp(-attenuation_.b_ * distance));
 }
 
 void Material::setTexture(const std::string& filename)
 {
-    _hasTexture = _texture.loadTexture(filename);
+    hasTexture_ = texture_.loadTexture(filename);
 }
 
 void Material::setNormalMap(const std::string& filename)
 {
-    _hasNormalMap = _normalMap.loadTexture(filename);
+    hasNormalMap_ = normalMap_.loadTexture(filename);
 }
 
 void Material::setSpecularMap(const std::string& filename)
 {
-    _hasSpecularMap = _specularMap.loadTexture(filename);
+    hasSpecularMap_ = specularMap_.loadTexture(filename);
 }
 
 float Material::schlick(float eta1, float eta2, float cosTheta) const
 {
     float R = ((eta1-eta2)*(eta1-eta2)) / ((eta1+eta2)*(eta1+eta2));
     R = R + (1.f - R) * pow((1.f-cosTheta), 5);
-    return (_reflectivity + (1.0 - _reflectivity) * R);
+    return (reflectivity_ + (1.0 - reflectivity_) * R);
 }
 
 bool Material::isCheckered(const Vec3& point, int width, int height) const
 {
     // Checkered plane
-    if(_checkered)
+    if(checkered_)
     {
-        float x = point._x, y = point._z;
+        float x = point.x_, y = point.z_;
         int x1 = ((int)x / width) % 2;
         int y1 = ((int)y / height) % 2;
         return (y > 0) ^ y1 ? ((x <= 0 && x1) || (x > 0 && !x1)) : ((x <= 0 && !x1) || (x > 0 && x1));

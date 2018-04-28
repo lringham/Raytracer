@@ -9,11 +9,11 @@ public:
     Ray(Vec3 origin, Vec3 dir, float offset = 0.f);
     Vec3 intersection() const;
 
-    Vec3 _origin;
-    Vec3 _dir;
-    Vec3 _normal;
-    Vec3 _tangent;
-    Vec2 _uv;
-    float _t, _ior;
-    int _materialID;
+    Vec3 origin_;
+    Vec3 dir_;
+    Vec3 normal_;
+    Vec3 tangent_;
+    Vec2 uv_;
+    float t_, ior_;
+    int materialID_;
 };

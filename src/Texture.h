@@ -21,7 +21,7 @@ public:
 
 
 private:
-    std::vector<unsigned char> _pixels;
-    int _width, _height, _numComp;
-    bool _initalized;
+    std::vector<unsigned char> pixels_;
+    int width_, height_, numComp_;
+    bool initalized_;
 };

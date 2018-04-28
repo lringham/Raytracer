@@ -13,28 +13,28 @@ Camera::Camera(const Vec3& position, const Vec3& direction, float fov, float foc
 
 void Camera::init(const Vec3& position, const Vec3& direction, float fov, float focalLength, Pixels pixels, int sampleCount, float lensRadius)
 {
-    _pixels = pixels;
-    _position = position;
-    _direction = normalize(direction);
+    pixels_ = pixels;
+    position_ = position;
+    direction_ = normalize(direction);
 
     if(fov == 0)
-        _fov = pixels.width() / pixels.height();
+        fov_ = pixels.width() / pixels.height();
     else
-        _fov = fov;
+        fov_ = fov;
 
-    _focalLength = focalLength;
-    _lensRadius = lensRadius;
-    _sampleCount = sampleCount;
+    focalLength_ = focalLength;
+    lensRadius_ = lensRadius;
+    sampleCount_ = sampleCount;
 
-    float dx = std::tan(_fov / 2.f) * focalLength;
-    float dy = dx * (static_cast<float>(_pixels.height()) / static_cast<float>(_pixels.width()));
-    _pxWidth  = (2.f * dx)  / _pixels.width();
-    _pxHeight = (2.f * dy) / _pixels.height();
+    float dx = std::tan(fov_ / 2.f) * focalLength;
+    float dy = dx * (static_cast<float>(pixels_.height()) / static_cast<float>(pixels_.width()));
+    pxWidth_  = (2.f * dx)  / pixels_.width();
+    pxHeight_ = (2.f * dy) / pixels_.height();
 
-    _up.set(0, 1, 0);
-    _right = normalize(cross(_direction, _up));
-    _up    = normalize(cross(_right, _direction));
-    _topLeft = _position + _direction * _focalLength - _right * dx + _up * dy;
+    up_.set(0, 1, 0);
+    right_ = normalize(cross(direction_, up_));
+    up_    = normalize(cross(right_, direction_));
+    topLeft_ = position_ + direction_ * focalLength_ - right_ * dx + up_ * dy;
 }
 
 
@@ -45,29 +45,29 @@ std::vector<Ray> Camera::createRays(unsigned x, unsigned y) const
     std::mt19937 gen(rd());
     std::uniform_real_distribution<> dis(0.f, 1.f);
 
-    for(int rayID = 0; rayID < _sampleCount; ++rayID)
+    for(int rayID = 0; rayID < sampleCount_; ++rayID)
     {
         Vec3 pos;
-        if(_lensRadius == 0.f)
-            pos = _position;
+        if(lensRadius_ == 0.f)
+            pos = position_;
         else
         {
-            Vec3 p = pointInCircle(gen) * _lensRadius;
-            pos = _position + _right*p._x + _up*p._y;
+            Vec3 p = pointInCircle(gen) * lensRadius_;
+            pos = position_ + right_*p.x_ + up_*p.y_;
         }
 
         Vec3 dir;
-        if(_sampleCount == 1)
+        if(sampleCount_ == 1)
         {
-            dir = normalize(_topLeft +
-                            (x*_pxWidth  + .5f*_pxWidth) * _right -
-                            (y*_pxHeight - .5f*_pxHeight)* _up    - pos);
+            dir = normalize(topLeft_ +
+                            (x*pxWidth_  + .5f*pxWidth_) * right_ -
+                            (y*pxHeight_ - .5f*pxHeight_)* up_    - pos);
         }
         else
         {
-            dir = normalize(_topLeft +
-                            (x*_pxWidth  + dis(gen)*_pxWidth) * _right -
-                            (y*_pxHeight - dis(gen)*_pxHeight)* _up    - pos);
+            dir = normalize(topLeft_ +
+                            (x*pxWidth_  + dis(gen)*pxWidth_) * right_ -
+                            (y*pxHeight_ - dis(gen)*pxHeight_)* up_    - pos);
         }
         rays.emplace_back(pos, dir);
     }
@@ -76,5 +76,5 @@ std::vector<Ray> Camera::createRays(unsigned x, unsigned y) const
 
 int Camera::sampleCount() const
 {
-    return _sampleCount;
+    return sampleCount_;
 }

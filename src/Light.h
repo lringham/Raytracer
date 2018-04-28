@@ -15,8 +15,8 @@ public:
     virtual Vec3 vectorFrom(const Vec3& collisionPoint) const = 0;
 
 protected:
-    Vec3 _color;
-    float _intensity;
+    Vec3 color_;
+    float intensity_;
 };
 
 // -----------------
@@ -33,8 +33,8 @@ public:
 private:
     float attenuation(const Vec3& collisionPoint) const;
 
-    Vec3 _position;
-    float _radius;
+    Vec3 position_;
+    float radius_;
 };
 
 // -----------------
@@ -49,7 +49,7 @@ public:
     Vec3 vectorFrom(const Vec3& collisionPoint) const override;
 
 private:
-    Vec3 _direction;
+    Vec3 direction_;
 };
 
 // -----------------
@@ -64,7 +64,7 @@ public:
     Vec3 vectorFrom(const Vec3& collisionPoint) const override;
 
 private:
-    Vec3 _position;
-    Vec3 _direction;
-    float _cosThetaP, _cosThetaU, _exp; // thetaP denotes start of penumbra, thetaU denotes end of penumbra (start of umbra)
+    Vec3 position_;
+    Vec3 direction_;
+    float cosThetaP_, cosThetaU_, exp_; // thetaP denotes start of penumbra, thetaU denotes end of penumbra (start of umbra)
 };

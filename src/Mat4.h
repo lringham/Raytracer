@@ -26,7 +26,7 @@ public:
     friend Vec4 operator*(const Mat4& m, const Vec4& v);
 
     //fields
-    float _elements[16];
+    float elements_[16];
 };
 
 Mat4 transpose(const Mat4& m);

@@ -11,8 +11,8 @@ public:
 
 private:
     Mat3 m;
-    Vec3 _normal;
-    Vec3 _tangent;
-    Vec3 _position;
-    float _width, _height, _halfWidth, _halfHeight;
+    Vec3 normal_;
+    Vec3 tangent_;
+    Vec3 position_;
+    float width_, height_, halfWidth_, halfHeight_;
 };

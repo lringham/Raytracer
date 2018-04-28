@@ -13,41 +13,41 @@ BVH::BVH(const Obj& obj)
 void BVH::build(const Obj& obj)
 {
     // Find all triangles
-    _position = obj._position;
+    position_ = obj.position_;
     std::vector<Triangle> triangles;
     {
         int i = 0;
-        for(auto& f : obj._faces)
+        for(auto& f : obj.faces_)
         {
-            triangles.emplace_back( obj._positions[f._v0] + _position,
-                    obj._positions[f._v1] + _position,
-                    obj._positions[f._v2] + _position);
+            triangles.emplace_back( obj.positions_[f.v0_] + position_,
+                    obj.positions_[f.v1_] + position_,
+                    obj.positions_[f.v2_] + position_);
 
             if(obj.hasTextureCoordinates())
             {
-                triangles.back()._uv0 = obj._textureCoords[f._t0];
-                triangles.back()._uv1 = obj._textureCoords[f._t1];
-                triangles.back()._uv2 = obj._textureCoords[f._t2];
+                triangles.back().uv0_ = obj.textureCoords_[f.t0_];
+                triangles.back().uv1_ = obj.textureCoords_[f.t1_];
+                triangles.back().uv2_ = obj.textureCoords_[f.t2_];
 
-                triangles.back()._t = calculateTangent(
-                            triangles.back()._p0,
-                            triangles.back()._p1,
-                            triangles.back()._p2,
-                            triangles.back()._uv0,
-                            triangles.back()._uv1,
-                            triangles.back()._uv2
+                triangles.back().t_ = calculateTangent(
+                            triangles.back().p0_,
+                            triangles.back().p1_,
+                            triangles.back().p2_,
+                            triangles.back().uv0_,
+                            triangles.back().uv1_,
+                            triangles.back().uv2_
                             );
             }
 
             if(obj.hasNormals())
             {
-                triangles.back()._n0 = obj._normals[f._n0];
-                triangles.back()._n1 = obj._normals[f._n1];
-                triangles.back()._n2 = obj._normals[f._n2];
+                triangles.back().n0_ = obj.normals_[f.n0_];
+                triangles.back().n1_ = obj.normals_[f.n1_];
+                triangles.back().n2_ = obj.normals_[f.n2_];
             }
 
-            if(obj._faceMaterialMap.size() > 0)
-                triangles.back()._materialID = obj._faceMaterialMap.at(i);
+            if(obj.faceMaterialMap_.size() > 0)
+                triangles.back().materialID_ = obj.faceMaterialMap_.at(i);
             else
                 std::cout << "Mesh has no material\n";
 
@@ -57,10 +57,10 @@ void BVH::build(const Obj& obj)
     }
     
     // Create root and childern
-    _tree.emplace_back(AABB(triangles));
+    tree_.emplace_back(AABB(triangles));
     buildChildern(triangles);
-    _tree.shrink_to_fit();
-    _triangles.shrink_to_fit();
+    tree_.shrink_to_fit();
+    triangles_.shrink_to_fit();
 }
 
 
@@ -69,8 +69,8 @@ void BVH::buildChildern(std::vector<Triangle>& triangles, int parentIndex, int a
 {      
     if(triangles.size() == 1)
     {
-        _triangles.push_back(triangles[0]);
-        _tree[parentIndex]._triangleIndex = _triangles.size()-1;
+        triangles_.push_back(triangles[0]);
+        tree_[parentIndex].triangleIndex_ = triangles_.size()-1;
     }
     else if(triangles.size() > 1)
     {
@@ -78,13 +78,13 @@ void BVH::buildChildern(std::vector<Triangle>& triangles, int parentIndex, int a
         axis = (axis + 1) % 3;
 
         // Insert left
-        _tree.emplace_back(AABB(pair._first));
-        buildChildern(pair._first, _tree.size() - 1, axis);
+        tree_.emplace_back(AABB(pair.first_));
+        buildChildern(pair.first_, tree_.size() - 1, axis);
 
         // Insert right
-        _tree.emplace_back(AABB(pair._second));
-        _tree[parentIndex]._rightChildOffset = _tree.size() - 1;
-        buildChildern(pair._second, _tree.size() - 1, axis);
+        tree_.emplace_back(AABB(pair.second_));
+        tree_[parentIndex].rightChildOffset_ = tree_.size() - 1;
+        buildChildern(pair.second_, tree_.size() - 1, axis);
     }
 }
 
@@ -100,15 +100,15 @@ BVH::Pair BVH::split(const std::vector<Triangle>& triangles, int axis) const
     // split on x
     if(axis == 0)
         for(auto& t : triangles)
-            divider += barycentre(t)._x;
+            divider += barycentre(t).x_;
     // split on y
     else if(axis == 1)
         for(auto& t : triangles)
-            divider += barycentre(t)._y;
+            divider += barycentre(t).y_;
     // split on z
     else if(axis == 2)
         for(auto& t : triangles)
-            divider += barycentre(t)._z;
+            divider += barycentre(t).z_;
     divider /= static_cast<float>(triangles.size());
 
     // sort triangles
@@ -116,42 +116,42 @@ BVH::Pair BVH::split(const std::vector<Triangle>& triangles, int axis) const
     {
         for(auto& t : triangles)
         {
-            if(barycentre(t)._x <= divider)
-                pair._first.push_back(t);
+            if(barycentre(t).x_ <= divider)
+                pair.first_.push_back(t);
             else
-                pair._second.push_back(t);
+                pair.second_.push_back(t);
         }
     }
     else if(axis == 1)
     {
         for(auto& t : triangles)
         {
-            if(barycentre(t)._y <= divider)
-                pair._first.push_back(t);
+            if(barycentre(t).y_ <= divider)
+                pair.first_.push_back(t);
             else
-                pair._second.push_back(t);
+                pair.second_.push_back(t);
         }
     }
     else if(axis == 2)
     {
         for(auto& t : triangles)
         {
-            if(barycentre(t)._z <= divider)
-                pair._first.push_back(t);
+            if(barycentre(t).z_ <= divider)
+                pair.first_.push_back(t);
             else
-                pair._second.push_back(t);
+                pair.second_.push_back(t);
         }
     }
 
-    if(pair._first.size() == 0 && pair._second.size() > 1)
+    if(pair.first_.size() == 0 && pair.second_.size() > 1)
     {
-        pair._first.push_back(pair._second.back());
-        pair._second.erase(pair._second.end()-1);
+        pair.first_.push_back(pair.second_.back());
+        pair.second_.erase(pair.second_.end()-1);
     }
-    else if(pair._second.size() == 0 && pair._first.size() > 1)
+    else if(pair.second_.size() == 0 && pair.first_.size() > 1)
     {
-        pair._second.push_back(pair._first.back());
-        pair._first.erase(pair._first.end()-1);
+        pair.second_.push_back(pair.first_.back());
+        pair.first_.erase(pair.first_.end()-1);
     }
 
     return pair;
@@ -166,30 +166,30 @@ bool BVH::raycast(Ray& ray) const
 bool BVH::search(Ray& ray, int parentIndex) const
 {
     Ray parentRay = ray;
-    const Node& node = _tree[parentIndex];
+    const Node& node = tree_[parentIndex];
     if(node.isLeaf())
     {
-        if(_triangles[node._triangleIndex].raycast(parentRay))
+        if(triangles_[node.triangleIndex_].raycast(parentRay))
         {
             ray = parentRay;
             return true;
         }
         return false;
     }
-    else if(node._boundingBox.raycast(parentRay))
+    else if(node.boundingBox_.raycast(parentRay))
     {
         Ray leftRay = ray, rightRay = ray;
         bool hitLeft = false, hitRight = false;
 
-        bool hasLeft = !node.isLeaf() && node._rightChildOffset != parentIndex + 1;
+        bool hasLeft = !node.isLeaf() && node.rightChildOffset_ != parentIndex + 1;
         if(hasLeft) // has left child
             hitLeft = search(leftRay, parentIndex + 1); // search left
-        if(node._rightChildOffset != -1) // has right child
-            hitRight = search(rightRay, node._rightChildOffset); // search right
+        if(node.rightChildOffset_ != -1) // has right child
+            hitRight = search(rightRay, node.rightChildOffset_); // search right
 
         if(hitLeft && hitRight)
         {
-            if(leftRay._t < rightRay._t)
+            if(leftRay.t_ < rightRay.t_)
                 ray = leftRay;
             else
                 ray = rightRay;

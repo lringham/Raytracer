@@ -38,21 +38,21 @@ public:
 
     union
     {
-        float _x, _r;
+        float x_, r_;
     };
 
     union
     {
-        float _y, _g;
+        float y_, g_;
     };
 
     union
     {
-        float _z, _b;
+        float z_, b_;
     };
 
     union
     {
-        float _w, _a;
+        float w_, a_;
     };
 };

@@ -28,14 +28,14 @@ public:
     bool raycast(Ray& ray) const override;
 
 private:
-    float _radius;
-    Vec3 _center;
-    bool _invertNormals;
+    float radius_;
+    Vec3 center_;
+    bool invertNormals_;
 };
 
 inline Vec2 calculateUV(const Vec3& vec) 
 {
     return Vec2(
-                atan2(vec._x, vec._z) / (3.1415926f*2.f),
-                1.f - acos(vec._y) / 3.1415926f);
+                atan2(vec.x_, vec.z_) / (3.1415926f*2.f),
+                1.f - acos(vec.y_) / 3.1415926f);
 }

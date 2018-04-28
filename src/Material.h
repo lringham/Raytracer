@@ -25,56 +25,56 @@ public:
 
     inline Vec3 ambientColor() const
     {
-        return _Ia*_kd;
+        return Ia_*kd_;
     }
 
     inline bool isBlinnPhong() const
     {
-        return _type == blinnPhong;
+        return type_ == blinnPhong;
     };
     inline bool isTransparent() const
     {
-        return _type == transparent;
+        return type_ == transparent;
     };
     inline bool isMetallic() const
     {
-        return _type == metallic;
+        return type_ == metallic;
     };
 
     inline bool hasTexture()
     {
-        return _texture.isInitialized();
+        return texture_.isInitialized();
     }
 
     inline Vec3 sampleTexture(const Vec2& uv) const
     {
-        return _texture.sample(uv._u, uv._v);
+        return texture_.sample(uv.u_, uv.v_);
     }
 
     inline Vec3 sampleNormalMap(const Vec2& uv) const
     {
-        return _normalMap.sample(uv._u, uv._v);
+        return normalMap_.sample(uv.u_, uv.v_);
     }
 
     inline bool hasNormalMap()
     {
-        return _hasNormalMap;
+        return hasNormalMap_;
     }
 
     inline bool hasSpecularMap()
     {
-        return _hasSpecularMap;
+        return hasSpecularMap_;
     }
 
-    std::string _name;
-    float _Ia;
-    Vec3 _kd, _ks, _attenuation;
-    float _gloss, _ior, _reflectivity;
-    MaterialType _type;
+    std::string name_;
+    float Ia_;
+    Vec3 kd_, ks_, attenuation_;
+    float gloss_, ior_, reflectivity_;
+    MaterialType type_;
 
 private:
-    Texture _texture;
-    Texture _normalMap;
-    Texture _specularMap;
-    bool _hasTexture, _hasNormalMap, _hasSpecularMap, _checkered;
+    Texture texture_;
+    Texture normalMap_;
+    Texture specularMap_;
+    bool hasTexture_, hasNormalMap_, hasSpecularMap_, checkered_;
 };

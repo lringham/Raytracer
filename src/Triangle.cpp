@@ -1,11 +1,11 @@
 #include "Triangle.h"
 
 Triangle::Triangle(Vec3 p0, Vec3 p1, Vec3 p2) :
-    _p0(p0), _p1(p1), _p2(p2)
+    p0_(p0), p1_(p1), p2_(p2)
 {
-    _n0 = normalize(cross(_p1 - _p0, _p2 - _p0));
-    _n1 = _n0;
-    _n2 = _n0;
+    n0_ = normalize(cross(p1_ - p0_, p2_ - p0_));
+    n1_ = n0_;
+    n2_ = n0_;
 }
 
 /* From pg 78 in Fundamentals of Computer Graphics 3rd Edition
@@ -28,14 +28,14 @@ det(A3)/M = v
 */
 bool Triangle::raycast(Ray& ray) const
 {
-    Vec3 e0 = _p1 - _p0;
-    Vec3 e1 = _p2 - _p0;
-    Vec3 rsubv0 = ray._origin - _p0;
+    Vec3 e0 = p1_ - p0_;
+    Vec3 e1 = p2_ - p0_;
+    Vec3 rsubv0 = ray.origin_ - p0_;
 
-    float a = -ray._dir._x, b = -ray._dir._y, c = -ray._dir._z;
-    float d = e0._x, e = e0._y, f = e0._z;
-    float g = e1._x, h = e1._y, i = e1._z;
-    float j = rsubv0._x, k = rsubv0._y, l = rsubv0._z;
+    float a = -ray.dir_.x_, b = -ray.dir_.y_, c = -ray.dir_.z_;
+    float d = e0.x_, e = e0.y_, f = e0.z_;
+    float g = e1.x_, h = e1.y_, i = e1.z_;
+    float j = rsubv0.x_, k = rsubv0.y_, l = rsubv0.z_;
 
     float eisubhf = e*i - h*f;
     float gfsubdi = g*f - d*i;
@@ -43,8 +43,8 @@ bool Triangle::raycast(Ray& ray) const
 
     float Minv = 1.f / (a*eisubhf + b*gfsubdi + c*dhsubeg);
 
-    ray._t = (j*eisubhf + k*gfsubdi + l*dhsubeg) * Minv;
-    if (ray._t < 0)
+    ray.t_ = (j*eisubhf + k*gfsubdi + l*dhsubeg) * Minv;
+    if (ray.t_ < 0)
         return false;
 
     float aksubjb = a*k - j*b;
@@ -59,15 +59,15 @@ bool Triangle::raycast(Ray& ray) const
     if (v < 0.f || v > 1.f - u)
         return false;
 
-    ray._normal  = _n0 * (1.f-u-v) +
-            _n1 * u +
-            _n2 * v;
-    ray._tangent = _t;
-    ray._uv      = _uv0 * (1.f-u-v) +
-            _uv1 * u +
-            _uv2 * v;
+    ray.normal_  = n0_ * (1.f-u-v) +
+            n1_ * u +
+            n2_ * v;
+    ray.tangent_ = t_;
+    ray.uv_      = uv0_ * (1.f-u-v) +
+            uv1_ * u +
+            uv2_ * v;
 
-    ray._materialID = _materialID;
+    ray.materialID_ = materialID_;
     return true;
 }
 
@@ -75,12 +75,12 @@ bool raycastTri(const Vec3& p0, const Vec3& p1, const Vec3& p2, Ray& ray, float*
 {
     Vec3 e0 = p1 - p0;
     Vec3 e1 = p2 - p0;
-    Vec3 rsubv0 = ray._origin - p0;
+    Vec3 rsubv0 = ray.origin_ - p0;
 
-    float a = -ray._dir._x, b = -ray._dir._y, c = -ray._dir._z;
-    float d = e0._x, e = e0._y, f = e0._z;
-    float g = e1._x, h = e1._y, i = e1._z;
-    float j = rsubv0._x, k = rsubv0._y, l = rsubv0._z;
+    float a = -ray.dir_.x_, b = -ray.dir_.y_, c = -ray.dir_.z_;
+    float d = e0.x_, e = e0.y_, f = e0.z_;
+    float g = e1.x_, h = e1.y_, i = e1.z_;
+    float j = rsubv0.x_, k = rsubv0.y_, l = rsubv0.z_;
 
     float eisubhf = e*i - h*f;
     float gfsubdi = g*f - d*i;
@@ -88,8 +88,8 @@ bool raycastTri(const Vec3& p0, const Vec3& p1, const Vec3& p2, Ray& ray, float*
 
     float Minv = 1.f / (a*eisubhf + b*gfsubdi + c*dhsubeg);
 
-    ray._t = (j*eisubhf + k*gfsubdi + l*dhsubeg) * Minv;
-    if (ray._t < 0)
+    ray.t_ = (j*eisubhf + k*gfsubdi + l*dhsubeg) * Minv;
+    if (ray.t_ < 0)
         return false;
 
     float aksubjb = a*k - j*b;
@@ -104,7 +104,7 @@ bool raycastTri(const Vec3& p0, const Vec3& p1, const Vec3& p2, Ray& ray, float*
     if (v < 0.f || v > 1.f - u)
         return false;
 
-    ray._normal = normalize(cross(e0, e1));
+    ray.normal_ = normalize(cross(e0, e1));
 
     if(uRet != nullptr)
         *uRet = u;
@@ -117,7 +117,7 @@ bool raycastTri(const Vec3& p0, const Vec3& p1, const Vec3& p2, Ray& ray, float*
 
 Vec3 barycentre(const Triangle& triangle)
 {
-    return (triangle._p0 + triangle._p1 + triangle._p2) * (1.f/3.f);
+    return (triangle.p0_ + triangle.p1_ + triangle.p2_) * (1.f/3.f);
 }
 
 Vec3 calculateTangent(const Vec3& p0, const Vec3& p1, const Vec3& p2, const Vec2& uv0, const Vec2& uv1, const Vec2& uv2)
@@ -125,10 +125,10 @@ Vec3 calculateTangent(const Vec3& p0, const Vec3& p1, const Vec3& p2, const Vec2
     Vec3 Q1 = p1 - p0;
     Vec3 Q2 = p2 - p0;
 
-    float u1 = uv1._u - uv0._u;
-    float u2 = uv2._u - uv0._u;
-    float v1 = uv1._v - uv0._v;
-    float v2 = uv2._v - uv0._v;
+    float u1 = uv1.u_ - uv0.u_;
+    float u2 = uv2.u_ - uv0.u_;
+    float v1 = uv1.v_ - uv0.v_;
+    float v2 = uv2.v_ - uv0.v_;
 
     float denom = u1*v2 - u2*v1;
     if(denom != 0)

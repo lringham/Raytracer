@@ -12,19 +12,19 @@ public:
     void init(const Vec3& position, const Vec3& direction, float fov, float focalLength, Pixels pixels, int sampleCount, float lensRadius);
     int sampleCount() const;
 
-    Pixels _pixels;
-    Vec3 _position;
-    Vec3 _direction;
+    Pixels pixels_;
+    Vec3 position_;
+    Vec3 direction_;
 
 private:
-    Vec3 _up;
-    Vec3 _right;
-    Vec3 _topLeft;
+    Vec3 up_;
+    Vec3 right_;
+    Vec3 topLeft_;
 
-    float _fov;
-    float _focalLength;
-    float _pxWidth;
-    float _pxHeight;
-    int _sampleCount;
-    float _lensRadius;
+    float fov_;
+    float focalLength_;
+    float pxWidth_;
+    float pxHeight_;
+    int sampleCount_;
+    float lensRadius_;
 };

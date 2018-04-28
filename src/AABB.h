@@ -20,5 +20,5 @@ public:
     void move(Vec3 translation);
     Vec3 center() const;
 
-    Vec3 _min, _max;
+    Vec3 min_, max_;
 };

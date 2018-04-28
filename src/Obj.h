@@ -11,9 +11,9 @@ class Obj : public Tracable
 public:
     struct Face
     {
-        unsigned _v0 = 0, _t0 = 0, _n0 = 0,
-        _v1 = 0, _t1 = 0, _n1 = 0,
-        _v2 = 0, _t2 = 0, _n2 = 0;
+        unsigned v0_ = 0, t0_ = 0, n0_ = 0,
+        v1_ = 0, t1_ = 0, n1_ = 0,
+        v2_ = 0, t2_ = 0, n2_ = 0;
     };
 
     Obj();
@@ -23,22 +23,22 @@ public:
 
     inline bool hasNormals() const
     {
-        return _normals.size() > 0;
+        return normals_.size() > 0;
     }
 
     inline bool hasTextureCoordinates() const
     {
-        return _textureCoords.size() > 0;
+        return textureCoords_.size() > 0;
     }
 
-    Vec3 _position;
-    const std::string _name;
-    std::vector<Vec3> _positions;
-    std::vector<Vec3> _normals;
-    std::vector<Vec2> _textureCoords;
-    std::vector<Face> _faces;
-    std::vector<unsigned> _indices;
-    std::map<int, int> _faceMaterialMap;
+    Vec3 position_;
+    const std::string name_;
+    std::vector<Vec3> positions_;
+    std::vector<Vec3> normals_;
+    std::vector<Vec2> textureCoords_;
+    std::vector<Face> faces_;
+    std::vector<unsigned> indices_;
+    std::map<int, int> faceMaterialMap_;
 
 private:	
     enum OBJ_TYPE
@@ -64,5 +64,5 @@ private:
     void parseLine(char* line, OBJ_TYPE objType, std::vector<Material>& materials, std::map<std::string, int>& materialMap, int& materialID);
     void loadMTLFile(const std::string& filename, std::vector<Material>& materials, std::map<std::string, int>& materialMap);
 
-    std::string _path;
+    std::string path_;
 };

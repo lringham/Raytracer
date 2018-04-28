@@ -1,18 +1,18 @@
 #include "AABB.h"
 
 AABB::AABB() :
-    _min(std::numeric_limits<float>::max()), _max(std::numeric_limits<float>::min())
+    min_(std::numeric_limits<float>::max()), max_(std::numeric_limits<float>::min())
 {}
 
 AABB::AABB(const AABB& b0,const AABB& b1)
 {
-    _min._x = std::min(b0._min._x, b1._min._x);
-    _min._y = std::min(b0._min._y, b1._min._y);
-    _min._z = std::min(b0._min._z, b1._min._z);
+    min_.x_ = std::min(b0.min_.x_, b1.min_.x_);
+    min_.y_ = std::min(b0.min_.y_, b1.min_.y_);
+    min_.z_ = std::min(b0.min_.z_, b1.min_.z_);
 
-    _max._x = std::max(b0._max._x, b1._max._x);
-    _max._y = std::max(b0._max._y, b1._max._y);
-    _max._z = std::max(b0._max._z, b1._max._z);
+    max_.x_ = std::max(b0.max_.x_, b1.max_.x_);
+    max_.y_ = std::max(b0.max_.y_, b1.max_.y_);
+    max_.z_ = std::max(b0.max_.z_, b1.max_.z_);
 }
 
 AABB::AABB(const std::vector<Vec3>& points)
@@ -20,41 +20,41 @@ AABB::AABB(const std::vector<Vec3>& points)
     if(points.size() == 0)
         return;
 
-    _min = points[0];
-    _max = points[0];
+    min_ = points[0];
+    max_ = points[0];
     for(const Vec3& v : points)
     {
-        _min._x = std::min(_min._x, v._x);
-        _min._y = std::min(_min._y, v._y);
-        _min._z = std::min(_min._z, v._z);
-        _max._x = std::max(_max._x, v._x);
-        _max._y = std::max(_max._y, v._y);
-        _max._z = std::max(_max._z, v._z);
+        min_.x_ = std::min(min_.x_, v.x_);
+        min_.y_ = std::min(min_.y_, v.y_);
+        min_.z_ = std::min(min_.z_, v.z_);
+        max_.x_ = std::max(max_.x_, v.x_);
+        max_.y_ = std::max(max_.y_, v.y_);
+        max_.z_ = std::max(max_.z_, v.z_);
     }
 }
 
 AABB::AABB(const Triangle& t)
 {
-    _min._x = t._p0._x;
-    _min._y = t._p0._y;
-    _min._z = t._p0._z;
-    _max._x = t._p0._x;
-    _max._y = t._p0._y;
-    _max._z = t._p0._z;
+    min_.x_ = t.p0_.x_;
+    min_.y_ = t.p0_.y_;
+    min_.z_ = t.p0_.z_;
+    max_.x_ = t.p0_.x_;
+    max_.y_ = t.p0_.y_;
+    max_.z_ = t.p0_.z_;
 
-    _min._x = std::min(_min._x, t._p1._x);
-    _min._y = std::min(_min._y, t._p1._y);
-    _min._z = std::min(_min._z, t._p1._z);
-    _max._x = std::max(_max._x, t._p1._x);
-    _max._y = std::max(_max._y, t._p1._y);
-    _max._z = std::max(_max._z, t._p1._z);
+    min_.x_ = std::min(min_.x_, t.p1_.x_);
+    min_.y_ = std::min(min_.y_, t.p1_.y_);
+    min_.z_ = std::min(min_.z_, t.p1_.z_);
+    max_.x_ = std::max(max_.x_, t.p1_.x_);
+    max_.y_ = std::max(max_.y_, t.p1_.y_);
+    max_.z_ = std::max(max_.z_, t.p1_.z_);
 
-    _min._x = std::min(_min._x, t._p2._x);
-    _min._y = std::min(_min._y, t._p2._y);
-    _min._z = std::min(_min._z, t._p2._z);
-    _max._x = std::max(_max._x, t._p2._x);
-    _max._y = std::max(_max._y, t._p2._y);
-    _max._z = std::max(_max._z, t._p2._z);
+    min_.x_ = std::min(min_.x_, t.p2_.x_);
+    min_.y_ = std::min(min_.y_, t.p2_.y_);
+    min_.z_ = std::min(min_.z_, t.p2_.z_);
+    max_.x_ = std::max(max_.x_, t.p2_.x_);
+    max_.y_ = std::max(max_.y_, t.p2_.y_);
+    max_.z_ = std::max(max_.z_, t.p2_.z_);
 }
 
 AABB::AABB(const std::vector<Triangle>& triangles)
@@ -62,34 +62,34 @@ AABB::AABB(const std::vector<Triangle>& triangles)
     if(triangles.size() > 0)
     {
         const Triangle& t = triangles[0];
-        _min._x = std::min(t._p0._x, std::min(t._p1._x, t._p2._x));
-        _min._y = std::min(t._p0._y, std::min(t._p1._y, t._p2._y));
-        _min._z = std::min(t._p0._z, std::min(t._p1._z, t._p2._z));
-        _max._x = std::max(t._p0._x, std::max(t._p1._x, t._p2._x));
-        _max._y = std::max(t._p0._y, std::max(t._p1._y, t._p2._y));
-        _max._z = std::max(t._p0._z, std::max(t._p1._z, t._p2._z));
+        min_.x_ = std::min(t.p0_.x_, std::min(t.p1_.x_, t.p2_.x_));
+        min_.y_ = std::min(t.p0_.y_, std::min(t.p1_.y_, t.p2_.y_));
+        min_.z_ = std::min(t.p0_.z_, std::min(t.p1_.z_, t.p2_.z_));
+        max_.x_ = std::max(t.p0_.x_, std::max(t.p1_.x_, t.p2_.x_));
+        max_.y_ = std::max(t.p0_.y_, std::max(t.p1_.y_, t.p2_.y_));
+        max_.z_ = std::max(t.p0_.z_, std::max(t.p1_.z_, t.p2_.z_));
     }
 
     for(const auto& t : triangles)
     {
-        _min._x = std::min(_min._x, std::min(t._p0._x, std::min(t._p1._x, t._p2._x)));
-        _min._y = std::min(_min._y, std::min(t._p0._y, std::min(t._p1._y, t._p2._y)));
-        _min._z = std::min(_min._z, std::min(t._p0._z, std::min(t._p1._z, t._p2._z)));
+        min_.x_ = std::min(min_.x_, std::min(t.p0_.x_, std::min(t.p1_.x_, t.p2_.x_)));
+        min_.y_ = std::min(min_.y_, std::min(t.p0_.y_, std::min(t.p1_.y_, t.p2_.y_)));
+        min_.z_ = std::min(min_.z_, std::min(t.p0_.z_, std::min(t.p1_.z_, t.p2_.z_)));
 
-        _max._x = std::max(_max._x, std::max(t._p0._x, std::max(t._p1._x, t._p2._x)));
-        _max._y = std::max(_max._y, std::max(t._p0._y, std::max(t._p1._y, t._p2._y)));
-        _max._z = std::max(_max._z, std::max(t._p0._z, std::max(t._p1._z, t._p2._z)));
+        max_.x_ = std::max(max_.x_, std::max(t.p0_.x_, std::max(t.p1_.x_, t.p2_.x_)));
+        max_.y_ = std::max(max_.y_, std::max(t.p0_.y_, std::max(t.p1_.y_, t.p2_.y_)));
+        max_.z_ = std::max(max_.z_, std::max(t.p0_.z_, std::max(t.p1_.z_, t.p2_.z_)));
     }
 }
 
 AABB::AABB(const Vec3& corner0,const Vec3& corner1)
 {
-    _min._x = std::min(corner0._x, corner1._x);
-    _min._y = std::min(corner0._y, corner1._y);
-    _min._z = std::min(corner0._z, corner1._z);
-    _max._x = std::max(corner0._x, corner1._x);
-    _max._y = std::max(corner0._y, corner1._y);
-    _max._z = std::max(corner0._z, corner1._z);
+    min_.x_ = std::min(corner0.x_, corner1.x_);
+    min_.y_ = std::min(corner0.y_, corner1.y_);
+    min_.z_ = std::min(corner0.z_, corner1.z_);
+    max_.x_ = std::max(corner0.x_, corner1.x_);
+    max_.y_ = std::max(corner0.y_, corner1.y_);
+    max_.z_ = std::max(corner0.z_, corner1.z_);
 }
 
 bool AABB::raycast(Ray& ray) const
@@ -100,34 +100,34 @@ bool AABB::raycast(Ray& ray) const
     // Solve for distance from each set of planes (slabs)
     // if the min of all the intersections is less than the  max
     // of all the intersections then the box is hit
-    if(ray._dir._x != 0.f)
+    if(ray.dir_.x_ != 0.f)
     {
-        float tx0 = (_min._x - ray._origin._x) / ray._dir._x;
-        float tx1 = (_max._x - ray._origin._x) / ray._dir._x;
+        float tx0 = (min_.x_ - ray.origin_.x_) / ray.dir_.x_;
+        float tx1 = (max_.x_ - ray.origin_.x_) / ray.dir_.x_;
         tMin = std::max(tMin, std::min(tx0, tx1));
         tMax = std::min(tMax, std::max(tx0, tx1));
     }
 
-    if(ray._dir._y != 0.f)
+    if(ray.dir_.y_ != 0.f)
     {
-        float ty0 = (_min._y - ray._origin._y) / ray._dir._y;
-        float ty1 = (_max._y - ray._origin._y) / ray._dir._y;
+        float ty0 = (min_.y_ - ray.origin_.y_) / ray.dir_.y_;
+        float ty1 = (max_.y_ - ray.origin_.y_) / ray.dir_.y_;
         tMin = std::max(tMin, std::min(ty0, ty1));
         tMax = std::min(tMax, std::max(ty0, ty1));
     }
 
-    if(ray._dir._z != 0.f)
+    if(ray.dir_.z_ != 0.f)
     {
-        float tz0 = (_min._z - ray._origin._z) / ray._dir._z;
-        float tz1 = (_max._z - ray._origin._z) / ray._dir._z;
+        float tz0 = (min_.z_ - ray.origin_.z_) / ray.dir_.z_;
+        float tz1 = (max_.z_ - ray.origin_.z_) / ray.dir_.z_;
         tMin = std::max(tMin, std::min(tz0, tz1));
         tMax = std::min(tMax, std::max(tz0, tz1));
     }
 
     if(tMin <= tMax && tMin >= 0)
     {
-        ray._normal.set(0,0,1);
-        ray._t = tMin;
+        ray.normal_.set(0,0,1);
+        ray.t_ = tMin;
         return true;
     }
     return false;
@@ -135,24 +135,24 @@ bool AABB::raycast(Ray& ray) const
 
 bool AABB::fastRaycast(Ray& ray,const Vec3& invDir) const
 {
-    float tx0 = (_min._x - ray._origin._x) * invDir._x;
-    float tx1 = (_max._x - ray._origin._x) * invDir._x;
+    float tx0 = (min_.x_ - ray.origin_.x_) * invDir.x_;
+    float tx1 = (max_.x_ - ray.origin_.x_) * invDir.x_;
     float tMin = std::min(tx0, tx1);
     float tMax = std::max(tx0, tx1);
 
-    float ty0 = (_min._y - ray._origin._y) * invDir._y;
-    float ty1 = (_max._y - ray._origin._y) * invDir._y;
+    float ty0 = (min_.y_ - ray.origin_.y_) * invDir.y_;
+    float ty1 = (max_.y_ - ray.origin_.y_) * invDir.y_;
     tMin = std::max(tMin, std::min(ty0, ty1));
     tMax = std::min(tMax, std::max(ty0, ty1));
 
-    float tz0 = (_min._z - ray._origin._z) * invDir._z;
-    float tz1 = (_max._z - ray._origin._z) * invDir._z;
+    float tz0 = (min_.z_ - ray.origin_.z_) * invDir.z_;
+    float tz1 = (max_.z_ - ray.origin_.z_) * invDir.z_;
     tMin = std::max(tMin, std::min(tz0, tz1));
     tMax = std::min(tMax, std::max(tz0, tz1));
 
     if(tMin <= tMax && tMin >= 0)
     {
-        ray._t = tMin;
+        ray.t_ = tMin;
         return true;
     }
     return false;
@@ -160,11 +160,11 @@ bool AABB::fastRaycast(Ray& ray,const Vec3& invDir) const
 
 void AABB::move(Vec3 translation)
 {
-    _min = _min + translation;
-    _max = _max + translation;
+    min_ = min_ + translation;
+    max_ = max_ + translation;
 }
 
 Vec3 AABB::center() const
 {
-    return _min + (_min + _max) * .5f;
+    return min_ + (min_ + max_) * .5f;
 }

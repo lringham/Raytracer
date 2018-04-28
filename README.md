@@ -3,9 +3,9 @@ A simple raytracer made for fun. It is a work in progress.
 
 ## How to Build
 ```
-cd Raytracer/build
-cmake ..
-make
+cd Raytracer
+cmake -H. -Bbuild
+make -j4 -C build
 ```
 
 ## How to Run

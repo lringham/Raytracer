@@ -23,10 +23,10 @@ public:
 private:
     struct Block
     {
-        unsigned _startX, _endX, _startY, _endY;
+        unsigned startX_, endX_, startY_, endY_;
 
         Block(unsigned startX, unsigned endX, unsigned startY, unsigned endY) :
-            _startX(startX), _endX(endX), _startY(startY), _endY(endY)
+            startX_(startX), endX_(endX), startY_(startY), endY_(endY)
         {}
 
         Block()
@@ -41,9 +41,9 @@ private:
         {
             const YAML::Node& vec3Node = node[name];
             missingComponent = !(vec3Node[0] && vec3Node[1] && vec3Node[2]);
-            result._x = vec3Node[0] ? vec3Node[0].as<float>() : defaultVal._x;
-            result._y = vec3Node[1] ? vec3Node[1].as<float>() : defaultVal._y;
-            result._z = vec3Node[2] ? vec3Node[2].as<float>() : defaultVal._z;
+            result.x_ = vec3Node[0] ? vec3Node[0].as<float>() : defaultVal.x_;
+            result.y_ = vec3Node[1] ? vec3Node[1].as<float>() : defaultVal.y_;
+            result.z_ = vec3Node[2] ? vec3Node[2].as<float>() : defaultVal.z_;
             if(missingComponent)
                 std::cout << "yaml node " << name << " doesn't have 3 components" << std::endl;
         }
@@ -80,18 +80,18 @@ private:
     bool getBlock(unsigned& startX, unsigned& endX, unsigned& startY, unsigned& endY);
     void usage();
 
-    std::vector<std::unique_ptr<Tracable>> _geometry;
-    std::vector<std::unique_ptr<Light>> _lights;
-    std::vector<Material> _materials;
+    std::vector<std::unique_ptr<Tracable>> geometry_;
+    std::vector<std::unique_ptr<Light>> lights_;
+    std::vector<Material> materials_;
     std::stack<Block> blocks;
 
-    Texture _skySphere;
-    Camera _camera;
-    Vec3 _backgroundColor;
-    std::string _name;
-    std::string _outputName;
-    std::mutex _mutex;
-    unsigned _threadCount, _depth, _shadowSampleCount, _totalBlockCount;
-    float _rayOffset, _ambientIOR;
-    bool _backgroundSet;
+    Texture skySphere_;
+    Camera camera_;
+    Vec3 backgroundColor_;
+    std::string name_;
+    std::string outputName_;
+    std::mutex mutex_;
+    unsigned threadCount_, depth_, shadowSampleCount_, totalBlockCount_;
+    float rayOffset_, ambientIOR_;
+    bool backgroundSet_;
 };
