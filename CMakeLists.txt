@@ -12,6 +12,7 @@ file(GLOB SOURCES "src/*.cpp")
 add_compile_options(-Wall -Wextra -Wpedantic)
 
 # include yaml-cpp
+include_directories(${CMAKE_SOURCE_DIR}/middleware/stb/include)
 include_directories(${CMAKE_SOURCE_DIR}/middleware/yaml-cpp/include)
 link_directories(${CMAKE_SOURCE_DIR}/middleware/yaml-cpp/lib)
 
