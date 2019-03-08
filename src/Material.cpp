@@ -78,7 +78,7 @@ float Material::schlick(float eta1, float eta2, float cosTheta) const
 {
     float R = ((eta1-eta2)*(eta1-eta2)) / ((eta1+eta2)*(eta1+eta2));
     R = R + (1.f - R) * pow((1.f-cosTheta), 5);
-    return (reflectivity_ + (1.0 - reflectivity_) * R);
+    return (reflectivity_ + (1.f - reflectivity_) * R);
 }
 
 bool Material::isCheckered(const Vec3& point, int width, int height) const
