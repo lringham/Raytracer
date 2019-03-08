@@ -194,8 +194,8 @@ bool Scene::loadScene(int argc, char** argv)
                                 parseNode(light, "position", Vec3(0, 0, 0)),
                                 parseNode<float>(light, "intensity", 100.f),
                                 parseNode(light, "direction", Vec3(0, -1, 0)),
-                                parseNode<float>(light, "cosThetaP", .5),
-                                parseNode<float>(light, "cosThetaU", .7),
+                                parseNode<float>(light, "cosThetaP", .5f),
+                                parseNode<float>(light, "cosThetaU", .7f),
                                 parseNode<float>(light, "exp", 1.f)
                                 ));
             }
@@ -312,7 +312,7 @@ void Scene::traceSection(Camera& camera_)
                     color = color + calculateColor(ray, depth_);
                 }
 
-                float rayCount = rays.size();
+                float rayCount = static_cast<float>(rays.size());
                 color.r_ /= rayCount;
                 color.g_ /= rayCount;
                 color.b_ /= rayCount;
