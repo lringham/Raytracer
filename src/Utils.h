@@ -11,7 +11,7 @@ inline Vec3 pointInCircle()
 {
     std::random_device rd;
     std::mt19937 gen(rd());
-    std::uniform_real_distribution<> dis(-1.f, 1.f);
+    std::uniform_real_distribution<float> dis(-1.f, 1.f);
     Vec3 result(0, 0, 0);
 
     do
@@ -24,7 +24,7 @@ inline Vec3 pointInCircle()
 
 inline Vec3 pointInCircle(std::mt19937& gen)
 {
-    std::uniform_real_distribution<> dis(-1.f, 1.f);
+    std::uniform_real_distribution<float> dis(-1.f, 1.f);
     Vec3 result(0, 0, 0);
 
     do
