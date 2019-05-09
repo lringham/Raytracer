@@ -17,12 +17,12 @@ inline Vec3 pointInCircle()
     do
     {
         result.set(dis(gen), dis(gen), dis(gen)); // Find point in box around the sphere
-    } while(dot(result, result) >= 1.f); // Reject point if outside the sphere
+    } while (dot(result, result) >= 1.f); // Reject point if outside the sphere
 
     return result;
 }
 
-inline Vec3 pointInCircle(std::mt19937& gen)
+inline Vec3 pointInCircle(std::mt19937 & gen)
 {
     std::uniform_real_distribution<float> dis(-1.f, 1.f);
     Vec3 result(0, 0, 0);
@@ -30,27 +30,27 @@ inline Vec3 pointInCircle(std::mt19937& gen)
     do
     {
         result.set(dis(gen), dis(gen), dis(gen)); // Find point in box around the sphere
-    } while(dot(result, result) >= 1.f); // Reject point if outside the sphere
+    } while (dot(result, result) >= 1.f); // Reject point if outside the sphere
 
     return result;
 }
 
-inline bool startsWith(const std::string& string, const std::string& start)
-{	
+inline bool startsWith(const std::string & string, const std::string & start)
+{
     size_t smallest = std::min(string.size(), start.size());
-    for(size_t i = 0; i < smallest; ++i)
-        if(start[i] != string[i])
+    for (size_t i = 0; i < smallest; ++i)
+        if (start[i] != string[i])
             return false;
     return true;
 }
 
-inline std::string greenText(const std::string& text)
+inline std::string greenText(const std::string & text)
 {
-    #ifdef __linux__
+#ifdef __linux__
     return "\033[1;32m" + text + "\033[0m";
-    #else
+#else
     return text;
-    #endif
+#endif
 
 }
 
@@ -63,7 +63,7 @@ inline bool inbetweenInc(T val, T lower, T upper)
 template<typename T>
 inline bool inbetweenExc(T val, T lower, T upper)
 {
-    return val > lower && val < upper;
+    return val > lower&& val < upper;
 }
 
 const float PI_ = 3.14159265f;

@@ -17,10 +17,10 @@ bool Sphere::raycast(Ray& ray) const
         return false;
 
     // Now solve for d^2
-    float d2 = L.dot(L) -  tc*tc;
+    float d2 = L.dot(L) - tc * tc;
 
     // Check if ray missed the sphere
-    float radius2 = radius_*radius_;
+    float radius2 = radius_ * radius_;
     if (d2 > radius2)
         return false;
 
@@ -33,20 +33,20 @@ bool Sphere::raycast(Ray& ray) const
 
     ray.t_ = t1 >= 0 && t1 < t2 ? t1 : t2;
 
-    if(invertNormals_)
+    if (invertNormals_)
         ray.normal_ = normalize(center_ - ray.intersection());
     else
         ray.normal_ = normalize(ray.intersection() - center_);
 
 
-    if(dot(Vec3(0, 1, 0), ray.normal_) != 0.f)
+    if (dot(Vec3(0, 1, 0), ray.normal_) != 0.f)
         ray.tangent_ = normalize(cross(Vec3(0, 1, 0), ray.normal_));
     else
         ray.tangent_.set(1, 0, 0);
 
     ray.uv_.set(
-                atan2(ray.normal_.x_, ray.normal_.z_) / (3.1415926f*2.f),
-                1.f - acos(ray.normal_.y_) / 3.1415926f);
+        atan2(ray.normal_.x_, ray.normal_.z_) / (3.1415926f * 2.f),
+        1.f - acos(ray.normal_.y_) / 3.1415926f);
 
     ray.materialID_ = materialID_;
     return true;

@@ -72,4 +72,4 @@ camera:
   lensRadius: 2
   pxWidth: 1000
   pxHeight: 640
-  sampleCount: 100
+  sampleCount: 600

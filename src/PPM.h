@@ -1,5 +1,6 @@
 #include <fstream>
 #include <string>
+
 bool savePPM(std::string filename, unsigned width, unsigned height, char* data, bool normalize = false)
 {
     std::ofstream file(filename, std::ios::out | std::ios::binary);
@@ -14,7 +15,7 @@ bool savePPM(std::string filename, unsigned width, unsigned height, char* data, 
         if (normalize)
         {
             char max = 0;
-            for (unsigned long i = 0; i < width*height * 3; ++i)
+            for (unsigned long i = 0; i < width * height * 3; ++i)
                 if (max < data[i])
                     max = data[i];
             file << std::to_string(max) << "\n";
@@ -23,7 +24,7 @@ bool savePPM(std::string filename, unsigned width, unsigned height, char* data, 
             file << "255\n";
 
         // Write data
-        for (unsigned long i = 0; i < width*height*3; ++i)
+        for (unsigned long i = 0; i < width * height * 3; ++i)
             file << data[i];
 
         // Cleanup

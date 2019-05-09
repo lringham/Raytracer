@@ -3,7 +3,7 @@
 int main(int argc, char** argv)
 {
     Scene scene;
-    if(scene.init(argc, argv))
+    if (scene.init(argc, argv))
     {
         scene.trace();
         scene.save();

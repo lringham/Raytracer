@@ -16,11 +16,11 @@ materials:
       type: transparent
       kd: [1, 1, 1]
       ks: [1, 1, 1]
-      attenuation: [200, 200, 200]
-      Ia: .1
-      ior: 1.5
+      attenuation: [0, 0, 0]
+      Ia: 0.01
+      ior: 1.05
       gloss: 256
-      reflectivity: 0.05
+      reflectivity: 0.01
     - name: bluePyramid
       type: blinnPhong
       kd: [0, 0, 1]

@@ -23,7 +23,7 @@ public:
 private:
     struct Block
     {
-        unsigned startX_, endX_, startY_, endY_;
+        unsigned startX_ = 0, endX_ = 0, startY_ = 0, endY_ = 0;
 
         Block(unsigned startX, unsigned endX, unsigned startY, unsigned endY) :
             startX_(startX), endX_(endX), startY_(startY), endY_(endY)
@@ -37,14 +37,14 @@ private:
     {
         Vec3 result = defaultVal;
         bool missingComponent = false;
-        if(node[name])
+        if (node[name])
         {
             const YAML::Node& vec3Node = node[name];
             missingComponent = !(vec3Node[0] && vec3Node[1] && vec3Node[2]);
             result.x_ = vec3Node[0] ? vec3Node[0].as<float>() : defaultVal.x_;
             result.y_ = vec3Node[1] ? vec3Node[1].as<float>() : defaultVal.y_;
             result.z_ = vec3Node[2] ? vec3Node[2].as<float>() : defaultVal.z_;
-            if(missingComponent)
+            if (missingComponent)
                 std::cout << "yaml node " << name << " doesn't have 3 components" << std::endl;
         }
         return result;
@@ -53,7 +53,7 @@ private:
     template<typename T>
     T parseNode(const YAML::Node& node, const std::string& name, T defaultVal)
     {
-        if(node[name])
+        if (node[name])
             return node[name].as<T>();
         else
             return defaultVal;
@@ -63,7 +63,7 @@ private:
     T parseNode(const YAML::Node& node, const std::string& name)
     {
         T t;
-        if(node[name])
+        if (node[name])
             t = node[name].as<T>();
         else
             std::cout << "Cannot find yaml node: " << name << "\n";

@@ -26,7 +26,7 @@ det(A1)/M = t
 det(A2)/M = u
 det(A3)/M = v
 */
-bool Triangle::raycast(Ray& ray) const
+bool Triangle::raycast(Ray & ray) const
 {
     Vec3 e0 = p1_ - p0_;
     Vec3 e1 = p2_ - p0_;
@@ -37,41 +37,41 @@ bool Triangle::raycast(Ray& ray) const
     float g = e1.x_, h = e1.y_, i = e1.z_;
     float j = rsubv0.x_, k = rsubv0.y_, l = rsubv0.z_;
 
-    float eisubhf = e*i - h*f;
-    float gfsubdi = g*f - d*i;
-    float dhsubeg = d*h - e*g;
+    float eisubhf = e * i - h * f;
+    float gfsubdi = g * f - d * i;
+    float dhsubeg = d * h - e * g;
 
-    float Minv = 1.f / (a*eisubhf + b*gfsubdi + c*dhsubeg);
+    float Minv = 1.f / (a * eisubhf + b * gfsubdi + c * dhsubeg);
 
-    ray.t_ = (j*eisubhf + k*gfsubdi + l*dhsubeg) * Minv;
+    ray.t_ = (j * eisubhf + k * gfsubdi + l * dhsubeg) * Minv;
     if (ray.t_ < 0)
         return false;
 
-    float aksubjb = a*k - j*b;
-    float jcsubal = j*c - a*l;
-    float blsubkc = b*l - k*c;
+    float aksubjb = a * k - j * b;
+    float jcsubal = j * c - a * l;
+    float blsubkc = b * l - k * c;
 
-    float u = (i*aksubjb + h*jcsubal + g*blsubkc) * Minv;
+    float u = (i * aksubjb + h * jcsubal + g * blsubkc) * Minv;
     if (u < 0.f || u > 1.f)
         return false;
 
-    float v = -(f*aksubjb + e*(jcsubal)+d*blsubkc) * Minv;
+    float v = -(f * aksubjb + e * (jcsubal)+d * blsubkc) * Minv;
     if (v < 0.f || v > 1.f - u)
         return false;
 
-    ray.normal_  = n0_ * (1.f-u-v) +
-            n1_ * u +
-            n2_ * v;
+    ray.normal_ = n0_ * (1.f - u - v) +
+        n1_ * u +
+        n2_ * v;
     ray.tangent_ = t_;
-    ray.uv_      = uv0_ * (1.f-u-v) +
-            uv1_ * u +
-            uv2_ * v;
+    ray.uv_ = uv0_ * (1.f - u - v) +
+        uv1_ * u +
+        uv2_ * v;
 
     ray.materialID_ = materialID_;
     return true;
 }
 
-bool raycastTri(const Vec3& p0, const Vec3& p1, const Vec3& p2, Ray& ray, float* uRet, float* vRet)
+bool raycastTri(const Vec3 & p0, const Vec3 & p1, const Vec3 & p2, Ray & ray, float* uRet, float* vRet)
 {
     Vec3 e0 = p1 - p0;
     Vec3 e1 = p2 - p0;
@@ -82,45 +82,45 @@ bool raycastTri(const Vec3& p0, const Vec3& p1, const Vec3& p2, Ray& ray, float*
     float g = e1.x_, h = e1.y_, i = e1.z_;
     float j = rsubv0.x_, k = rsubv0.y_, l = rsubv0.z_;
 
-    float eisubhf = e*i - h*f;
-    float gfsubdi = g*f - d*i;
-    float dhsubeg = d*h - e*g;
+    float eisubhf = e * i - h * f;
+    float gfsubdi = g * f - d * i;
+    float dhsubeg = d * h - e * g;
 
-    float Minv = 1.f / (a*eisubhf + b*gfsubdi + c*dhsubeg);
+    float Minv = 1.f / (a * eisubhf + b * gfsubdi + c * dhsubeg);
 
-    ray.t_ = (j*eisubhf + k*gfsubdi + l*dhsubeg) * Minv;
+    ray.t_ = (j * eisubhf + k * gfsubdi + l * dhsubeg) * Minv;
     if (ray.t_ < 0)
         return false;
 
-    float aksubjb = a*k - j*b;
-    float jcsubal = j*c - a*l;
-    float blsubkc = b*l - k*c;
+    float aksubjb = a * k - j * b;
+    float jcsubal = j * c - a * l;
+    float blsubkc = b * l - k * c;
 
-    float u = (i*aksubjb + h*jcsubal + g*blsubkc) * Minv;
+    float u = (i * aksubjb + h * jcsubal + g * blsubkc) * Minv;
     if (u < 0.f || u > 1.f)
         return false;
 
-    float v = -(f*aksubjb + e*(jcsubal)+d*blsubkc) * Minv;
+    float v = -(f * aksubjb + e * (jcsubal)+d * blsubkc) * Minv;
     if (v < 0.f || v > 1.f - u)
         return false;
 
     ray.normal_ = normalize(cross(e0, e1));
 
-    if(uRet != nullptr)
-        *uRet = u;
+    if (uRet != nullptr)
+        * uRet = u;
 
-    if(vRet != nullptr)
-        *vRet = v;
+    if (vRet != nullptr)
+        * vRet = v;
 
     return true;
 }
 
-Vec3 barycentre(const Triangle& triangle)
+Vec3 barycentre(const Triangle & triangle)
 {
-    return (triangle.p0_ + triangle.p1_ + triangle.p2_) * (1.f/3.f);
+    return (triangle.p0_ + triangle.p1_ + triangle.p2_) * (1.f / 3.f);
 }
 
-Vec3 calculateTangent(const Vec3& p0, const Vec3& p1, const Vec3& p2, const Vec2& uv0, const Vec2& uv1, const Vec2& uv2)
+Vec3 calculateTangent(const Vec3 & p0, const Vec3 & p1, const Vec3 & p2, const Vec2 & uv0, const Vec2 & uv1, const Vec2 & uv2)
 {
     Vec3 Q1 = p1 - p0;
     Vec3 Q2 = p2 - p0;
@@ -130,11 +130,11 @@ Vec3 calculateTangent(const Vec3& p0, const Vec3& p1, const Vec3& p2, const Vec2
     float v1 = uv1.v_ - uv0.v_;
     float v2 = uv2.v_ - uv0.v_;
 
-    float denom = u1*v2 - u2*v1;
-    if(denom != 0)
+    float denom = u1 * v2 - u2 * v1;
+    if (denom != 0)
     {
-        float invDet = 1.f / (u1*v2 - u2*v1);
-        return invDet * (v2*Q1 - u1*Q2);
+        float invDet = 1.f / (u1 * v2 - u2 * v1);
+        return invDet * (v2 * Q1 - u1 * Q2);
     }
     return Vec3(0, 0, 0);
 }

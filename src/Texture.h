@@ -6,7 +6,8 @@
 class Texture
 {
 public:
-    enum FilterMode {
+    enum FilterMode
+    {
         NEAREST,
         LINEAR
     } filter = LINEAR;

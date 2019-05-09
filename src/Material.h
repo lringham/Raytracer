@@ -4,20 +4,22 @@
 #include "Light.h"
 #include "Texture.h"
 #include <string>
+
 class Material
 {
 public:
-    enum MaterialType {
+    enum MaterialType
+    {
         blinnPhong,
         transparent,
         metallic
     };
 
-    Material(const std::string& name = "", float Ia = .1f, const Vec3& kd = Vec3(1,1,1), const Vec3& ks = Vec3(1,1,1), const Vec3& attenuation = Vec3(1,1,1), float gloss = 64.f, float ior = 1.f, float reflectivity = 0.f, const std::string& type = "blinnPhong", bool checkered = false);
+    Material(const std::string& name = "", float Ia = .1f, const Vec3& kd = Vec3(1, 1, 1), const Vec3& ks = Vec3(1, 1, 1), const Vec3& attenuation = Vec3(1, 1, 1), float gloss = 64.f, float ior = 1.f, float reflectivity = 0.f, const std::string& type = "blinnPhong", bool checkered = false);
     void setTexture(const std::string& filename);
     void setNormalMap(const std::string& filename);
     void setSpecularMap(const std::string& filename);
-    Vec3 color(const Vec3& N,const Vec3& V, const Vec3& L, const Vec3& lightColor, const Vec2& uv) const;
+    Vec3 color(const Vec3& N, const Vec3& V, const Vec3& L, const Vec3& lightColor, const Vec2& uv) const;
     Vec3 sampleTexture(const Vec2& uv);
     Vec3 attenuationColor(float distance);
     bool isCheckered(const Vec3& point, int width = 5, int height = 5) const;
@@ -25,7 +27,7 @@ public:
 
     inline Vec3 ambientColor() const
     {
-        return Ia_*kd_;
+        return Ia_ * kd_;
     }
 
     inline bool isBlinnPhong() const

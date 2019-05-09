@@ -5,7 +5,7 @@
 class Mat3
 {
 public:
-    Mat3(float mainDiag=0);
+    Mat3(float mainDiag = 0);
     Mat3(float elements[9]);
     ~Mat3();
 

@@ -12,8 +12,8 @@ public:
     struct Face
     {
         unsigned v0_ = 0, t0_ = 0, n0_ = 0,
-        v1_ = 0, t1_ = 0, n1_ = 0,
-        v2_ = 0, t2_ = 0, n2_ = 0;
+            v1_ = 0, t1_ = 0, n1_ = 0,
+            v2_ = 0, t2_ = 0, n2_ = 0;
     };
 
     Obj();
@@ -40,7 +40,7 @@ public:
     std::vector<unsigned> indices_;
     std::map<int, int> faceMaterialMap_;
 
-private:	
+private:
     enum OBJ_TYPE
     {
         V, VT, VTN, VN, F, OBJECT, MATERIAL, USE_MATERIAL, NONE

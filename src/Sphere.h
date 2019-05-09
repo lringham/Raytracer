@@ -33,9 +33,9 @@ private:
     bool invertNormals_;
 };
 
-inline Vec2 calculateUV(const Vec3& vec) 
+inline Vec2 calculateUV(const Vec3& vec)
 {
     return Vec2(
-                atan2(vec.x_, vec.z_) / (3.1415926f*2.f),
-                1.f - acos(vec.y_) / 3.1415926f);
+        atan2(vec.x_, vec.z_) / (3.1415926f * 2.f),
+        1.f - acos(vec.y_) / 3.1415926f);
 }

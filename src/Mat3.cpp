@@ -3,8 +3,7 @@
 Mat3::Mat3(float mainDiag) : elements_{ mainDiag, 0, 0,
                                         0, mainDiag, 0,
                                         0, 0, mainDiag }
-{
-}
+{}
 
 Mat3::Mat3(float elements_[9])
 {
@@ -22,8 +21,7 @@ Mat3::Mat3(float elements_[9])
 }
 
 Mat3::~Mat3()
-{
-}
+{}
 
 void Mat3::identity()
 {
@@ -77,7 +75,7 @@ void Mat3::setRow(int index, float x, float y, float z)
 void Mat3::setRow(int index, Vec3 row)
 {
     int off = 3 * index;
-    elements_[off] 		= row.x_;
+    elements_[off] = row.x_;
     elements_[off + 1] = row.y_;
     elements_[off + 2] = row.z_;
 }
@@ -112,7 +110,7 @@ void Mat3::transpose()
 }
 
 // Opertors
-std::ostream& operator<<(std::ostream& os, const Mat3& m)
+std::ostream& operator<<(std::ostream & os, const Mat3 & m)
 {
     for (int i = 0; i < 3; i++)
     {
@@ -127,7 +125,7 @@ std::ostream& operator<<(std::ostream& os, const Mat3& m)
     return os;
 }
 
-Mat3 operator+(const Mat3& m1, const Mat3& m2)
+Mat3 operator+(const Mat3 & m1, const Mat3 & m2)
 {
     Mat3 m;
     for (int i = 0; i < 9; i++)
@@ -135,7 +133,7 @@ Mat3 operator+(const Mat3& m1, const Mat3& m2)
     return m;
 }
 
-Mat3 operator-(const Mat3& m1, const Mat3& m2)
+Mat3 operator-(const Mat3 & m1, const Mat3 & m2)
 {
     Mat3 m;
     for (int i = 0; i < 9; i++)
@@ -143,7 +141,7 @@ Mat3 operator-(const Mat3& m1, const Mat3& m2)
     return m;
 }
 
-Vec3 operator*(const Mat3& m, const Vec3& v)
+Vec3 operator*(const Mat3 & m, const Vec3 & v)
 {
     Vec3 ans;
 
@@ -154,7 +152,7 @@ Vec3 operator*(const Mat3& m, const Vec3& v)
     return ans;
 }
 
-Mat3 operator*(const Mat3& m1, const Mat3& m2)
+Mat3 operator*(const Mat3 & m1, const Mat3 & m2)
 {
     Mat3 m;
 

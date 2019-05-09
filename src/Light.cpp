@@ -17,34 +17,34 @@ PointLight::PointLight(Vec3 color, Vec3 position, float intensity, float radius)
 {}
 
 Ray PointLight::getShadowRay(const Vec3& collisionPoint, float offset) const
-{  
+{
     Vec3 L = normalize(position_ - collisionPoint);
-    if(radius_ == 0)
+    if (radius_ == 0)
         return Ray(collisionPoint, L, offset);
     else
     {
-        Vec3 shadowDir = normalize((position_ - radius_*(L*.5f + pointInCircle())) - collisionPoint);
-        if(dot(shadowDir, L) < 0)
+        Vec3 shadowDir = normalize((position_ - radius_ * (L * .5f + pointInCircle())) - collisionPoint);
+        if (dot(shadowDir, L) < 0)
             shadowDir = -1 * shadowDir;
         return Ray(collisionPoint, shadowDir, offset);
     }
 }
 
-Vec3 PointLight::getColor(const Vec3& collisionPoint) const
+Vec3 PointLight::getColor(const Vec3 & collisionPoint) const
 {
-    return attenuation(collisionPoint) * color_;
+    return attenuation(collisionPoint)* color_;
 }
 
-Vec3 PointLight::vectorFrom(const Vec3& collisionPoint) const
+Vec3 PointLight::vectorFrom(const Vec3 & collisionPoint) const
 {
     return position_ - collisionPoint;
 }
 
-float PointLight::attenuation(const Vec3& collisionPoint) const
+float PointLight::attenuation(const Vec3 & collisionPoint) const
 {
     Vec3 D = position_ - collisionPoint;
     float DdotD = dot(D, D);
-    if(DdotD != 0.f)
+    if (DdotD != 0.f)
         return intensity_ / DdotD;
     else
         return 1.f;
@@ -53,11 +53,11 @@ float PointLight::attenuation(const Vec3& collisionPoint) const
 // -----------------
 // DirectionalLight
 // -----------------
-DirectionalLight::DirectionalLight(Vec3 color, float intensity, const Vec3& direction) :
+DirectionalLight::DirectionalLight(Vec3 color, float intensity, const Vec3 & direction) :
     Light(color, intensity), direction_(normalize(direction))
 {}
 
-Ray DirectionalLight::getShadowRay(const Vec3& collisionPoint, float offset) const
+Ray DirectionalLight::getShadowRay(const Vec3 & collisionPoint, float offset) const
 {
     return Ray(collisionPoint, -1.f * direction_, offset);
 }
@@ -75,16 +75,16 @@ Vec3 DirectionalLight::vectorFrom(const Vec3&) const
 // -----------------
 // Spotlight
 // -----------------
-SpotLight::SpotLight(Vec3 color, Vec3 position, float intensity, const Vec3& direction, float cosThetaP, float cosThetaU, float exp) :
+SpotLight::SpotLight(Vec3 color, Vec3 position, float intensity, const Vec3 & direction, float cosThetaP, float cosThetaU, float exp) :
     Light(color, intensity), position_(position), direction_(normalize(direction)), cosThetaP_(cosThetaP), cosThetaU_(cosThetaU), exp_(exp)
 {}
 
-Ray SpotLight::getShadowRay(const Vec3& collisionPoint, float offset) const
+Ray SpotLight::getShadowRay(const Vec3 & collisionPoint, float offset) const
 {
     return Ray(collisionPoint, normalize(position_ - collisionPoint), offset);
 }
 
-Vec3 SpotLight::getColor(const Vec3& collisionPoint) const
+Vec3 SpotLight::getColor(const Vec3 & collisionPoint) const
 {
     Vec3 L = collisionPoint - position_;
     float dist = L.length();
@@ -92,17 +92,17 @@ Vec3 SpotLight::getColor(const Vec3& collisionPoint) const
     float cosThetaS = dot(L, direction_);
 
     // In the centre of spotlight
-    if(cosThetaS >= cosThetaP_)
+    if (cosThetaS >= cosThetaP_)
     {
         return color_;
     }
     // In the penumbra
-    else if(cosThetaS > cosThetaU_)
+    else if (cosThetaS > cosThetaU_)
     {
         float denom = cosThetaP_ - cosThetaU_;
-        if(denom != 0.f)
+        if (denom != 0.f)
         {
-            return color_ * std::pow((cosThetaS  - cosThetaU_) / denom, exp_);
+            return color_ * std::pow((cosThetaS - cosThetaU_) / denom, exp_);
         }
         else
             return color_;
@@ -112,7 +112,7 @@ Vec3 SpotLight::getColor(const Vec3& collisionPoint) const
         return Vec3(0);
 }
 
-Vec3 SpotLight::vectorFrom(const Vec3& collisionPoint) const
+Vec3 SpotLight::vectorFrom(const Vec3 & collisionPoint) const
 {
     return position_ - collisionPoint;
 }

@@ -27,7 +27,7 @@ private:
         int triangleIndex_;
         int rightChildOffset_;
 
-        Node(){}
+        Node() {}
 
         Node(AABB boundingBox, int triangleIndex = -1, int rightChildOffset = -1) :
             boundingBox_(boundingBox), triangleIndex_(triangleIndex), rightChildOffset_(rightChildOffset)
