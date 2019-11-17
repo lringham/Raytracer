@@ -122,7 +122,7 @@ objects:
 lights:
   - type: "point"
     color: [1.0, 1.0, 1.0]
-    position: [200.0, 400.0, 0.0]
+    position: [200.0, 200.0, 0.0]
     radius: 25.0
     intensity: 100000.0
 camera:

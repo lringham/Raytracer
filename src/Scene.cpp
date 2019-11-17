@@ -373,7 +373,7 @@ void Scene::trace()
     for (auto& thread : threads)
         thread.join();
 
-    std::cout << "Finished\n";
+    std::cout << "\n";
 }
 
 void Scene::traceSection(Camera & camera_)
@@ -414,12 +414,12 @@ void Scene::printProgress(float progress) const
     const int progressRes = 10;    
     std::string progressText = "[";
     for (int i = 0; i < progressRes; ++i)
-        {
+    {
         if (progress * progressRes > i)
             progressText += '=';
         else
             progressText += ' ';
-        }
+    }
     progressText += ']';
     if (progress < 10)
         progressText += "  ";

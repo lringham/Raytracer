@@ -18,10 +18,8 @@ make -j4 -C build
 - Non PBR
 
 ## TODO
-- clean todos and fixmes
-- Render a scene with all types of geometry
-- make a few interesting scenes showing off features
-- energy conserving phong
+- clean TODOs and FIXMEs
+- energy conserving phong?
 
 ## Features
 - Multi-threaded
@@ -43,6 +41,9 @@ make -j4 -C build
 Cornell box  
 ![Cornell Box](./images/cornell.png)
 
+Default scene  
+![Default Scene](./images/default.png)
+
 Depth of field example  
 ![Depth of Field](./images/spheres.png)
 
@@ -55,3 +56,5 @@ Masterchief with texture, specular and normal maps. And a plasma gernade
 Interesting bug  
 ![Bug](./images/bug.png)
 
+## CONTRIBUTIONS
+Thanks to Cory B. for suggesting non-blocking threading.

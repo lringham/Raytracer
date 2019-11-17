@@ -88,7 +88,7 @@ lights:
     color: [1, 1, 1]
     position: [20, 10, 0]
     radius: 0.02
-    intensity: 50
+    intensity: 25
   - type: point
     color: [0, .5, 1]
     position: [5, 2, 2]
@@ -98,7 +98,7 @@ lights:
     color: [.8, .3, 0]
     position: [0, 10, 0]
     radius: 0.03
-    intensity: 50
+    intensity: 25
 camera:
   position: [3, 3, 6]
   direction: [0, -.25, -1]
