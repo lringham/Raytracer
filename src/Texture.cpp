@@ -8,8 +8,7 @@ Texture::Texture() :
 
 Texture::Texture(const std::string& filename)
 {
-    if (!loadTexture(filename))
-        std::cout << "Cannot load texture:" << filename << "\n";
+    loadTexture(filename);
 }
 
 Vec3 Texture::getPixelColor(int x, int y) const
@@ -80,6 +79,9 @@ bool Texture::loadTexture(const std::string & filename)
         stbi_image_free(data);
         initalized_ = true;
     }
+    else
+        std::cout << "Cannot load texture: " << filename << "\n";
+
     return initalized_;
 }
 

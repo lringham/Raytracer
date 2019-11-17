@@ -13,7 +13,7 @@ public:
     int sampleCount() const;
 
     Pixels pixels_;
-    Vec3 position_ = Vec3(0, 0, 0);
+    Vec3 position_ = Vec3(0, 0, 1);
     Vec3 direction_ = Vec3(0, 0, -1);
 
 private:

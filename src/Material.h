@@ -8,7 +8,7 @@
 class Material
 {
 public:
-    enum MaterialType
+    enum class MaterialType
     {
         blinnPhong,
         transparent,

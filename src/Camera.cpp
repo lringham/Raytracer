@@ -43,6 +43,8 @@ void Camera::init(const Vec3& position, const Vec3& direction, float fov, float 
 std::vector<Ray> Camera::createRays(unsigned x, unsigned y) const
 {
     std::vector<Ray> rays;
+
+    //TODO: replace with seeded member var
     std::random_device rd;
     std::mt19937 gen(rd());
     std::uniform_real_distribution<float> dis(0.f, 1.f);

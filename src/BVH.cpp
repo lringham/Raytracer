@@ -3,6 +3,7 @@
 #include <memory>
 #include <iostream>
 
+//TODO: make templated?
 BVH::BVH() {}
 
 BVH::BVH(const Obj& obj)

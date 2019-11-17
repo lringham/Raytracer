@@ -3,7 +3,6 @@ outputName: cornell.ppm
 backgroundColor: [0, 0, 0]
 recursionDepth: 3
 shadowSampleCount: 20
-skySphere: sky.png
 materials:
     - name: plane
       type: metallic

@@ -45,5 +45,5 @@ private:
 
     std::vector<Node> tree_;
     std::vector<Triangle> triangles_;
-    Vec3 position_;
+    Vec3 position_ = Vec3(0, 0, 0);
 };

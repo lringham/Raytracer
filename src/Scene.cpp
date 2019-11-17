@@ -1,5 +1,7 @@
 #include <thread>
 #include <iostream>
+#include <fstream>
+#include <sstream>
 #include <functional>
 #include <map>
 
@@ -17,15 +19,11 @@ Scene::Scene()
 
 bool Scene::init(int argc, char** argv)
 {
-    std::cout << "Loading scene...";
+    std::cout << "Loading scene... \n";
     if (loadScene(argc, argv))
-    {
-        std::cout << "finished\n";
         return true;
-    }
     else
     {
-        std::cout << "failed\n";
         usage();
         return false;
     }
@@ -39,9 +37,11 @@ bool Scene::parseArgs(int argc, char** argv, std::string& sceneFilename)
         threadCount_ = std::stoi(value);
     };
 
-    if (inbetweenExc(argc, 1, 4))
+    if (inbetweenExc(argc, 0, 4))
     {
-        sceneFilename = argv[1];
+        if(argc > 1)
+            sceneFilename = argv[1];
+
         for (int i = 1; i < argc; ++i)
         {
             std::string arg = argv[i];
@@ -52,12 +52,15 @@ bool Scene::parseArgs(int argc, char** argv, std::string& sceneFilename)
                 std::string value = arg.substr(pos + 1);
                 if (argMap.count(header) == 1)
                     argMap.at(header)(value);
+                else
+                    return false;
             }
-        }
-        return true;
+        }        
     }
     else
         return false;
+
+    return true;
 }
 
 bool Scene::loadScene(int argc, char** argv)
@@ -69,50 +72,93 @@ bool Scene::loadScene(int argc, char** argv)
     std::map<std::string, int> materialMap;
     try
     {
-        YAML::Node config = YAML::LoadFile(sceneFilename);
-        std::string modelsDir = parseNode<std::string>(config, "modelsDir", "");
-        outputName_ = parseNode<std::string>(config, "outputName", "scene.ppm");
-        name_ = parseNode<std::string>(config, "name", "scene");
-        depth_ = parseNode(config, "recursionDepth", 1);
-        shadowSampleCount_ = parseNode(config, "shadowSampleCount", 1);
+        // Try to load the specified scene, if the file cannot be opened
+        // a default scene is used.
+        YAML::Node config;
+        {
+            if (sceneFilename == "")
+            {
+                std::istringstream iss(defaultScene);
+                config = YAML::Load(iss);
+            }
+            else
+            {
+                std::ifstream file(sceneFilename);
+                if (file.is_open())
+                {
+                    file.close();
+                    config = YAML::LoadFile(sceneFilename);
+                }
+                else
+                {
+                    std::cout << "Cannot load scene: " << sceneFilename << "\n";
+                    return false;
+                }
+            }
+        }
 
-        if (config["skySphere"])
-            skySphere_.loadTexture(parseNode<std::string>(config, "skySphere", ""));
+        std::string modelsDir = "", skySphere = "";
+        parseNode(config, "modelsDir", modelsDir);
+        parseNode(config, "outputName", outputName_);
+        parseNode(config, "name", name_);
+        parseNode(config, "recursionDepth", depth_);
+        parseNode(config, "shadowSampleCount", shadowSampleCount_);
+
+        // parse background
+        if(parseNode(config, "skySphere", skySphere))
+            skySphere_.loadTexture(skySphere);
+
+        Vec3 backgroundColor(0, 0, 0);
+        backgroundSet_ = parseNode(config, "backgroundColor", backgroundColor);
+        backgroundColor_.set(backgroundColor);
 
         // parse materials
         const YAML::Node& materialsNode = config["materials"];
         for (YAML::const_iterator it = materialsNode.begin(); it != materialsNode.end(); ++it)
         {
-            const YAML::Node& materialNode = *it;
-            std::string materialName = parseNode<std::string>(materialNode, "name", "materialName");
+            const YAML::Node& materialNode  = *it;
+            std::string materialName        = "materialName";
+            float Ia 				        = 0.1f;
+            Vec3 kd 				        = Vec3(1.f, 1.f, 1.f);
+            Vec3 ks 			            = Vec3(1.f, 1.f, 1.f);
+            Vec3 attenuation 	            = Vec3(1.f, 1.f, 1.f);
+            float gloss 		            = 1.f;
+            float ior 			            = 1.f;
+            float reflectivity 	            = 0.f;
+            std::string type 	            = "blinnPhong";
+            bool checkered 		            = false;
+
+            if(!parseNode(materialNode, "name", materialName)) 
+                throw YAML::BadFile();
+
+            parseNode(materialNode, "Ia", Ia);
+            parseNode(materialNode, "kd", kd);
+            parseNode(materialNode, "ks", ks);
+            parseNode(materialNode, "attenuation", attenuation);
+            parseNode(materialNode, "gloss", gloss);
+            parseNode(materialNode, "ior", ior);
+            parseNode(materialNode, "reflectivity", reflectivity);
+            parseNode(materialNode, "type", type);
+            parseNode(materialNode, "checkered", checkered);
 
             materialMap[materialName] = materials_.size();
             materials_.emplace_back(
-                materialName,
-                parseNode(materialNode, "Ia", 0.1f),
-                parseNode(materialNode, "kd", Vec3(1.f, 1.f, 1.f)),
-                parseNode(materialNode, "ks", Vec3(1.f, 1.f, 1.f)),
-                parseNode(materialNode, "attenuation", Vec3(1.f, 1.f, 1.f)),
-                parseNode(materialNode, "gloss", 1.f),
-                parseNode(materialNode, "ior", 1.f),
-                parseNode(materialNode, "reflectivity", 0.f),
-                parseNode<std::string>(materialNode, "type", "blinnPhong"),
-                parseNode(materialNode, "checkered", false));
+                materialName, 
+                Ia, kd, ks, 
+                attenuation, 
+                gloss, 
+                ior, 
+                reflectivity, 
+                type, 
+                checkered);
 
-            if (materialNode["texture"])
-            {
-                materials_.back().setTexture(materialNode["texture"].as<std::string>());
-            }
-
-            if (materialNode["normalMap"])
-            {
-                materials_.back().setNormalMap(materialNode["normalMap"].as<std::string>());
-            }
-
-            if (materialNode["specularMap"])
-            {
-                materials_.back().setSpecularMap(materialNode["specularMap"].as<std::string>());
-            }
+            std::string texture = "", normalMap = "", specularMap = "";
+            if (parseNode(materialNode, "texture", texture))
+                materials_.back().setTexture(texture);
+            if (parseNode(materialNode, "normalMap", normalMap))
+                materials_.back().setNormalMap(normalMap); 
+            if (parseNode(materialNode, "specularMap", specularMap))
+                materials_.back().setNormalMap(specularMap);
         }
 
         // parse objects
@@ -120,48 +166,59 @@ bool Scene::loadScene(int argc, char** argv)
         for (YAML::const_iterator it = objectsNode.begin(); it != objectsNode.end(); ++it)
         {
             const YAML::Node& object = *it;
-            std::string type = object["type"].as<std::string>();
+            std::string type = "sphere";
+            parseNode(object, "type", type);
 
             if (type == "sphere")
             {
-                geometry_.emplace_back(
-                    new Sphere(
-                        parseNode(object, "radius", 1.f),
-                        parseNode(object, "position", Vec3(0, 0, 0)),
-                        parseNode(object, "invertNormals", false)));
+                float radius = 1.f;
+                Vec3 position(0, 0, 0);
+                bool invertNormals = false;
+
+                parseNode(object, "radius", radius);
+                parseNode(object, "position", position);
+                parseNode(object, "invertNormals", invertNormals);
+                geometry_.emplace_back(new Sphere(radius, position, invertNormals));
             }
             else if (type == "triangle")
             {
-                geometry_.emplace_back(
-                    new Triangle(
-                        parseNode(object, "x0", Vec3(-1, 0, 0)),
-                        parseNode(object, "x1", Vec3(0, 1, 0)),
-                        parseNode(object, "x2", Vec3(1, 0, 0))));
+                Vec3 x0(-1, 0, 0), x1(0, 1, 0), x2(1, 0, 0);
+
+                parseNode(object, "x0", x0);
+                parseNode(object, "x1", x1);
+                parseNode(object, "x2", x2);
+                geometry_.emplace_back(new Triangle(x0, x1, x2));
             }
             else if (type == "plane")
             {
-                geometry_.emplace_back(
-                    new Plane(
-                        parseNode(object, "normal", Vec3(0, 1, 0)),
-                        parseNode(object, "position", Vec3(0, 0, 0)),
-                        parseNode(object, "width", std::numeric_limits<float>::max()),
-                        parseNode(object, "height", std::numeric_limits<float>::max())));
+                Vec3 normal(0, 1, 0), position(0, 0, 0);
+                float width = std::numeric_limits<float>::max(), height = std::numeric_limits<float>::max();
+
+                parseNode(object, "normal", normal),
+                parseNode(object, "position", position),
+                parseNode(object, "width", width),
+                parseNode(object, "height", height);
+                geometry_.emplace_back(new Plane(normal, position, width, height));
             }
             else if (type == "model")
             {
-                std::string matName = parseNode<std::string>(object, "material", "");
+                std::string matName = "", filename = "";
+                parseNode(object, "material", matName);
+                parseNode(object, "filename", filename);
+
                 Obj obj;
-                obj.position_ = parseNode(object, "position", Vec3(0, 0, 0));
+                parseNode(object, "position", obj.position_);
                 obj.materialID_ = matName != "" ? materialMap[matName] : -1;
-                if (!obj.load(object["filename"].as<std::string>(), modelsDir, materials_, materialMap))
+                if (!obj.load(filename, modelsDir, materials_, materialMap))
                     return false;
                 geometry_.emplace_back(new BVH(obj));
             }
             else
                 std::cout << "Invalid geometry type: " << type << std::endl;
 
-            if (object["material"])
-                geometry_.back()->materialID_ = materialMap[object["material"].as<std::string>()];
+            std::string materialName = "";
+            parseNode(object, "material", materialName);
+            geometry_.back()->materialID_ = materialMap[materialName];
         }
 
         // parse lights
@@ -169,59 +226,75 @@ bool Scene::loadScene(int argc, char** argv)
         for (YAML::const_iterator it = lights.begin(); it != lights.end(); ++it)
         {
             const YAML::Node& light = *it;
-            std::string type = light["type"].as<std::string>();
-
+            std::string type = "";
+            parseNode(light, "type", type);
+            
             if (type == "point")
             {
-                lights_.emplace_back(
-                    new PointLight(
-                        parseNode(light, "color", Vec3(1, 1, 1)),
-                        parseNode(light, "position", Vec3(0, 0, 0)),
-                        parseNode(light, "intensity", 100.f),
-                        parseNode(light, "radius", 0.f)
-                    ));
+                Vec3 color(1, 1, 1), position(0, 0, 0);
+                float intensity = 100.f, radius = 0.f;
+
+                parseNode(light, "color", color);
+                parseNode(light, "position", position);
+                parseNode(light, "intensity", intensity);
+                parseNode(light, "radius", radius);
+
+                lights_.emplace_back(new PointLight(color, position, intensity, radius));
             }
             else if (type == "spot")
             {
-                lights_.emplace_back(
-                    new SpotLight(
-                        parseNode(light, "color", Vec3(1, 1, 1)),
-                        parseNode(light, "position", Vec3(0, 0, 0)),
-                        parseNode(light, "intensity", 100.f),
-                        parseNode(light, "direction", Vec3(0, -1, 0)),
-                        parseNode(light, "cosThetaP", .5f),
-                        parseNode(light, "cosThetaU", .7f),
-                        parseNode(light, "exp", 1.f)
-                    ));
+                Vec3 color(1, 1, 1), position(0, 0, 0), direction(0, -1, 0);
+                float intensity = 100.f, cosThetaP = .5f, cosThetaU = .7f, exp = 1.f;
+
+                parseNode(light, "color", color);
+                parseNode(light, "position", position);
+                parseNode(light, "intensity", intensity);
+                parseNode(light, "direction", direction);
+                parseNode(light, "cosThetaP", cosThetaP);
+                parseNode(light, "cosThetaU", cosThetaU);
+                parseNode(light, "exp", exp);
+
+                lights_.emplace_back(new SpotLight(color, position, intensity, direction, cosThetaP, cosThetaU, exp));
             }
             else if (type == "directional")
             {
-                lights_.emplace_back(
-                    new DirectionalLight(
-                        parseNode(light, "color", Vec3(1, 1, 1)),
-                        parseNode(light, "intensity", 100.f),
-                        parseNode(light, "direction", Vec3(0, -1, 0))
-                    ));
+                Vec3 color(1, 1, 1), direction(0, -1, 0);
+                float intensity = 100.f;
+
+                parseNode(light, "color", color);
+                parseNode(light, "intensity", intensity);
+                parseNode(light, "direction", direction);
+
+                lights_.emplace_back(new DirectionalLight(color, intensity, direction));
             }
         }
 
         // create camera
-        camera_.init(
-            parseNode(config["camera"], "position", Vec3(0, 0, 1)),
-            parseNode(config["camera"], "direction", Vec3(0, 0, -1)),
-            parseNode(config["camera"], "fov", 0.f),
-            parseNode(config["camera"], "focalLength", 1.f),
-            Pixels(
-                parseNode(config["camera"], "pxWidth", 100),
-                parseNode(config["camera"], "pxHeight", 100)),
-            parseNode(config["camera"], "sampleCount", 1),
-            parseNode(config["camera"], "lensRadius", 0.f));
+        Vec3 position(0, 0, 1), direction(0, 0, -1);
+        float fov = 0.f, focalLength = 1.f, lensRadius = 0.f;
+        unsigned pxWidth = 100, pxHeight = 100, sampleCount = 1;
 
-        if (config["backgroundColor"])
+        if (config["camera"])
         {
-            backgroundColor_.set(parseNode(config, "backgroundColor", Vec3(0, 0, 0)));
-            backgroundSet_ = true;
+            auto cameraNode = config["camera"];
+            parseNode(cameraNode, "position", position);
+            parseNode(cameraNode, "direction", direction);
+            parseNode(cameraNode, "fov", fov);
+            parseNode(cameraNode, "focalLength", focalLength);
+            parseNode(cameraNode, "pxWidth", pxWidth);
+            parseNode(cameraNode, "pxHeight", pxHeight);
+            parseNode(cameraNode, "sampleCount", sampleCount);
+            parseNode(cameraNode, "lensRadius", lensRadius);
         }
+
+        camera_.init(
+            position, 
+            direction, 
+            fov, 
+            focalLength, 
+            Pixels(pxWidth, pxHeight), 
+            sampleCount, 
+            lensRadius);
     }
     catch (YAML::BadFile e)
     {
@@ -246,12 +319,11 @@ void Scene::trace()
     }
 
     // Print tracing details
-    std::cout << "Thread count: " << threadCount_ << "\n";
-    std::cout << "Recursion depth: " << depth_ << "\n";
-    std::cout << "Pixel sample count: " << camera_.sampleCount() << "\n";
-    std::cout << "Shadow sample count: " << shadowSampleCount_ << "\n";
-    //std::cout << "Tracing " << name_ << "...";
-
+    std::cout << "\tThread count: " << threadCount_ << "\n";
+    std::cout << "\tRecursion depth: " << depth_ << "\n";
+    std::cout << "\tPixel sample count: " << camera_.sampleCount() << "\n";
+    std::cout << "\tShadow sample count: " << shadowSampleCount_ << "\n";
+    
     // Divide image into blocks
     unsigned width = camera_.pixels_.width();
     unsigned height = camera_.pixels_.height();
@@ -264,7 +336,6 @@ void Scene::trace()
     if (height % blockHeight > 0)
         yRes++;
 
-    //TODO: replace with space filling curve for better cache locality
     for (unsigned y = 0; y < yRes; ++y)
     {
         for (unsigned x = 0; x < xRes; ++x)
