@@ -6,11 +6,11 @@
 class Texture
 {
 public:
-    enum FilterMode
+    enum class FilterMode
     {
         NEAREST,
         LINEAR
-    } filter = LINEAR;
+    } filter = FilterMode::LINEAR;
 
     Texture();
     Texture(const std::string& filename);
@@ -23,6 +23,6 @@ public:
 
 private:
     std::vector<unsigned char> pixels_;
-    int width_, height_, numComp_;
-    bool initalized_;
+    int width_ = 0, height_ = 0, numComp_ = 0;
+    bool initalized_ = false;
 };

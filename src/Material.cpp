@@ -38,7 +38,7 @@ Vec3 Material::color(const Vec3& N, const Vec3& V, const Vec3& L, const Vec3& li
     {
         color = color + (1.f - Ia_) * lightColor * ks;
     }
-    else
+    else //blinnPhong
     {
         color = color + (1.f - Ia_) * (kd + lightColor * ks);
     }

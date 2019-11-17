@@ -20,5 +20,5 @@ public:
     void move(Vec3 translation);
     Vec3 center() const;
 
-    Vec3 min_, max_;
+    Vec3 min_ = std::numeric_limits<float>::max(), max_ = std::numeric_limits<float>::min();
 };

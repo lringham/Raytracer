@@ -12,8 +12,7 @@
 #include "Obj.h"
 #include "BVH.h"
 
-Scene::Scene() :
-    name_("scene"), outputName_(""), threadCount_(0), rayOffset_(.01f), ambientIOR_(1.f), backgroundSet_(false)
+Scene::Scene()
 {}
 
 bool Scene::init(int argc, char** argv)
@@ -54,8 +53,6 @@ bool Scene::parseArgs(int argc, char** argv, std::string& sceneFilename)
                 if (argMap.count(header) == 1)
                     argMap.at(header)(value);
             }
-            // else // is a flag
-            // {}
         }
         return true;
     }
@@ -70,39 +67,37 @@ bool Scene::loadScene(int argc, char** argv)
         return false;
 
     std::map<std::string, int> materialMap;
-    YAML::Node config;
     try
     {
-        //TODO convert all optional args to use parseNode function
-        //TODO extract default values / magic numbers
         YAML::Node config = YAML::LoadFile(sceneFilename);
         std::string modelsDir = parseNode<std::string>(config, "modelsDir", "");
         outputName_ = parseNode<std::string>(config, "outputName", "scene.ppm");
         name_ = parseNode<std::string>(config, "name", "scene");
-        depth_ = parseNode<unsigned>(config, "recursionDepth", 1);
-        shadowSampleCount_ = parseNode<unsigned>(config, "shadowSampleCount", 1);
+        depth_ = parseNode(config, "recursionDepth", 1);
+        shadowSampleCount_ = parseNode(config, "shadowSampleCount", 1);
 
         if (config["skySphere"])
             skySphere_.loadTexture(parseNode<std::string>(config, "skySphere", ""));
 
+        // parse materials
         const YAML::Node& materialsNode = config["materials"];
         for (YAML::const_iterator it = materialsNode.begin(); it != materialsNode.end(); ++it)
         {
             const YAML::Node& materialNode = *it;
-            std::string materialName = materialNode["name"].as<std::string>();
+            std::string materialName = parseNode<std::string>(materialNode, "name", "materialName");
 
             materialMap[materialName] = materials_.size();
             materials_.emplace_back(
                 materialName,
-                materialNode["Ia"].as<float>(),
-                parseNode(materialNode, "kd", Vec3(1, 1, 1)),
-                parseNode(materialNode, "ks", Vec3(1, 1, 1)),
-                parseNode(materialNode, "attenuation", Vec3(1, 1, 1)),
-                parseNode<float>(materialNode, "gloss", 1.f),
-                parseNode<float>(materialNode, "ior", 1.f),
-                parseNode<float>(materialNode, "reflectivity", 0.f),
-                materialNode["type"].as<std::string>(),
-                parseNode<bool>(materialNode, "checkered", false));
+                parseNode(materialNode, "Ia", 0.1f),
+                parseNode(materialNode, "kd", Vec3(1.f, 1.f, 1.f)),
+                parseNode(materialNode, "ks", Vec3(1.f, 1.f, 1.f)),
+                parseNode(materialNode, "attenuation", Vec3(1.f, 1.f, 1.f)),
+                parseNode(materialNode, "gloss", 1.f),
+                parseNode(materialNode, "ior", 1.f),
+                parseNode(materialNode, "reflectivity", 0.f),
+                parseNode<std::string>(materialNode, "type", "blinnPhong"),
+                parseNode(materialNode, "checkered", false));
 
             if (materialNode["texture"])
             {
@@ -120,6 +115,7 @@ bool Scene::loadScene(int argc, char** argv)
             }
         }
 
+        // parse objects
         const YAML::Node& objectsNode = config["objects"];
         for (YAML::const_iterator it = objectsNode.begin(); it != objectsNode.end(); ++it)
         {
@@ -130,9 +126,9 @@ bool Scene::loadScene(int argc, char** argv)
             {
                 geometry_.emplace_back(
                     new Sphere(
-                        parseNode<float>(object, "radius", 1.f),
+                        parseNode(object, "radius", 1.f),
                         parseNode(object, "position", Vec3(0, 0, 0)),
-                        parseNode<bool>(object, "invertNormals", false)));
+                        parseNode(object, "invertNormals", false)));
             }
             else if (type == "triangle")
             {
@@ -148,8 +144,8 @@ bool Scene::loadScene(int argc, char** argv)
                     new Plane(
                         parseNode(object, "normal", Vec3(0, 1, 0)),
                         parseNode(object, "position", Vec3(0, 0, 0)),
-                        parseNode<float>(object, "width", std::numeric_limits<float>::max()),
-                        parseNode<float>(object, "height", std::numeric_limits<float>::max())));
+                        parseNode(object, "width", std::numeric_limits<float>::max()),
+                        parseNode(object, "height", std::numeric_limits<float>::max())));
             }
             else if (type == "model")
             {
@@ -168,6 +164,7 @@ bool Scene::loadScene(int argc, char** argv)
                 geometry_.back()->materialID_ = materialMap[object["material"].as<std::string>()];
         }
 
+        // parse lights
         const YAML::Node& lights = config["lights"];
         for (YAML::const_iterator it = lights.begin(); it != lights.end(); ++it)
         {
@@ -180,8 +177,8 @@ bool Scene::loadScene(int argc, char** argv)
                     new PointLight(
                         parseNode(light, "color", Vec3(1, 1, 1)),
                         parseNode(light, "position", Vec3(0, 0, 0)),
-                        parseNode<float>(light, "intensity", 100.f),
-                        parseNode<float>(light, "radius", 0.f)
+                        parseNode(light, "intensity", 100.f),
+                        parseNode(light, "radius", 0.f)
                     ));
             }
             else if (type == "spot")
@@ -190,11 +187,11 @@ bool Scene::loadScene(int argc, char** argv)
                     new SpotLight(
                         parseNode(light, "color", Vec3(1, 1, 1)),
                         parseNode(light, "position", Vec3(0, 0, 0)),
-                        parseNode<float>(light, "intensity", 100.f),
+                        parseNode(light, "intensity", 100.f),
                         parseNode(light, "direction", Vec3(0, -1, 0)),
-                        parseNode<float>(light, "cosThetaP", .5f),
-                        parseNode<float>(light, "cosThetaU", .7f),
-                        parseNode<float>(light, "exp", 1.f)
+                        parseNode(light, "cosThetaP", .5f),
+                        parseNode(light, "cosThetaU", .7f),
+                        parseNode(light, "exp", 1.f)
                     ));
             }
             else if (type == "directional")
@@ -202,22 +199,23 @@ bool Scene::loadScene(int argc, char** argv)
                 lights_.emplace_back(
                     new DirectionalLight(
                         parseNode(light, "color", Vec3(1, 1, 1)),
-                        parseNode<float>(light, "intensity", 100.f),
+                        parseNode(light, "intensity", 100.f),
                         parseNode(light, "direction", Vec3(0, -1, 0))
                     ));
             }
         }
 
+        // create camera
         camera_.init(
             parseNode(config["camera"], "position", Vec3(0, 0, 1)),
             parseNode(config["camera"], "direction", Vec3(0, 0, -1)),
-            parseNode<float>(config["camera"], "fov", 0),
-            parseNode<float>(config["camera"], "focalLength", 1.f),
+            parseNode(config["camera"], "fov", 0.f),
+            parseNode(config["camera"], "focalLength", 1.f),
             Pixels(
-                parseNode<unsigned>(config["camera"], "pxWidth", 100),
-                parseNode<unsigned>(config["camera"], "pxHeight", 100)),
-            parseNode<int>(config["camera"], "sampleCount", 1),
-            parseNode<float>(config["camera"], "lensRadius", 0.f));
+                parseNode(config["camera"], "pxWidth", 100),
+                parseNode(config["camera"], "pxHeight", 100)),
+            parseNode(config["camera"], "sampleCount", 1),
+            parseNode(config["camera"], "lensRadius", 0.f));
 
         if (config["backgroundColor"])
         {
@@ -227,6 +225,7 @@ bool Scene::loadScene(int argc, char** argv)
     }
     catch (YAML::BadFile e)
     {
+        std::cout << e.what() << "\n";
         return false;
     }
     return true;
@@ -272,17 +271,32 @@ void Scene::trace()
         {
             unsigned startX = x * blockWidth;
             unsigned startY = y * blockHeight;
-            blocks.push(Block(startX, std::min(startX + blockWidth - 1, width - 1),
+            blocks_.emplace_back(Block(startX, std::min(startX + blockWidth - 1, width - 1),
                 startY, std::min(startY + blockHeight - 1, height - 1)));
         }
     }
-    totalBlockCount_ = blocks.size();
+    totalBlockCount_ = blocks_.size();
+    const unsigned finalIndex = totalBlockCount_ + threadCount_;
 
     // Create threads and trace
-    std::vector<std::thread> threads(threadCount_ - 1);
-    for (unsigned i = 0; i < threadCount_ - 1; ++i)
+    std::vector<std::thread> threads(threadCount_);
+    for (unsigned i = 0; i < threadCount_; ++i)
         threads[i] = std::thread(&Scene::traceSection, this, std::ref(camera_));
-    traceSection(camera_);
+
+    // Print progress
+    float progress = 0.f;
+    while (progress < 1.f)
+    {
+        float prevProgress = progress;
+            progress = float(currentBlock_) / float(finalIndex);
+        
+        if (progress != prevProgress)
+            printProgress(progress);
+        
+        if (progress < 1.f)
+            std::this_thread::sleep_for(std::chrono::milliseconds(250));
+    }
+
 
     // Join threads
     for (auto& thread : threads)
@@ -324,42 +338,40 @@ void Scene::traceSection(Camera & camera_)
     }
 }
 
+void Scene::printProgress(float progress) const
+{
+    const int progressRes = 10;    
+    std::string progressText = "[";
+    for (int i = 0; i < progressRes; ++i)
+        {
+        if (progress * progressRes > i)
+            progressText += '=';
+        else
+            progressText += ' ';
+        }
+    progressText += ']';
+    if (progress < 10)
+        progressText += "  ";
+    else if (progress < 100)
+        progressText += ' ';
+    
+    std::cout << "Tracing " << name_ << " ";
+    std::cout << greenText(progressText + std::to_string(int(progress * 100)) + "%\r");
+    std::cout.flush();
+}
+
+
 bool Scene::getBlock(unsigned& startX, unsigned& endX, unsigned& startY, unsigned& endY)
 {
-    if (blocks.size() > 0)
+    unsigned blockIndex = currentBlock_++;
+    if (blockIndex < totalBlockCount_)
     {
-        std::unique_lock<std::mutex> lock(mutex_);
-
-        Block b = blocks.top();
-        blocks.pop();
+        Block b = blocks_[blockIndex];
 
         startX = b.startX_;
         endX = b.endX_;
         startY = b.startY_;
         endY = b.endY_;
-
-        // Print progress
-        int progressRes = 10;
-        float progress = 1.f - static_cast<float>(blocks.size()) / static_cast<float>(totalBlockCount_);
-        std::cout.flush();
-        std::cout << "Tracing " << name_ << " ";
-
-        // Create progress string
-        std::string progressText = "[";
-        for (int i = 0; i < progressRes; ++i)
-        {
-            if (progress * progressRes > i)
-                progressText = progressText + '=';
-            else
-                progressText = progressText + ' ';
-        }
-        progressText = progressText + ']';
-        if (progress < 10)
-            progressText = progressText + "  ";
-        else if (progress < 100)
-            progressText = progressText + ' ';
-
-        std::cout << greenText(progressText + std::to_string(static_cast<int>(progress * 100)) + "%\r");
 
         return true;
     }

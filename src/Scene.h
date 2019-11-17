@@ -8,7 +8,7 @@
 #include <stack>
 #include <map>
 #include <memory>
-#include <mutex>
+#include <atomic>
 #include <yaml-cpp/yaml.h>
 
 class Scene
@@ -75,23 +75,23 @@ private:
     int castRay(Ray& ray);
     Vec3 calculateColor(const Ray origRay, int depth);
     bool castShadowRay(Ray& ray, float distToLight);
-    Vec3 blinnPhong(const Ray& ray, const Tracable& geom);
     Vec3 sampleBackground(const Vec3& dir) const;
     bool getBlock(unsigned& startX, unsigned& endX, unsigned& startY, unsigned& endY);
     void usage();
+    void printProgress(float progress) const;
 
     std::vector<std::unique_ptr<Tracable>> geometry_;
     std::vector<std::unique_ptr<Light>> lights_;
     std::vector<Material> materials_;
-    std::stack<Block> blocks;
+    std::vector<Block> blocks_;
+    std::atomic<unsigned> currentBlock_;
 
     Texture skySphere_;
     Camera camera_;
-    Vec3 backgroundColor_;
-    std::string name_;
-    std::string outputName_;
-    std::mutex mutex_;
-    unsigned threadCount_, depth_, shadowSampleCount_, totalBlockCount_;
-    float rayOffset_, ambientIOR_;
-    bool backgroundSet_;
+    Vec3 backgroundColor_ = Vec3(0, 0, 0);
+    std::string name_ = "scene";
+    std::string outputName_ = "out";
+    unsigned threadCount_ = 0, depth_ = 0, shadowSampleCount_ = 0, totalBlockCount_ = 0;
+    float rayOffset_ = 0.01f, ambientIOR_ = 1.f;
+    bool backgroundSet_ = false;
 };

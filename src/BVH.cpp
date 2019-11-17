@@ -182,7 +182,7 @@ bool BVH::search(Ray & ray, int parentIndex) const
         bool hitLeft = false, hitRight = false;
 
         bool hasLeft = !node.isLeaf() && node.rightChildOffset_ != parentIndex + 1;
-        if (hasLeft) // has left child
+        if (hasLeft)
             hitLeft = search(leftRay, parentIndex + 1); // search left
         if (node.rightChildOffset_ != -1) // has right child
             hitRight = search(rightRay, node.rightChildOffset_); // search right

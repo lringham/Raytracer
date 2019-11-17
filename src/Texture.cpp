@@ -37,7 +37,7 @@ Vec3 Texture::getPixelColor(int x, int y) const
 
 Vec3 Texture::sample(float u, float v) const
 {
-    if (filter == NEAREST)
+    if (filter == FilterMode::NEAREST)
     {
         return getPixelColor(
             static_cast<unsigned>(u * width_),
@@ -67,6 +67,9 @@ Vec3 Texture::sample(float u, float v) const
 
 bool Texture::loadTexture(const std::string & filename)
 {
+    if (filename == "")
+        return false;
+
     stbi_set_flip_vertically_on_load(true);
     unsigned char* data = stbi_load(&filename[0], &width_, &height_, &numComp_, 0);
     if (data != nullptr)

@@ -184,11 +184,11 @@ void Obj::loadMTLFile(const std::string & filename, std::vector<Material> & mate
             else if (heading == "map_Bump")
                 materials.back().setNormalMap(path_ + std::string(line + offset));
             // else if(heading == "d")
-            // 	; // transparancy or (1-tr)
+            //     ; // transparancy or (1-tr)
             // else if(heading == "Ka")
-            // 	; // amb color
+            //     ; // amb color
             // else if(heading == "illum")
-            // 	; // illumination model
+            //     ; // illumination model
 
         }
         matReader.close();

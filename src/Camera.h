@@ -13,18 +13,18 @@ public:
     int sampleCount() const;
 
     Pixels pixels_;
-    Vec3 position_;
-    Vec3 direction_;
+    Vec3 position_ = Vec3(0, 0, 0);
+    Vec3 direction_ = Vec3(0, 0, -1);
 
 private:
-    Vec3 up_;
-    Vec3 right_;
-    Vec3 topLeft_;
+    Vec3 up_ = Vec3(0.f, 1.f, 0.f);
+    Vec3 right_ = Vec3(1.f, 0.f, 0.f);
+    Vec3 topLeft_ = Vec3(-4.37042f, 4.37042f, -8.f);
 
-    float fov_;
-    float focalLength_;
-    float pxWidth_;
-    float pxHeight_;
-    int sampleCount_;
-    float lensRadius_;
+    float fov_ = 1.f;
+    float focalLength_ = 1.f;
+    float lensRadius_ = 0.f;
+    float pxWidth_ = 0.0145681f;
+    float pxHeight_ = 0.0145681f;
+    unsigned sampleCount_ = 1;
 };

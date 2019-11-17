@@ -69,9 +69,9 @@ public:
     }
 
     std::string name_;
-    float Ia_;
-    Vec3 kd_, ks_, attenuation_;
-    float gloss_, ior_, reflectivity_;
+    float Ia_ = 0.1f;
+    Vec3 kd_ = Vec3(1.f, 1.f, 1.f), ks_ = Vec3(1.f, 1.f, 1.f), attenuation_ = Vec3(1.f, 1.f, 1.f);
+    float gloss_ = 1.f, ior_ = 1.f, reflectivity_ = 0.f;
     MaterialType type_;
 
 private:

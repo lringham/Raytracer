@@ -1,7 +1,6 @@
 #include "AABB.h"
 
-AABB::AABB() :
-    min_(std::numeric_limits<float>::max()), max_(std::numeric_limits<float>::min())
+AABB::AABB()
 {}
 
 AABB::AABB(const AABB& b0, const AABB& b1)

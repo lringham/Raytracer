@@ -10,7 +10,7 @@ Sphere::Sphere(float radius, Vec3 center, bool invertNormals)
 bool Sphere::raycast(Ray& ray) const
 {
     Vec3 L = center_ - ray.origin_; // Get vector from ray origin to sphere centre
-    float tc = L.dot(ray.dir_);	// Project vector onto ray dir
+    float tc = L.dot(ray.dir_);    // Project vector onto ray dir
 
     // Check if ray is pointing at sphere
     if (tc < 0)

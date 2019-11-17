@@ -4,7 +4,9 @@
 #include <random>
 
 Camera::Camera()
-{}
+{
+    init(position_, direction_, fov_, focalLength_, Pixels{}, sampleCount_, lensRadius_);
+}
 
 Camera::Camera(const Vec3& position, const Vec3& direction, float fov, float focalLength, Pixels pixels, int sampleCount, float lensRadius)
 {
@@ -30,7 +32,7 @@ void Camera::init(const Vec3& position, const Vec3& direction, float fov, float 
     float dy = dx * (static_cast<float>(pixels_.height()) / static_cast<float>(pixels_.width()));
     pxWidth_ = (2.f * dx) / pixels_.width();
     pxHeight_ = (2.f * dy) / pixels_.height();
-
+    
     up_.set(0, 1, 0);
     right_ = normalize(cross(direction_, up_));
     up_ = normalize(cross(right_, direction_));
@@ -45,7 +47,7 @@ std::vector<Ray> Camera::createRays(unsigned x, unsigned y) const
     std::mt19937 gen(rd());
     std::uniform_real_distribution<float> dis(0.f, 1.f);
 
-    for (int rayID = 0; rayID < sampleCount_; ++rayID)
+    for (unsigned rayID = 0; rayID < sampleCount_; ++rayID)
     {
         Vec3 pos;
         if (lensRadius_ == 0.f)
