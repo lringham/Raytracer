@@ -32,15 +32,15 @@ public:
 
     inline bool isBlinnPhong() const
     {
-        return type_ == blinnPhong;
+        return type_ == MaterialType::blinnPhong;
     };
     inline bool isTransparent() const
     {
-        return type_ == transparent;
+        return type_ == MaterialType::transparent;
     };
     inline bool isMetallic() const
     {
-        return type_ == metallic;
+        return type_ == MaterialType::metallic;
     };
 
     inline bool hasTexture()
