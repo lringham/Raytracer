@@ -550,7 +550,7 @@ Vec3 Scene::calculateColor(Ray ray, int depth)
             if (dDotN < 0)
             {
                 Vec3 dir;
-                refract(ray.dir_, N, ambientIOR_, material.ior_, dir); //TIR can't happen because air is <= goem ior
+                refract(ray.dir_, N, ambientIOR_, material.ior_, dir); //TIR can't happen because air is <= geom ior
                 It = calculateColor(Ray(collisionPoint, dir, rayOffset_), depth - 1);
                 Ir = calculateColor(Ray(collisionPoint, reflect(ray.dir_, N), rayOffset_), depth - 1);
                 cosTheta = -dDotN;

@@ -1,7 +1,7 @@
 name: Bunny
 outputName: bunny.ppm
 recursionDepth: 6
-shadowSampleCount: 10
+shadowSampleCount: 3
 materials:
     - name: plane
       type: blinnPhong
@@ -42,4 +42,4 @@ camera:
   lensRadius: 0.05
   pxWidth: 1920
   pxHeight: 1080
-  sampleCount: 200
+  sampleCount: 100

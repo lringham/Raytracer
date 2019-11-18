@@ -50,7 +50,7 @@ Depth of field example
 Glass bunny example  
 ![Bunny](./images/bunny.png)
 
-Masterchief with texture, specular and normal maps. And a plasma gernade
+Masterchief with texture, specular and normal maps. On the bottom right is a plasma gernade. Assets are not included due to copyright
 ![Chief](./images/chief.png)
 
 Interesting bug  
