@@ -38,23 +38,23 @@ make -j4 -C build
 - Soft shadows
 
 ## Sample Renders
-Cornell box  
 ![Cornell Box](./images/cornell.png)
-
-Default scene  
+*Cornell box*
+  
 ![Default Scene](./images/default.png)
-
-Depth of field example  
+*Default scene*
+ 
 ![Depth of Field](./images/spheres.png)
-
-Glass bunny example  
+*Depth of field example*
+  
 ![Bunny](./images/bunny.png)
+*Glass bunny example*
 
-Masterchief with texture, specular, and normal maps. On the bottom right is a plasma gernade. Assets are not included due to copyright
 ![Chief](./images/chief.png)
+*Masterchief with texture, specular, and normal maps.*
 
-Interesting bug  
 ![Bug](./images/bug.png)
+*Interesting bug*
 
 ## CONTRIBUTIONS
 Thanks to Cory B. for suggesting non-blocking threading.
