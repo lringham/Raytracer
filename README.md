@@ -38,7 +38,7 @@ make -j4 -C build
 - Soft shadows
 
 ## Sample Renders
-![Cornell Box](./images/cornell.png)
+![Cornell Box](./images/cornell.png)  
 *Cornell box*
   
 ![Default Scene](./images/default.png)
