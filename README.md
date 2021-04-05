@@ -24,7 +24,7 @@ make -j4 -C build
 ## Features
 - Multi-threaded
 - Plane, Sphere, Triangles, OBJ/MTL files
-- BlinnPhong, Reflectivity, and Transparancy 
+- BlinnPhong, Reflectivity, and Transparency 
 - Point and directional lights
 - Sky spheres
 - Textures
